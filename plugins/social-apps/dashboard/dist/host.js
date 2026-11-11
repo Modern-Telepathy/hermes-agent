@@ -181,26 +181,37 @@ function fitStage(node) {
     root.style.height = rect.height + "px";
   };
 
+  // Coalesce: app renders and our own style writes both come in bursts.
+  let queued = false;
+  const schedule = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      apply();
+    });
+  };
+
   apply();
-  const observer = new ResizeObserver(apply);
+  const observer = new ResizeObserver(schedule);
   observer.observe(stage);
   if (main && main !== stage) observer.observe(main);
-  window.addEventListener("resize", apply);
-  // Fonts, the header slot and the app's own frame settle over the first frames; re-measure through
-  // them instead of trusting the first paint.
-  let frames = 0;
-  const settle = () => {
-    apply();
-    frames += 1;
-    if (frames < 40) requestAnimationFrame(settle);
-  };
-  requestAnimationFrame(settle);
+  if (stage.parentElement) observer.observe(stage.parentElement);
+  window.addEventListener("resize", schedule);
+  window.addEventListener("scroll", schedule, true);
+  // Rows above the stage (banners, the page header) appear once data loads, which moves the stage
+  // without resizing it, so poll briefly instead of trusting the first paint. Bounded on purpose:
+  // a MutationObserver here feeds back on our own style writes and locks up the page.
+  const settle = setInterval(apply, 250);
+  setTimeout(() => clearInterval(settle), 6000);
   // Apps measure their own frame on a resize event; our change does not fire one by itself.
   window.dispatchEvent(new Event("resize"));
 
   return () => {
     observer.disconnect();
-    window.removeEventListener("resize", apply);
+    clearInterval(settle);
+    window.removeEventListener("resize", schedule);
+    window.removeEventListener("scroll", schedule, true);
     delete root.dataset.stage;
     root.style.left = "";
     root.style.top = "";
