@@ -66,6 +66,15 @@ import { SidebarFooter } from "@/components/SidebarFooter";
 import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
 import { SidebarStatusStrip, gatewayLine } from "@/components/SidebarStatusStrip";
 import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint";
+
+import { rowsInGroup, useSidebarDrag } from "@/hooks/useSidebarDrag";
+import {
+  applySidebarOrder,
+  movePath,
+  readStoredSidebarOrder,
+  writeStoredSidebarOrder,
+  type SidebarOrder,
+} from "@/lib/sidebar-order";
 import { useSidebarStatus } from "@/hooks/useSidebarStatus";
 import { AuthWidget } from "@/components/AuthWidget";
 import { PageHeaderProvider } from "@/contexts/PageHeaderProvider";
@@ -388,6 +397,29 @@ export default function App() {
       return false;
     }
   });
+  // Drag order lives in localStorage so a reorder survives a reload; paths that vanish from the
+  // saved order (a plugin removed) are simply appended again by applySidebarOrder.
+  const [navOrder, setNavOrder] = useState<SidebarOrder>(() =>
+    readStoredSidebarOrder(),
+  );
+  const reorderNav = useCallback(
+    (from: string, to: string, group: string) => {
+      const rendered = rowsInGroup(group);
+      const fromIndex = rendered.indexOf(from);
+      const toIndex = rendered.indexOf(to);
+      if (fromIndex < 0 || toIndex < 0) return;
+      const next = movePath(rendered, fromIndex, toIndex);
+      if (next === rendered) return;
+      const key = group === "plugins" ? "plugins" : "core";
+      setNavOrder((prev) => {
+        const updated: SidebarOrder = { ...prev, [key]: next };
+        writeStoredSidebarOrder(updated);
+        return updated;
+      });
+    },
+    [],
+  );
+  const navDrag = useSidebarDrag({ onMove: reorderNav });
   const toggleCollapsed = useCallback(() => {
     setCollapsed((prev) => {
       const next = !prev;
@@ -623,9 +655,11 @@ export default function App() {
             <nav
               className="min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden border-t border-current/10 py-2"
               aria-label={t.app.navigation}
+              ref={navDrag.navRef}
+              data-dragging={navDrag.dragging ?? undefined}
             >
-              <ul className="flex flex-col">
-                {sidebarNav.coreItems.map((item) => (
+              <ul className="flex flex-col" data-nav-group="core">
+                {applySidebarOrder(sidebarNav.coreItems, navOrder.core).map((item) => (
                   <SidebarNavLink
                     closeMobile={closeMobile}
                     collapsed={isDesktopCollapsed}
@@ -640,7 +674,7 @@ export default function App() {
               <SidebarPluginNav
                 closeMobile={closeMobile}
                 collapsed={isDesktopCollapsed}
-                items={sidebarNav.pluginItems}
+                items={applySidebarOrder(sidebarNav.pluginItems, navOrder.plugins)}
                 t={t}
                 tooltipWarmRef={tooltipWarmRef}
               />
@@ -843,6 +877,7 @@ function SidebarNavLink({
 
   return (
     <li
+      data-nav-path={path}
       onMouseEnter={collapsed ? showTooltip : undefined}
       onMouseLeave={collapsed ? hideTooltip : undefined}
     >
@@ -927,7 +962,7 @@ function SidebarPluginNav({
         {linkProps.t.app.pluginNavSection}
       </span>
 
-      <ul className="flex flex-col">
+      <ul className="flex flex-col" data-nav-group="plugins">
         {items.map((item) => (
           <SidebarNavLink {...linkProps} item={item} key={item.path} />
         ))}
