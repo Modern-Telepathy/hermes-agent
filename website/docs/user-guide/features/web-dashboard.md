@@ -1332,14 +1332,14 @@ Built-in themes:
 
 | Theme | Character |
 |-------|-----------|
-| **Neutral** (`default`) | Charcoal canvas + light grey text, system fonts, 12px radii — matches the Meet apps |
+| **Neutral** (`default`) | Charcoal canvas + light grey text, Inter, 12px radii — matches the Meet apps |
 | **Neutral (Large)** (`default-large`) | Same as default with 18px text and roomier spacing |
 | **Nous Blue** (`nous-blue`) | Nous-branded blue accents with airy spacing |
 | **Midnight** (`midnight`) | Deep blue-violet, Inter + JetBrains Mono |
-| **Ember** (`ember`) | Warm crimson + bronze, Spectral serif + IBM Plex Mono |
-| **Mono** (`mono`) | Grayscale, IBM Plex, compact |
-| **Cyberpunk** (`cyberpunk`) | Neon green on black, Share Tech Mono |
-| **Rosé** (`rose`) | Pink + ivory, Fraunces serif, spacious |
+| **Ember** (`ember`) | Warm crimson + bronze, Inter + IBM Plex Mono |
+| **Mono** (`mono`) | Grayscale, Inter + IBM Plex Mono, compact |
+| **Cyberpunk** (`cyberpunk`) | Neon green on black, Inter + Share Tech Mono |
+| **Rosé** (`rose`) | Pink + ivory, Inter + DM Mono, spacious |
 
 To build your own theme, add a plugin tab, inject into shell slots, or expose plugin-specific REST endpoints, see **[Extending the Dashboard](./extending-the-dashboard)** — the complete guide covers:
 

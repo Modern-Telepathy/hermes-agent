@@ -284,15 +284,15 @@ Each built-in ships its own palette, typography, and layout — switching produc
 
 | Theme | Palette | Typography | Layout |
 |-------|---------|------------|--------|
-| **Neutral** (`default`) | Charcoal + light grey | System stack, 14px, line-height 1.45 | 0.75rem radius, comfortable |
-| **Neutral (Large)** (`default-large`) | Same as default | System stack, 18px, line-height 1.65 | 0.75rem radius, spacious |
+| **Neutral** (`default`) | Charcoal + light grey | Inter, 14px, line-height 1.45 | 0.75rem radius, comfortable |
+| **Neutral (Large)** (`default-large`) | Same as default | Inter, 18px, line-height 1.65 | 0.75rem radius, spacious |
 | **Midnight** (`midnight`) | Deep blue-violet | Inter + JetBrains Mono, 14px | 0.75rem radius, comfortable |
-| **Ember** (`ember`) | Warm crimson + bronze | Spectral (serif) + IBM Plex Mono, 15px | 0.25rem radius, comfortable |
-| **Mono** (`mono`) | Grayscale | IBM Plex Sans + IBM Plex Mono, 13px | 0 radius, compact |
-| **Cyberpunk** (`cyberpunk`) | Neon green on black | Share Tech Mono everywhere, 14px | 0 radius, compact |
-| **Rosé** (`rose`) | Pink + ivory | Fraunces (serif) + DM Mono, 16px | 1rem radius, spacious |
+| **Ember** (`ember`) | Warm crimson + bronze | Inter + IBM Plex Mono, 15px | 0.25rem radius, comfortable |
+| **Mono** (`mono`) | Grayscale | Inter + IBM Plex Mono, 13px | 0 radius, compact |
+| **Cyberpunk** (`cyberpunk`) | Neon green on black | Inter + Share Tech Mono, 14px | 0 radius, compact |
+| **Rosé** (`rose`) | Pink + ivory | Inter + DM Mono, 16px | 1rem radius, spacious |
 
-Themes that reference Google Fonts (all except Neutral) load the stylesheet on demand — the first time you switch to them a `<link>` tag is injected into `<head>`.
+Inter is the dashboard's one UI face and ships self-hosted in the bundle, so the interface needs no network and no `<link>` tag. Only the monospace faces differ per theme: those reference Google Fonts (all except Neutral) and load on demand — the first time you switch to such a theme a `<link>` tag is injected into `<head>`.
 
 ### Full theme YAML reference
 

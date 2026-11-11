@@ -23,11 +23,13 @@ import type { DashboardTheme, ThemePalette, ThemeTypography, ThemeLayout } from 
 /** Default system stack — neutral, safe fallback for every platform. */
 const SYSTEM_SANS =
   'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+/** The dashboard's one UI face (self-hosted in `index.css`), system fallback. */
+const INTER_SANS = `"Inter", ${SYSTEM_SANS}`;
 const SYSTEM_MONO =
   'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace';
 
 const DEFAULT_TYPOGRAPHY: ThemeTypography = {
-  fontSans: SYSTEM_SANS,
+  fontSans: INTER_SANS,
   fontMono: SYSTEM_MONO,
   baseSize: "15px",
   lineHeight: "1.55",
@@ -68,7 +70,7 @@ export function webPresetFromShared(
 export const defaultTheme: DashboardTheme = {
   name: "default",
   label: "Neutral",
-  description: "Neutral dark canvas, system type, rounded panels — the Meet look",
+  description: "Neutral dark canvas, Inter type, rounded panels — the Meet look",
   // Matches the MeetRightHere app (`--mt-bg` / `--mt-panel` / `--mt-text`), so the shell and the
   // apps inside it read as one product instead of two palettes side by side.
   palette: {
@@ -100,10 +102,10 @@ export const midnightTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Inter", ${SYSTEM_SANS}`,
+    fontSans: INTER_SANS,
     fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap",
     letterSpacing: "-0.005em",
   },
   layout: {
@@ -122,10 +124,10 @@ export const emberTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Spectral", Georgia, "Times New Roman", serif`,
+    fontSans: INTER_SANS,
     fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap",
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -147,10 +149,10 @@ export const monoTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"IBM Plex Sans", ${SYSTEM_SANS}`,
+    fontSans: INTER_SANS,
     fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
+      "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap",
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -168,7 +170,7 @@ export const cyberpunkTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Share Tech Mono", "JetBrains Mono", ${SYSTEM_MONO}`,
+    fontSans: INTER_SANS,
     fontMono: `"Share Tech Mono", "JetBrains Mono", ${SYSTEM_MONO}`,
     fontUrl:
       "https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap",
@@ -197,10 +199,10 @@ export const roseTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Fraunces", Georgia, serif`,
+    fontSans: INTER_SANS,
     fontMono: `"DM Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Mono:wght@400;500&display=swap",
+      "https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap",
   },
   layout: {
     ...DEFAULT_LAYOUT,
