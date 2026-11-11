@@ -67,17 +67,26 @@ export function webPresetFromShared(
 
 export const defaultTheme: DashboardTheme = {
   name: "default",
-  label: "Hermes Teal",
-  description: "Classic dark teal — the canonical Hermes look",
+  label: "Neutral",
+  description: "Neutral dark canvas, system type, rounded panels — the Meet look",
+  // Matches the MeetRightHere app (`--mt-bg` / `--mt-panel` / `--mt-text`), so the shell and the
+  // apps inside it read as one product instead of two palettes side by side.
   palette: {
-    background: { hex: "#041c1c", alpha: 1 },
-    midground: { hex: "#ffe6cb", alpha: 1 },
+    background: { hex: "#171717", alpha: 1 },
+    midground: { hex: "#eeeeee", alpha: 1 },
     foreground: { hex: "#ffffff", alpha: 0 },
-    warmGlow: "rgba(255, 189, 56, 0.35)",
+    warmGlow: "rgba(238, 238, 238, 0.2)",
     noiseOpacity: 1,
   },
-  typography: DEFAULT_TYPOGRAPHY,
-  layout: DEFAULT_LAYOUT,
+  typography: {
+    ...DEFAULT_TYPOGRAPHY,
+    baseSize: "14px",
+    lineHeight: "1.45",
+  },
+  layout: {
+    ...DEFAULT_LAYOUT,
+    radius: "0.75rem",
+  },
   terminalBackground: "#000000",
 };
 
@@ -225,20 +234,20 @@ export const nousBlueTheme: DashboardTheme = {
 /**
  * Same look as ``defaultTheme`` but with a larger root font size, looser
  * line-height, and ``spacious`` density so every rem-based size in the
- * dashboard scales up. For users who find the default 15px UI too dense.
+ * dashboard scales up. For users who find the default 14px UI too dense.
  */
 export const defaultLargeTheme: DashboardTheme = {
   name: "default-large",
-  label: "Hermes Teal (Large)",
-  description: "Hermes Teal with bigger fonts and roomier spacing",
+  label: "Neutral (Large)",
+  description: "Neutral with bigger fonts and roomier spacing",
   palette: defaultTheme.palette,
   typography: {
-    ...DEFAULT_TYPOGRAPHY,
+    ...defaultTheme.typography,
     baseSize: "18px",
     lineHeight: "1.65",
   },
   layout: {
-    ...DEFAULT_LAYOUT,
+    ...defaultTheme.layout,
     density: "spacious",
   },
 };
