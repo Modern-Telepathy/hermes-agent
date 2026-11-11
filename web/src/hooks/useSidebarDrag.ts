@@ -1,30 +1,33 @@
 /**
- * Hold-and-drag reordering for the left nav.
+ * Grip-driven reordering for the left nav.
  *
- * Listeners are native and attached to the nav element rather than React props: a drag needs the
- * window for the release (the pointer usually leaves the row it started on), and it must not fight
- * the anchor's own click handling. A row is simply `data-nav-path` inside a `data-nav-group`.
+ * Drags start from the row's grip (`[data-nav-grip]`), not from the whole row, so clicking a link
+ * never turns into a reorder: the grip is a separate non-anchor control, and its pointerdown is the
+ * only thing that arms a drag. Listeners are native and attached to the nav element rather than
+ * React props because a drag needs the window for the release (the pointer usually leaves the row
+ * it started on) and must not fight the anchor's own click handling.
  *
- * The drag arms only after the pointer is held for `holdMs`, so an ordinary click that wanders a
- * pixel still navigates. Keyboard equivalent: Alt+Arrow on the focused row.
+ * A row is `data-nav-path` inside a `data-nav-group`. Every reorder runs through a FLIP pass so the
+ * rows slide to their new positions instead of jumping. Keyboard equivalent: Alt+Arrow on the
+ * focused row (or on the focused grip).
  */
 
 import { useEffect, useRef, useState } from "react";
 
-
-const DEFAULT_HOLD_MS = 250;
-/** Pixels a pointer must travel before a press becomes a drag instead of a click. */
-const DRAG_THRESHOLD_PX = 6;
+/** Pixels a grip must travel before it counts as a drag rather than a nudge. */
+const DRAG_THRESHOLD_PX = 3;
+const FLIP_MS = 180;
+const FLIP_EASING = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+const DRAGGING_CLASS = "nav-row-dragging";
+const GRABBING_CLASS = "nav-dragging-active";
 
 export function useSidebarDrag({
   navRef,
   onMove,
-  holdMs = DEFAULT_HOLD_MS,
 }: {
   /** The element that contains the rows; the caller owns it so the JSX keeps a plain ref. */
   navRef: React.RefObject<HTMLElement | null>;
   onMove: (from: string, to: string, group: string) => void;
-  holdMs?: number;
 }): { dragging: string | null } {
   const [dragging, setDragging] = useState<string | null>(null);
   // The effect owns the listeners for its whole life, so the callback is read through a ref
@@ -39,68 +42,53 @@ export function useSidebarDrag({
     const nav = navRef.current;
     if (!nav) return;
 
-    let timer: number | null = null;
     let source: string | null = null;
+    let group = "";
+    let rowElement: HTMLElement | null = null;
     let armed = false;
-    let suppressClick = false;
     let startX = 0;
     let startY = 0;
 
-    const clearTimer = () => {
-      if (timer !== null) {
-        window.clearTimeout(timer);
-        timer = null;
-      }
+    const endDrag = () => {
+      rowElement?.classList.remove(DRAGGING_CLASS);
+      document.body.classList.remove(GRABBING_CLASS);
+      source = null;
+      group = "";
+      rowElement = null;
+      armed = false;
+      setDragging(null);
     };
 
     const down = (event: PointerEvent) => {
       if (event.button !== 0) return;
-      const row = rowAt(event.target);
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target?.closest("[data-nav-grip]")) return;
+      const row = rowAt(target);
       if (!row) return;
-      suppressClick = false;
+      // The grip is the drag affordance: no hold timer, no text selection, no native drag.
+      event.preventDefault();
       source = row.path;
+      group = row.group;
+      rowElement = target.closest<HTMLElement>("[data-nav-path]");
       startX = event.clientX;
       startY = event.clientY;
-      clearTimer();
-      timer = window.setTimeout(() => {
-        if (!source) return;
-        armed = true;
-        setDragging(source);
-      }, holdMs);
+      armed = false;
+      setDragging(row.path);
     };
 
     const move = (event: PointerEvent) => {
       if (!source) return;
       if (!armed) {
-        // Arm on a real drag as well as on the hold: a pointer that travels past a few pixels was
-        // never a click, and waiting out the timer would feel like lag. Below that threshold the
-        // gesture stays a click, so links still navigate.
         if (Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD_PX) return;
-        clearTimer();
         armed = true;
-        setDragging(source);
+        rowElement?.classList.add(DRAGGING_CLASS);
+        document.body.classList.add(GRABBING_CLASS);
       }
       const row = rowAt(document.elementFromPoint(event.clientX, event.clientY));
-      if (!row || row.path === source) return;
+      if (!row || row.path === source || row.group !== group) return;
       const from = source;
-      onMoveRef.current(from, row.path, row.group);
+      reorderWithFlip(row.group, () => onMoveRef.current(from, row.path, row.group));
       source = row.path;
-    };
-
-    const release = () => {
-      clearTimer();
-      if (armed && source) suppressClick = true;
-      armed = false;
-      source = null;
-      setDragging(null);
-    };
-
-    // A drag that ends over a row must not also follow that row's link.
-    const click = (event: MouseEvent) => {
-      if (!suppressClick) return;
-      suppressClick = false;
-      event.preventDefault();
-      event.stopPropagation();
     };
 
     const key = (event: KeyboardEvent) => {
@@ -113,27 +101,55 @@ export function useSidebarDrag({
       const target = rows[rows.indexOf(row.path) + step];
       if (!target) return;
       event.preventDefault();
-      onMoveRef.current(row.path, target, row.group);
+      reorderWithFlip(row.group, () => onMoveRef.current(row.path, target, row.group));
     };
 
     nav.addEventListener("pointerdown", down);
     nav.addEventListener("pointermove", move);
     nav.addEventListener("keydown", key);
-    nav.addEventListener("click", click, true);
-    window.addEventListener("pointerup", release);
-    window.addEventListener("pointercancel", release);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
     return () => {
-      clearTimer();
+      endDrag();
       nav.removeEventListener("pointerdown", down);
       nav.removeEventListener("pointermove", move);
       nav.removeEventListener("keydown", key);
-      nav.removeEventListener("click", click, true);
-      window.removeEventListener("pointerup", release);
-      window.removeEventListener("pointercancel", release);
+      window.removeEventListener("pointerup", endDrag);
+      window.removeEventListener("pointercancel", endDrag);
     };
-  }, [holdMs, navRef]);
+  }, [navRef]);
 
   return { dragging };
+}
+
+/**
+ * Apply a reorder and animate the rows into their new slots. Rows are measured before the mutation
+ * and again on the next frame; the difference becomes the first keyframe of a WAAPI animation, so
+ * the DOM reorder is instant while the movement is visible and nothing is left behind in inline
+ * styles (a stuck `transform` would offset a row that later becomes sticky).
+ */
+function reorderWithFlip(group: string, mutate: () => void) {
+  const container = document.querySelector(`[data-nav-group="${group}"]`);
+  if (!container) {
+    mutate();
+    return;
+  }
+  const rows = Array.from(container.querySelectorAll<HTMLElement>("[data-nav-path]"));
+  const before = new Map(rows.map((row) => [row, row.getBoundingClientRect().top]));
+  mutate();
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  requestAnimationFrame(() => {
+    for (const row of container.querySelectorAll<HTMLElement>("[data-nav-path]")) {
+      const from = before.get(row);
+      if (from === undefined) continue;
+      const delta = from - row.getBoundingClientRect().top;
+      if (Math.abs(delta) < 1) continue;
+      row.animate(
+        [{ transform: `translateY(${delta}px)` }, { transform: "none" }],
+        { duration: FLIP_MS, easing: FLIP_EASING },
+      );
+    }
+  });
 }
 
 function rowAt(target: EventTarget | null): { path: string; group: string } | null {

@@ -33,6 +33,7 @@ import {
   FolderOpen,
   FileText,
   Globe,
+  GripVertical,
   Heart,
   KeyRound,
   Menu,
@@ -863,6 +864,7 @@ function SidebarNavLink({
 
   return (
     <li
+      className="group/nav relative"
       data-nav-path={path}
       onMouseEnter={collapsed ? showTooltip : undefined}
       onMouseLeave={collapsed ? hideTooltip : undefined}
@@ -917,6 +919,24 @@ function SidebarNavLink({
           </>
         )}
       </NavLink>
+
+      {!collapsed && (
+        <span
+          aria-label={`Reorder ${navLabel}`}
+          className={cn(
+            "absolute left-0.5 top-1/2 z-1 flex h-6 w-4 -translate-y-1/2",
+            "cursor-grab touch-none items-center justify-center",
+            "text-text-tertiary opacity-0 transition-opacity duration-150",
+            "group-hover/nav:opacity-100 group-focus-within/nav:opacity-100",
+            "hover:text-midground",
+          )}
+          data-nav-grip
+          role="button"
+          tabIndex={0}
+        >
+          <GripVertical className="h-3 w-3" />
+        </span>
+      )}
 
       {collapsed && hovered && tooltipAnchor && (
         <SidebarTooltip anchor={tooltipAnchor} label={navLabel} warmRef={tooltipWarmRef} />
