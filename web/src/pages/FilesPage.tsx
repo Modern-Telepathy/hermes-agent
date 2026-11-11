@@ -291,7 +291,7 @@ export default function FilesPage() {
               placeholder="Path"
               className="h-9 min-w-0 flex-1 font-mono"
             />
-            <Button type="submit" size="sm" outlined className="uppercase">
+            <Button type="submit" size="sm" outlined className="">
               Go
             </Button>
           </form>
@@ -307,7 +307,7 @@ export default function FilesPage() {
             disabled={!canUpload}
             size="sm"
             outlined
-            className="uppercase"
+            className=""
             prefix={uploading ? <Spinner /> : <Upload />}
           >
             Upload
@@ -318,7 +318,7 @@ export default function FilesPage() {
             disabled={!activePath}
             size="sm"
             outlined
-            className="uppercase"
+            className=""
             prefix={<FolderPlus />}
           >
             Create
@@ -346,7 +346,7 @@ export default function FilesPage() {
             {uploading ? <Spinner /> : <Upload className="h-4 w-4" />}
           </span>
           <span className="min-w-0">
-            <span className="block text-sm font-semibold uppercase tracking-[0.08em] text-foreground">
+            <span className="block text-sm font-semibold text-foreground">
               {uploading ? "Uploading" : draggingFiles ? "Release to upload" : "Drop files here"}
             </span>
             <span className="block truncate font-mono text-xs text-text-secondary" title={activePath}>
@@ -354,7 +354,7 @@ export default function FilesPage() {
             </span>
           </span>
         </span>
-        <span className="hidden shrink-0 text-xs font-semibold uppercase tracking-[0.08em] text-text-tertiary sm:block">
+        <span className="hidden shrink-0 text-xs font-semibold text-text-tertiary sm:block">
           Choose files
         </span>
       </button>
@@ -367,7 +367,7 @@ export default function FilesPage() {
             </div>
           )}
 
-          <div className="grid min-w-[42rem] grid-cols-[minmax(12rem,1fr)_7rem_10rem_5.5rem] items-center gap-3 border-b border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-text-tertiary">
+          <div className="grid min-w-[42rem] grid-cols-[minmax(12rem,1fr)_7rem_10rem_5.5rem] items-center gap-3 border-b border-border px-4 py-2 text-xs font-semibold text-text-tertiary">
             <span>Name</span>
             <span>Size</span>
             <span>Modified</span>

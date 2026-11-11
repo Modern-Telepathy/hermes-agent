@@ -486,7 +486,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
         aria-controls="chat-side-panel"
         className={cn(
           "shrink-0 rounded border border-current/20",
-          "px-2 py-1 text-xs font-medium tracking-wide",
+          "px-2 py-1 text-xs font-medium",
           "text-text-secondary hover:text-midground hover:bg-midground/5",
         )}
       >
@@ -1837,7 +1837,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
           >
             <Typography
               mondwest
-              className="text-display font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground"
+              className="text-display font-bold text-[1.125rem] leading-[0.95] text-midground"
             >
               {t.app.modelToolsSheetTitle}
               <br />
@@ -1892,7 +1892,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
       {visibleBanner && (
         <div
           role="alert"
-          className="flex flex-wrap items-center gap-2 border border-warning/50 bg-warning/10 text-warning px-3 py-2 text-xs tracking-wide"
+          className="flex flex-wrap items-center gap-2 border border-warning/50 bg-warning/10 text-warning px-3 py-2 text-xs"
         >
           <span className="min-w-0 flex-1">{visibleBanner}</span>
           {banner && bannerAction === "reload" && (
@@ -1953,7 +1953,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
           {showReconnectOverlay && (
             <div className="absolute inset-x-3 top-3 z-20 flex justify-center sm:inset-x-auto sm:right-3 sm:justify-end">
               <div className="flex max-w-[min(28rem,calc(100vw-3rem))] flex-col items-start gap-2 border border-warning/60 bg-black/80 px-3 py-2 text-xs text-warning shadow-lg">
-                <div className="tracking-wide">
+                <div className="">
                   {ptyState === "reconnecting"
                     ? "Chat is reconnecting."
                     : reconnectGaveUp
@@ -1992,7 +1992,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
               aria-live="polite"
               aria-label={PTY_RESUME_LOADING_MESSAGE}
             >
-              <div className="max-w-[min(28rem,calc(100vw-3rem))] border border-current/30 bg-black/80 px-4 py-3 text-center text-xs tracking-wide text-white/85 shadow-lg">
+              <div className="max-w-[min(28rem,calc(100vw-3rem))] border border-current/30 bg-black/80 px-4 py-3 text-center text-xs text-white/85 shadow-lg">
                 {PTY_RESUME_LOADING_MESSAGE}
               </div>
             </div>
@@ -2003,7 +2003,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
               whole page to get a working chat back. */}
           {ptyState === "ended" && (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/60">
-              <div className="max-w-[min(32rem,calc(100vw-3rem))] text-center text-sm tracking-wide text-white/80">
+              <div className="max-w-[min(32rem,calc(100vw-3rem))] text-center text-sm text-white/80">
                 {endedReason === "start-failed"
                   ? PTY_START_FAILED_MESSAGE
                   : PTY_SESSION_ENDED_MESSAGE}
@@ -2054,7 +2054,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
             >
               <span className="inline-flex items-center gap-1">
                 <PanelRight className="h-3 w-3 shrink-0" />
-                <span className="hidden min-[400px]:inline tracking-wide">
+                <span className="hidden min-[400px]:inline">
                   panel
                 </span>
               </span>

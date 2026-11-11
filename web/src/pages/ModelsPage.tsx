@@ -272,7 +272,7 @@ function UseAsMenu({
         outlined
         onClick={() => setOpen((v) => !v)}
         disabled={busy}
-        className="h-6 px-2 text-xs uppercase"
+        className="h-6 px-2 text-xs"
         prefix={busy ? <Spinner /> : null}
       >
         Use as <ChevronDown className="h-3 w-3" />
@@ -283,20 +283,20 @@ function UseAsMenu({
             type="button"
             onClick={() => assign("main", "")}
             disabled={busy}
-            className="flex w-full items-center justify-between px-3 py-2 text-xs uppercase hover:bg-muted/50 disabled:opacity-40"
+            className="flex w-full items-center justify-between px-3 py-2 text-xs hover:bg-muted/50 disabled:opacity-40"
           >
             <span className="flex items-center gap-2">
               <Star className="h-3 w-3" />
               Main model
             </span>
             {isMain && (
-              <span className="text-display text-xs tracking-wider text-primary">
+              <span className="text-display text-xs text-primary">
                 current
               </span>
             )}
           </button>
 
-          <div className="border-t border-border/50 px-3 py-1.5 text-display text-xs tracking-wider text-text-tertiary">
+          <div className="border-t border-border/50 px-3 py-1.5 text-display text-xs text-text-tertiary">
             Auxiliary task
           </div>
 
@@ -304,7 +304,7 @@ function UseAsMenu({
             type="button"
             onClick={() => assign("auxiliary", "")}
             disabled={busy}
-            className="flex w-full items-center justify-between px-3 py-1.5 text-xs uppercase hover:bg-muted/50 disabled:opacity-40"
+            className="flex w-full items-center justify-between px-3 py-1.5 text-xs hover:bg-muted/50 disabled:opacity-40"
           >
             <span>All auxiliary tasks</span>
           </button>
@@ -315,11 +315,11 @@ function UseAsMenu({
               type="button"
               onClick={() => assign("auxiliary", t.key)}
               disabled={busy}
-              className="flex w-full items-center justify-between px-3 py-1.5 text-xs uppercase hover:bg-muted/50 disabled:opacity-40"
+              className="flex w-full items-center justify-between px-3 py-1.5 text-xs hover:bg-muted/50 disabled:opacity-40"
             >
               <span>{t.label}</span>
               {mainAuxTask === t.key && (
-                <span className="text-display text-xs tracking-wider text-primary">
+                <span className="text-display text-xs text-primary">
                   current
                 </span>
               )}
@@ -403,12 +403,12 @@ function ModelCard({
                 {shortModelName(entry.model)}
               </CardTitle>
               {isMain && (
-                <span className="inline-flex items-center gap-0.5 bg-primary/15 px-1.5 py-0.5 text-display text-xs font-medium tracking-wider text-primary">
+                <span className="inline-flex items-center gap-0.5 bg-primary/15 px-1.5 py-0.5 text-display text-xs font-medium text-primary">
                   <Star className="h-2.5 w-2.5" /> main
                 </span>
               )}
               {mainAuxTask && (
-                <span className="inline-flex items-center bg-purple-500/10 px-1.5 py-0.5 text-display text-xs font-medium tracking-wider text-purple-600 dark:text-purple-400">
+                <span className="inline-flex items-center bg-purple-500/10 px-1.5 py-0.5 text-display text-xs font-medium text-purple-600 dark:text-purple-400">
                   aux · {mainAuxTask}
                 </span>
               )}
@@ -595,7 +595,7 @@ function AuxiliaryTasksModal({
           <div className="flex items-center justify-between gap-3 pr-8">
             <h2
               id="aux-modal-title"
-              className="font-mondwest text-display text-base tracking-wider"
+              className="font-mondwest text-display text-base"
             >
               Auxiliary Tasks
             </h2>
@@ -604,7 +604,7 @@ function AuxiliaryTasksModal({
               outlined
               onClick={() => setConfirmReset(true)}
               disabled={resetBusy}
-              className="h-6 text-xs uppercase"
+              className="h-6 text-xs"
               prefix={resetBusy ? <Spinner /> : null}
             >
               Reset all to auto
@@ -661,7 +661,7 @@ function AuxiliaryTasksModal({
                       });
                       onSaved();
                     }}
-                    className="h-6 text-xs uppercase"
+                    className="h-6 text-xs"
                   >
                     Follow {auxTaskLabel(aux?.tasks, t.inheritFrom)}
                   </Button>
@@ -670,7 +670,7 @@ function AuxiliaryTasksModal({
                   size="sm"
                   outlined
                   onClick={() => setPicker({ kind: "aux", task: t.key })}
-                  className="h-6 text-xs uppercase"
+                  className="h-6 text-xs"
                 >
                   Change
                 </Button>
@@ -839,7 +839,7 @@ function MoaModelsModal({
         <header className="p-5 pb-3 border-b border-border">
           <h2
             id="moa-modal-title"
-            className="font-mondwest text-display text-base tracking-wider"
+            className="font-mondwest text-display text-base"
           >
             Configure Mixture of Agents presets
           </h2>
@@ -873,7 +873,7 @@ function MoaModelsModal({
           </div>
 
           <div className="space-y-2">
-            <div className="text-display text-xs font-medium tracking-wider">Reference models</div>
+            <div className="text-display text-xs font-medium">Reference models</div>
             {preset.reference_models.map((slot, index) => (
               <div
                 key={`${selected}-${slot.provider}-${slot.model}-${index}`}
@@ -902,7 +902,7 @@ function MoaModelsModal({
           </div>
 
           <div className="space-y-2">
-            <div className="text-display text-xs font-medium tracking-wider">Aggregator</div>
+            <div className="text-display text-xs font-medium">Aggregator</div>
             <div className="flex items-center gap-2 border border-border/50 bg-muted/20 px-3 py-2">
               <div className="min-w-0 flex-1 truncate font-mono text-xs text-text-secondary">{slotLabel(preset.aggregator)}</div>
               <Button size="sm" outlined onClick={() => setPicker({ kind: "aggregator" })}>Change</Button>
@@ -1023,7 +1023,7 @@ function ModelSettingsPanel({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-0.5">
               <Star className="h-3 w-3 text-primary" />
-              <span className="text-display text-xs font-medium tracking-wider">
+              <span className="text-display text-xs font-medium">
                 Main model
               </span>
             </div>
@@ -1036,7 +1036,7 @@ function ModelSettingsPanel({
           <Button
             size="sm"
             onClick={() => setPicker({ kind: "main" })}
-            className="shrink-0 self-start text-xs uppercase sm:self-center"
+            className="shrink-0 self-start text-xs sm:self-center"
           >
             Change
           </Button>
@@ -1047,7 +1047,7 @@ function ModelSettingsPanel({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-0.5">
               <Cpu className="h-3 w-3 text-text-tertiary" />
-              <span className="text-display text-xs font-medium tracking-wider">
+              <span className="text-display text-xs font-medium">
                 Auxiliary tasks
               </span>
             </div>
@@ -1061,7 +1061,7 @@ function ModelSettingsPanel({
             size="sm"
             outlined
             onClick={() => setAuxModalOpen(true)}
-            className="shrink-0 self-start text-xs uppercase sm:self-center"
+            className="shrink-0 self-start text-xs sm:self-center"
           >
             Configure
           </Button>
@@ -1071,7 +1071,7 @@ function ModelSettingsPanel({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-0.5">
               <Brain className="h-3 w-3 text-text-tertiary" />
-              <span className="text-display text-xs font-medium tracking-wider">
+              <span className="text-display text-xs font-medium">
                 Mixture of Agents
               </span>
             </div>
@@ -1086,7 +1086,7 @@ function ModelSettingsPanel({
             outlined
             onClick={() => setMoaModalOpen(true)}
             disabled={!moa}
-            className="shrink-0 self-start text-xs uppercase sm:self-center"
+            className="shrink-0 self-start text-xs sm:self-center"
           >
             Configure
           </Button>
@@ -1219,7 +1219,7 @@ export default function ModelsPage() {
             size="sm"
             outlined={days !== p.days}
             onClick={() => setDays(p.days)}
-            className="uppercase"
+            className=""
           >
             {p.label}
           </Button>

@@ -138,6 +138,12 @@ code, kbd, pre, samp, .font-mono, .font-mono-ui {
   --spacing: calc(0.25rem * var(--theme-spacing-mul, 1));
   --font-sans: var(--theme-font-sans);
   --font-mono: var(--theme-font-mono);
+  /* Type policy: the tracked "label" look is retired, so the wide end of
+     the tracking scale collapses to normal spacing everywhere. Acronyms
+     stay legible through the letters themselves, not through tracking. */
+  --tracking-wide: 0em;
+  --tracking-wider: 0em;
+  --tracking-widest: 0em;
 }
 
 #root {
@@ -257,6 +263,28 @@ code { font-size: 0.875rem; }
 .font-mondwest,
 .font-display {
   font-family: var(--theme-font-sans);
+}
+
+/* Type policy: never render body copy in all caps. Only `.text-display`
+   (the DS chrome utility) and Tailwind's `.uppercase` transform text, so
+   both are neutralised here rather than at 90-odd call sites; strings that
+   are acronyms keep their caps because they are typed that way. */
+.text-display,
+.uppercase {
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+/* Titles are upright — italic display type reads as emphasis the words
+   don't carry, and it fights the single-face type system. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-style: normal;
 }
 
 /* The remaining display faces (Rules Expanded/Compressed) are declared as

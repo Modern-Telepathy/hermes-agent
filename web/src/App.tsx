@@ -590,7 +590,7 @@ export default function App() {
           <Menu />
         </Button>
 
-        <Typography className="font-bold text-[0.95rem] leading-[0.95] tracking-[0.05em] text-midground">
+        <Typography className="font-bold text-[0.95rem] leading-[0.95] text-midground">
           {t.app.brand}
         </Typography>
       </header>
@@ -943,7 +943,7 @@ function SidebarPluginNav({
       <span
         className={cn(
           "px-5 pt-2.5 pb-1",
-          "font-sans text-display text-xs tracking-[0.12em] text-text-tertiary",
+          "font-sans text-display text-xs text-text-tertiary",
           linkProps.collapsed && "lg:hidden",
         )}
         id="hermes-sidebar-plugin-nav-heading"
@@ -1170,7 +1170,7 @@ function SystemActionButton({
         className={cn(
           "group/action relative flex w-full items-center gap-3",
           "px-5 py-2.5",
-          "font-sans text-display text-xs tracking-[0.1em]",
+          "font-sans text-display text-xs",
           "whitespace-nowrap transition-colors cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
           busy

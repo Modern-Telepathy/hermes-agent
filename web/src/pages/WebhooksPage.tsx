@@ -255,7 +255,7 @@ export default function WebhooksPage() {
   useLayoutEffect(() => {
     setEnd(
       <Button
-        className="uppercase"
+        className=""
         size="sm"
         disabled={!enabled || enabling}
         prefix={<Plus />}
@@ -323,7 +323,7 @@ export default function WebhooksPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="create-webhook-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 New subscription
               </h2>
@@ -358,7 +358,7 @@ export default function WebhooksPage() {
 
                 <div className="flex justify-end">
                   <Button
-                    className="uppercase"
+                    className=""
                     size="sm"
                     onClick={closeCreateModal}
                   >
@@ -445,7 +445,7 @@ export default function WebhooksPage() {
 
                 <div className="flex justify-end">
                   <Button
-                    className="uppercase"
+                    className=""
                     size="sm"
                     onClick={handleCreate}
                     disabled={creating}
@@ -477,7 +477,7 @@ export default function WebhooksPage() {
             </div>
             <Button
               size="sm"
-              className="uppercase shrink-0"
+              className=" shrink-0"
               onClick={handleEnableWebhooks}
               disabled={enabling}
               prefix={enabling ? <Spinner /> : <Webhook className="h-4 w-4" />}
@@ -509,7 +509,7 @@ export default function WebhooksPage() {
             </div>
             <Button
               size="sm"
-              className="uppercase shrink-0"
+              className=" shrink-0"
               onClick={handleRestart}
               disabled={restarting}
               prefix={restarting ? <Spinner /> : <RotateCw className="h-4 w-4" />}
@@ -587,7 +587,7 @@ export default function WebhooksPage() {
                 <Button
                   ghost
                   size="sm"
-                  className="uppercase"
+                  className=""
                   disabled={togglingName === sub.name}
                   onClick={() => handleToggleEnabled(sub.name, !sub.enabled)}
                 >

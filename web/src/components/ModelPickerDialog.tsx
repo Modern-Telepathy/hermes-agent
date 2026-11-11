@@ -372,7 +372,7 @@ export function ModelPickerDialog(props: Props) {
         <header className="p-5 pb-3 border-b border-border">
           <h2
             id="model-picker-title"
-            className="font-mondwest text-display text-base tracking-wider"
+            className="font-mondwest text-display text-base"
           >
             {title}
           </h2>
@@ -665,7 +665,7 @@ function ModelColumn({
 
 function CurrentTag() {
   return (
-    <span className="text-display text-xs tracking-wider text-primary shrink-0">
+    <span className="text-display text-xs text-primary shrink-0">
       current
     </span>
   );

@@ -196,7 +196,7 @@ export function RelayLinkPanel({
       {portalUrl ? (
         <Button
           size="sm"
-          className="w-fit uppercase"
+          className="w-fit"
           onClick={() => window.open(portalUrl, "_blank", "noopener,noreferrer")}
           prefix={<ExternalLink className="h-4 w-4" />}
         >
@@ -240,7 +240,7 @@ export function RelayLinkPanel({
       ) : (
         <Button
           size="sm"
-          className="w-fit uppercase"
+          className="w-fit"
           onClick={() => void start()}
           disabled={busy}
           prefix={busy ? <Spinner /> : <Link2 className="h-4 w-4" />}

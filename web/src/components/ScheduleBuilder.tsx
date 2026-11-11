@@ -145,7 +145,7 @@ export function ScheduleBuilder({ onChange, value }: ScheduleBuilderProps) {
                     outlined={!isOn}
                     aria-pressed={isOn}
                     onClick={() => toggleWeekday(d)}
-                    className="min-w-[2.5rem] font-mono-ui text-xs uppercase"
+                    className="min-w-[2.5rem] font-mono-ui text-xs"
                   >
                     {modeStrings.weekdaysShort[d]}
                   </Button>

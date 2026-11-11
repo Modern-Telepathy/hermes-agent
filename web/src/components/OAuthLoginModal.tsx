@@ -242,7 +242,7 @@ export function OAuthLoginModal({ provider, onClose, onSuccess }: Props) {
               id="oauth-modal-title"
               variant="sm"
               mondwest
-              className="tracking-wider uppercase"
+              className=""
             >
               {t.oauth.connect} {provider.name}
             </H2>
@@ -317,13 +317,13 @@ export function OAuthLoginModal({ provider, onClose, onSuccess }: Props) {
                 {t.oauth.enterCodePrompt}
               </p>
               <div className="flex items-center justify-between gap-2 border border-border bg-secondary/30 p-4">
-                <code className="font-mono-ui text-2xl tracking-widest text-foreground">
+                <code className="font-mono-ui text-2xl text-foreground">
                   {deviceCode}
                 </code>
                 <Button
                   size="sm"
                   outlined
-                  className="shrink-0 uppercase"
+                  className="shrink-0"
                   onClick={() => void handleCopyDeviceCode(deviceCode)}
                   prefix={
                     copyStatus === "copied" ? (

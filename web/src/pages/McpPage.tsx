@@ -298,7 +298,7 @@ export default function McpPage() {
   useLayoutEffect(() => {
     setEnd(
       <Button
-        className="uppercase"
+        className=""
         size="sm"
         onClick={() => setCreateModalOpen(true)}
       >
@@ -369,7 +369,7 @@ export default function McpPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="create-mcp-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 Add MCP server
               </h2>
@@ -492,7 +492,7 @@ export default function McpPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="uppercase"
+                  className=""
                   size="sm"
                   onClick={handleCreate}
                   disabled={creating}
@@ -535,7 +535,7 @@ export default function McpPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="install-mcp-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 Install {installEntry.name}
               </h2>
@@ -568,7 +568,7 @@ export default function McpPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="uppercase"
+                  className=""
                   size="sm"
                   onClick={handleInstallSubmit}
                   disabled={installingName === installEntry.name}
@@ -897,7 +897,7 @@ export default function McpPage() {
                     <Badge tone="success">Installed</Badge>
                   ) : (
                     <Button
-                      className="uppercase"
+                      className=""
                       size="sm"
                       onClick={() => handleInstallClick(entry)}
                       disabled={isInstalling}

@@ -202,7 +202,7 @@ function EditorBody({
           </Button>
           <Button
             size="sm"
-            className="uppercase"
+            className=""
             onClick={handleSave}
             disabled={saving || loading}
             prefix={saving ? <Spinner /> : undefined}

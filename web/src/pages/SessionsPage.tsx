@@ -1710,7 +1710,7 @@ export default function SessionsPage() {
                 <Spinner className="shrink-0 text-[0.875rem] text-muted-foreground" />
               )}
 
-              <span className="text-xs font-mondwest tracking-[0.12em] truncate">
+              <span className="text-xs font-mondwest truncate">
                 {activeAction === "restart"
                   ? t.status.restartGateway
                   : t.status.updateHermes}

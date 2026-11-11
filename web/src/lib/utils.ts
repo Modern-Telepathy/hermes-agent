@@ -5,13 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Mondwest font only — use on layout shells; do not force normal-case here or `text-display` chrome (Segmented, badges) stops uppercasing. */
+/** Display-chrome face — use on layout shells and structural labels. */
 export const themedFont = "font-mondwest";
 
-/** Mondwest body copy — sentence-case themed text (not uppercase chrome). */
+/** Mondwest body copy — sentence-case themed text (not chrome). */
 export const themedBody = "font-mondwest normal-case";
 
-/** Mondwest brand chrome — uppercase section headers and nav labels. */
+/** Mondwest brand chrome — section headers and nav labels. */
 export const themedChrome = "font-mondwest text-display";
 
 /** Relative time from a Unix epoch timestamp (seconds). */

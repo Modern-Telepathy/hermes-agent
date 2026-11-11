@@ -48,7 +48,7 @@ import { cn, themedBody } from "@/lib/utils";
 import { errorMessage } from "@/lib/api-error";
 
 // Mirrors hermes_cli/profiles.py::_PROFILE_ID_RE so we can reject obviously
-// invalid names (uppercase, spaces, …) before round-tripping a doomed POST.
+// invalid names (, spaces, …) before round-tripping a doomed POST.
 const PROFILE_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 
 /** Braille unicode spinner (`unicode-animations`); static first frame when reduced motion is preferred. */
@@ -127,7 +127,7 @@ function ProfileActionsMenu({
   };
 
   const itemClass =
-    "flex w-full items-center gap-2.5 px-3 py-2 text-xs uppercase tracking-wider hover:bg-muted/50 disabled:opacity-40";
+    "flex w-full items-center gap-2.5 px-3 py-2 text-xs hover:bg-muted/50 disabled:opacity-40";
 
   return (
     <div className="relative" data-profile-actions ref={containerRef}>
@@ -751,7 +751,7 @@ export default function ProfilesPage() {
     setEnd(
       <div className="flex items-center gap-2">
         <Button
-          className="uppercase"
+          className=""
           size="sm"
           outlined
           onClick={() => navigate("/profiles/new")}
@@ -759,7 +759,7 @@ export default function ProfilesPage() {
           Build
         </Button>
         <Button
-          className="uppercase"
+          className=""
           size="sm"
           onClick={() => setCreateModalOpen(true)}
         >
@@ -832,7 +832,7 @@ export default function ProfilesPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="create-profile-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 {t.profiles.newProfile}
               </h2>
@@ -925,7 +925,7 @@ export default function ProfilesPage() {
               </div>
 
               <fieldset className="grid gap-3 border-t border-border pt-4">
-                <legend className="font-mondwest text-display text-xs tracking-wider text-muted-foreground">
+                <legend className="font-mondwest text-display text-xs text-muted-foreground">
                   {L.advancedOptions}
                 </legend>
 
@@ -970,7 +970,7 @@ export default function ProfilesPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="uppercase"
+                  className=""
                   size="sm"
                   onClick={handleCreate}
                   disabled={creating}
@@ -1257,7 +1257,7 @@ export default function ProfilesPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="profile-editor-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 {editorKind === "model"
                   ? L.editModel
@@ -1300,7 +1300,7 @@ export default function ProfilesPage() {
                     <div className="flex justify-end">
                       <Button
                         size="sm"
-                        className="uppercase"
+                        className=""
                         onClick={() => handleSaveModel(editorName)}
                         disabled={
                           modelSaving ||
@@ -1322,7 +1322,7 @@ export default function ProfilesPage() {
                   <div className="flex items-center justify-between gap-2">
                     <Label
                       htmlFor="profile-desc-editor"
-                      className="font-mondwest text-display text-xs tracking-wider text-muted-foreground"
+                      className="font-mondwest text-display text-xs text-muted-foreground"
                     >
                       {L.description}
                     </Label>
@@ -1350,7 +1350,7 @@ export default function ProfilesPage() {
                   <div className="flex justify-end">
                     <Button
                       size="sm"
-                      className="uppercase"
+                      className=""
                       onClick={() => handleSaveDesc(editorName)}
                       disabled={descSaving}
                     >
@@ -1364,7 +1364,7 @@ export default function ProfilesPage() {
                 <>
                   <Label
                     htmlFor="profile-soul-editor"
-                    className="font-mondwest text-display text-xs tracking-wider text-muted-foreground"
+                    className="font-mondwest text-display text-xs text-muted-foreground"
                   >
                     {t.profiles.soulSection}
                   </Label>
@@ -1380,7 +1380,7 @@ export default function ProfilesPage() {
                   <div className="flex justify-end">
                     <Button
                       size="sm"
-                      className="uppercase"
+                      className=""
                       onClick={() => handleSaveSoul(editorName)}
                       disabled={soulSaving}
                     >

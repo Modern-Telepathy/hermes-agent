@@ -144,7 +144,7 @@ export function SidebarSettingsHoverCard({
             }}
           >
             <div className="border-b border-current/20 px-5 py-2">
-              <span className="font-sans text-display text-xs tracking-[0.12em] text-text-tertiary">
+              <span className="font-sans text-display text-xs text-text-tertiary">
                 {label}
               </span>
             </div>
