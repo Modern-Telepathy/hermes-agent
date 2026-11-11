@@ -99,7 +99,7 @@ export function ChatStreamView({
   }, [sessionId]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    endRef.current?.scrollIntoView?.({ block: "end" });
   }, [state.turns]);
 
   const submit = () => {
