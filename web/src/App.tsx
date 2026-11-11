@@ -419,7 +419,11 @@ export default function App() {
     },
     [],
   );
-  const navDrag = useSidebarDrag({ onMove: reorderNav });
+  const sidebarNavRef = useRef<HTMLElement | null>(null);
+  const navDrag = useSidebarDrag({
+    navRef: sidebarNavRef,
+    onMove: reorderNav,
+  });
   const toggleCollapsed = useCallback(() => {
     setCollapsed((prev) => {
       const next = !prev;
@@ -655,7 +659,7 @@ export default function App() {
             <nav
               className="min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden border-t border-current/10 py-2"
               aria-label={t.app.navigation}
-              ref={navDrag.navRef}
+              ref={sidebarNavRef}
               data-dragging={navDrag.dragging ?? undefined}
             >
               <ul className="flex flex-col" data-nav-group="core">

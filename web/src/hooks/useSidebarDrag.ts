@@ -11,26 +11,22 @@
 
 import { useEffect, useRef, useState } from "react";
 
+
 const DEFAULT_HOLD_MS = 250;
 /** Pixels a pointer must travel before a press becomes a drag instead of a click. */
 const DRAG_THRESHOLD_PX = 6;
 
-export interface SidebarDrag {
-  /** Path of the row being dragged, for styling, or null. */
-  dragging: string | null;
-  /** Attach to the element that contains the rows. */
-  navRef: React.RefObject<HTMLElement | null>;
-}
-
 export function useSidebarDrag({
+  navRef,
   onMove,
   holdMs = DEFAULT_HOLD_MS,
 }: {
+  /** The element that contains the rows; the caller owns it so the JSX keeps a plain ref. */
+  navRef: React.RefObject<HTMLElement | null>;
   onMove: (from: string, to: string, group: string) => void;
   holdMs?: number;
-}): SidebarDrag {
+}): { dragging: string | null } {
   const [dragging, setDragging] = useState<string | null>(null);
-  const navRef = useRef<HTMLElement | null>(null);
   // The effect owns the listeners for its whole life, so the callback is read through a ref
   // instead of re-subscribing on every render of the page.
   const onMoveRef = useRef(onMove);
@@ -135,9 +131,9 @@ export function useSidebarDrag({
       window.removeEventListener("pointerup", release);
       window.removeEventListener("pointercancel", release);
     };
-  }, [holdMs]);
+  }, [holdMs, navRef]);
 
-  return { dragging, navRef };
+  return { dragging };
 }
 
 function rowAt(target: EventTarget | null): { path: string; group: string } | null {
