@@ -3,14 +3,12 @@
  *  extending-the-dashboard.md, but the shell never rendered them — a plugin
  *  targeting them mounted into nothing (silent no-op).
  *
- *  The footer slots live in SidebarFooter with the default cells as
- *  `fallback` (plugin content replaces the default when registered); the
- *  sidebar slot renders only when layoutVariant === "cockpit"
- *  (CockpitSidebarSlot). Tests drive the REAL production components via
- *  renderToStaticMarkup — no jsdom needed.
- *
- *  On the pre-fix tree the "replaces" assertions fail (no PluginSlot in
- *  SidebarFooter) and CockpitSidebarSlot does not exist to import. */
+ *  The footer slots live in SidebarFooter. The bar has no built-in cells any
+ *  more (the version and org line moved into the settings card), so it renders
+ *  nothing until a plugin claims a slot. The sidebar slot renders only when
+ *  layoutVariant === "cockpit" (CockpitSidebarSlot). Tests drive the REAL
+ *  production components via renderToStaticMarkup — no jsdom needed.
+ */
 import { describe, it, expect, afterEach } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -27,36 +25,24 @@ afterEach(() => {
 });
 
 describe("footer-left / footer-right slots (SidebarFooter)", () => {
-  it("renders the default cells as fallback when no plugin claims them", () => {
-    const html = renderToStaticMarkup(
-      React.createElement(SidebarFooter, {
-        status: { version: "1.2.3" } as never,
-      }),
-    );
-    expect(html).toContain("v1.2.3");
-    expect(html).toContain("nousresearch.com");
+  it("renders nothing when no plugin claims a footer slot", () => {
+    const html = renderToStaticMarkup(React.createElement(SidebarFooter));
+    expect(html).toBe("");
   });
 
-  it("plugin content replaces the default left cell", () => {
+  it("renders plugin content in the left cell", () => {
     registerSlot("test-plugin", "footer-left", () =>
       React.createElement(Mark, { text: "PLUGIN-LEFT" }),
     );
-    const html = renderToStaticMarkup(
-      React.createElement(SidebarFooter, {
-        status: { version: "1.2.3" } as never,
-      }),
-    );
+    const html = renderToStaticMarkup(React.createElement(SidebarFooter));
     expect(html).toContain("PLUGIN-LEFT");
-    expect(html).not.toContain("v1.2.3");
   });
 
-  it("plugin content replaces the default right cell", () => {
+  it("renders plugin content in the right cell", () => {
     registerSlot("test-plugin", "footer-right", () =>
       React.createElement(Mark, { text: "PLUGIN-RIGHT" }),
     );
-    const html = renderToStaticMarkup(
-      React.createElement(SidebarFooter, { status: null }),
-    );
+    const html = renderToStaticMarkup(React.createElement(SidebarFooter));
     expect(html).toContain("PLUGIN-RIGHT");
     expect(html).not.toContain("nousresearch.com");
   });

@@ -17,7 +17,7 @@ import { ThemeProvider } from "@/themes";
 import { AuthWidget } from "./AuthWidget";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { SidebarFooter } from "./SidebarFooter";
+import { SidebarOrgMeta } from "./SidebarFooter";
 
 vi.mock("@/lib/api", () => ({
   api: {
@@ -141,10 +141,10 @@ describe("sidebar control target sizes (WCAG 2.5.8, issue #70983)", () => {
     expect(hasClass(btn!, "py-1")).toBe(false);
   });
 
-  it("Nous Research footer link renders a >=24px hit area (min-h 24px)", async () => {
+  it("Nous Research link in the settings card renders a >=24px hit area (min-h 24px)", async () => {
     await render(
       <I18nProvider>
-        <SidebarFooter status={null} />
+        <SidebarOrgMeta status={null} />
       </I18nProvider>,
     );
     const link = container.querySelector('a[href="https://nousresearch.com"]');

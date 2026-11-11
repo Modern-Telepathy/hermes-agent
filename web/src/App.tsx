@@ -60,7 +60,7 @@ import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { cn } from "@/lib/utils";
-import { SidebarFooter } from "@/components/SidebarFooter";
+import { SidebarFooter, SidebarOrgMeta } from "@/components/SidebarFooter";
 import { SidebarHeader } from "@/components/SidebarHeader";
 import { SidebarLists } from "@/components/SidebarLists";
 import { SidebarNavCollapse } from "@/components/SidebarNavCollapse";
@@ -746,7 +746,7 @@ export default function App() {
               )}
             >
               <AuthWidget />
-              <SidebarFooter status={sidebarStatus} />
+              <SidebarFooter />
             </div>
           </aside>
 
@@ -1094,6 +1094,7 @@ function SidebarSystemActions({
         </>
       }
       label={t.app.system}
+      meta={<SidebarOrgMeta status={status} />}
     >
       <div className="flex flex-col py-1">
         <SidebarStatusStrip status={status} />

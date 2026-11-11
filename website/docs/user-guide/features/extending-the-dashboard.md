@@ -614,8 +614,8 @@ window.__HERMES_PLUGINS__.registerSlot("my-plugin", "header-left", MyCrest);
 | `sidebar` | Cockpit sidebar rail — **only rendered when `layoutVariant === "cockpit"`**. |
 | `pre-main` | Above the route outlet (inside `<main>`). |
 | `post-main` | Below the route outlet (inside `<main>`). |
-| `footer-left` | Footer cell content (replaces default). |
-| `footer-right` | Footer cell content (replaces default). |
+| `footer-left` | Footer cell content (the bar renders only once a slot is claimed). |
+| `footer-right` | Footer cell content (the bar renders only once a slot is claimed). |
 | `overlay` | Fixed-position layer above everything else. Useful for chrome (scanlines, vignettes) `customCSS` can't achieve alone. |
 
 **Page-scoped slots** (render only on the named built-in page — use these to inject widgets, cards, or toolbars into an existing page without overriding the whole route):
@@ -893,7 +893,7 @@ The [`strike-freedom-cockpit`](https://github.com/NousResearch/hermes-example-pl
 - A slot-only plugin (`tab.hidden: true`) that registers into three slots:
   - `sidebar` — an MS-STATUS panel with live telemetry bars driven by `SDK.api.getStatus()`.
   - `header-left` — a faction crest that reads `--theme-asset-crest` from the active theme.
-  - `footer-right` — a custom tagline replacing the default org line.
+  - `footer-right` — a custom tagline; the built-in version/org line lives in the settings card.
 - The plugin reads theme-supplied artwork via CSS vars, so swapping themes changes the hero/crest without plugin code changes.
 
 **Install:**

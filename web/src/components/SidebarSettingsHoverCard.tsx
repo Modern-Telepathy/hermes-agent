@@ -21,6 +21,7 @@ export function SidebarSettingsHoverCard({
   collapsed = false,
   footer,
   label,
+  meta,
 }: SidebarSettingsHoverCardProps) {
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<{ bottom: number; left: number } | null>(null);
@@ -156,6 +157,12 @@ export function SidebarSettingsHoverCard({
                 {footer}
               </div>
             )}
+
+            {meta && (
+              <div className="flex items-center justify-between gap-2 border-t border-current/20 px-5 py-1.5">
+                {meta}
+              </div>
+            )}
           </div>,
           document.body,
         )}
@@ -168,4 +175,6 @@ interface SidebarSettingsHoverCardProps {
   collapsed?: boolean;
   footer?: ReactNode;
   label: string;
+  /** Bottom line of the card: shell version and org, kept out of the sidebar footer. */
+  meta?: ReactNode;
 }
