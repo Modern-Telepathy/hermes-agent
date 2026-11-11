@@ -1,10 +1,20 @@
-import { useCallback, useId, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 const NAV_HIDDEN_KEY = "hermes-sidebar-nav-hidden";
-/** A released drag inside this band hides the list instead of leaving it squashed. */
+/** A released drag below this height hides the list instead of leaving a sliver. */
 const HIDE_THRESHOLD_PX = 48;
+/** A released drag within this much of the full height snaps back to auto. */
+const FULL_SNAP_PX = 8;
 /** Below this much vertical travel the pointer counts as a click, not a drag. */
 const DRAG_SLOP_PX = 2;
 
@@ -33,13 +43,17 @@ interface SidebarNavCollapseProps {
 }
 
 /**
- * A sidebar section that ends in a grippable divider. Dragging the divider up
- * past the threshold hides the list above it, dragging it back down (or
- * clicking / pressing Enter on the grip) restores it.
+ * A sidebar section that ends in a grippable divider. Dragging the divider
+ * resizes the list above it and the height stays where it was released, so
+ * the divider does not spring back under the pointer; past the hide
+ * threshold it collapses completely, and near the full height it snaps back
+ * to auto. Clicking or pressing Enter toggles; ArrowUp/ArrowDown collapse and
+ * expand.
  *
  * Only the hidden flag is persisted, never a pixel height: a stored height
  * goes stale as soon as a translation or the user's font size changes the
- * content, and then the divider sits somewhere meaningless.
+ * content. A session-lifetime height is dropped on window resize once it no
+ * longer fits.
  */
 export function SidebarNavCollapse({
   children,
@@ -52,28 +66,40 @@ export function SidebarNavCollapse({
   const dragRef = useRef<{ pointerY: number; height: number; moved: boolean } | null>(null);
   const suppressClickRef = useRef(false);
   const [hidden, setHidden] = useState(readStoredHidden);
-  const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   const setNavHidden = useCallback((next: boolean) => {
     setHidden(next);
     storeHidden(next);
   }, []);
 
+  useEffect(() => {
+    if (height === null) return;
+    const onResize = () => {
+      const content = contentRef.current;
+      if (content && height > content.scrollHeight) setHeight(null);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [height]);
+
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.button !== 0) return;
     const start = hidden ? 0 : (contentRef.current?.offsetHeight ?? 0);
     let latest = start;
     dragRef.current = { pointerY: event.clientY, height: start, moved: false };
-    setDragHeight(start);
 
     const onMove = (moveEvent: globalThis.PointerEvent) => {
       const drag = dragRef.current;
       const content = contentRef.current;
       if (!drag || !content) return;
       const delta = moveEvent.clientY - drag.pointerY;
-      if (Math.abs(delta) > DRAG_SLOP_PX) drag.moved = true;
+      if (!drag.moved && Math.abs(delta) <= DRAG_SLOP_PX) return;
+      drag.moved = true;
       latest = Math.max(0, Math.min(content.scrollHeight, drag.height + delta));
-      setDragHeight(latest);
+      setDragging(true);
+      setHeight(latest);
     };
 
     const onUp = () => {
@@ -81,15 +107,25 @@ export function SidebarNavCollapse({
       window.removeEventListener("pointerup", onUp);
       const drag = dragRef.current;
       dragRef.current = null;
-      if (drag?.moved) {
-        const content = contentRef.current;
-        const squashLimit = content
-          ? Math.min(HIDE_THRESHOLD_PX, content.scrollHeight / 2)
-          : HIDE_THRESHOLD_PX;
-        suppressClickRef.current = true;
-        setNavHidden(latest <= squashLimit);
+      setDragging(false);
+      if (!drag?.moved) {
+        // A plain click: leave the layout to the toggle handler.
+        setHeight(null);
+        return;
       }
-      setDragHeight(null);
+      const full = contentRef.current?.scrollHeight ?? 0;
+      suppressClickRef.current = true;
+      if (latest <= Math.min(HIDE_THRESHOLD_PX, full / 2)) {
+        setHeight(null);
+        setNavHidden(true);
+      } else if (latest >= full - FULL_SNAP_PX) {
+        setHeight(null);
+        setNavHidden(false);
+      } else {
+        // Keep the height the pointer was released at.
+        setNavHidden(false);
+        setHeight(latest);
+      }
     };
 
     window.addEventListener("pointermove", onMove);
@@ -101,32 +137,35 @@ export function SidebarNavCollapse({
       suppressClickRef.current = false;
       return;
     }
+    setHeight(null);
     setNavHidden(!hidden);
   };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "ArrowUp") {
       event.preventDefault();
+      setHeight(null);
       setNavHidden(true);
     } else if (event.key === "ArrowDown") {
       event.preventDefault();
+      setHeight(null);
       setNavHidden(false);
     }
   };
 
-  const squashed = hidden && dragHeight === null;
+  const squashed = hidden && height === null;
 
   return (
     <div className="flex min-h-0 flex-col">
       <div
         className={cn(
           "min-h-0 overflow-hidden",
-          dragHeight === null && "transition-[height] duration-200 ease-out",
+          !dragging && "transition-[height] duration-200 ease-out",
         )}
         id={contentId}
         inert={squashed}
         ref={contentRef}
-        style={{ height: dragHeight ?? (hidden ? 0 : undefined) }}
+        style={{ height: height ?? (hidden ? 0 : undefined) }}
       >
         {children}
       </div>
@@ -134,8 +173,8 @@ export function SidebarNavCollapse({
       {hasListBelow && (
         <button
           aria-controls={contentId}
-          aria-expanded={!hidden}
-          aria-label={`${hidden ? t.common.expand : t.common.collapse} ${t.app.navigation}`}
+          aria-expanded={!hidden && height === null ? true : !squashed}
+          aria-label={`${squashed ? t.common.expand : t.common.collapse} ${t.app.navigation}`}
           className={cn(
             "group flex h-3 w-full shrink-0 cursor-row-resize items-center bg-transparent",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/30",
