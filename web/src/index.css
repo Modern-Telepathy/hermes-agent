@@ -259,6 +259,16 @@ code { font-size: 0.875rem; }
   font-family: var(--theme-font-sans);
 }
 
+/* The remaining display faces (Rules Expanded/Compressed) are declared as
+   standalone `--font-*` tokens by the DS rather than theme tokens, so
+   retarget the tokens themselves: no heading, eyebrow or badge renders in a
+   second typeface. */
+:root {
+  --font-mondwest: var(--theme-font-sans);
+  --font-rules-compressed: var(--theme-font-sans);
+  --font-rules-expanded: var(--theme-font-sans);
+}
+
 /* Subtle grain overlay for badges. */
 .grain {
   position: relative;
