@@ -1192,7 +1192,7 @@ export default function ProfilesPage() {
                             "line-clamp-2",
                             p.description
                               ? "text-muted-foreground"
-                              : "text-muted-foreground/60 italic",
+                              : "text-muted-foreground/60",
                           )}
                         >
                           {p.description || L.noDescription}

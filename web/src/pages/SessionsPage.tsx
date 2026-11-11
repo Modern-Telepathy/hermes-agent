@@ -608,7 +608,7 @@ function SessionRow({
                   </div>
                 ) : (
                   <span
-                    className={`font-mondwest normal-case min-w-0 flex-1 truncate text-sm ${hasTitle ? "font-medium" : "text-muted-foreground italic"}`}
+                    className={`font-mondwest normal-case min-w-0 flex-1 truncate text-sm ${hasTitle ? "font-medium" : "text-muted-foreground"}`}
                   >
                     {hasTitle
                       ? session.title
@@ -2087,7 +2087,7 @@ export default function SessionsPage() {
                   >
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <span
-                        className={`font-mondwest normal-case min-w-0 truncate text-sm ${s.title ? "font-medium" : "text-muted-foreground italic"}`}
+                        className={`font-mondwest normal-case min-w-0 truncate text-sm ${s.title ? "font-medium" : "text-muted-foreground"}`}
                       >
                         {s.title ??
                           (s.preview
