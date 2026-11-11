@@ -867,7 +867,7 @@ function SidebarNavLink({
           cn(
             "group/nav relative flex items-center gap-3",
             "px-5 py-2.5",
-            "font-sans text-display uppercase text-sm tracking-[0.12em]",
+            "font-sans text-display text-sm",
             "whitespace-nowrap transition-colors cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
             isActive
@@ -1339,7 +1339,7 @@ function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
         "fixed z-[100] pointer-events-none",
         "px-2 py-1",
         "bg-background-base border border-current/20 shadow-lg",
-        "font-sans text-display text-xs tracking-[0.1em] text-midground uppercase",
+        "font-sans text-display text-xs text-midground",
       )}
       style={{
         top: rect.top + rect.height / 2,
