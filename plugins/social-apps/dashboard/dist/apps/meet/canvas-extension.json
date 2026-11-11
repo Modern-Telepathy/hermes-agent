@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "meet",
+  "display_name": "MeetRightHere™",
+  "version": "0.1.0",
+  "description": "Video meetings in Canvas: join a room, share camera, mic and screen, and chat, on an open WebRTC stack (LiveKit).",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "meet",
+        "title": "MeetRightHere™",
+        "path": "/meet",
+        "nav_label": "MeetRightHere™",
+        "description": "Video meetings with your team."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "blue"
+  }
+}

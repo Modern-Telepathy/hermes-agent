@@ -395,6 +395,8 @@ _PLUGIN_ASSET_CONTENT_TYPES = {
     ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
     ".webp": "image/webp", ".ico": "image/x-icon", ".woff2": "font/woff2", ".woff": "font/woff",
     ".ttf": "font/ttf", ".otf": "font/otf", ".map": "application/json",
+    # 3D plugins (WebGL widgets) ship glTF scenes: glb is self-contained, bin is a sidecar buffer.
+    ".glb": "model/gltf-binary", ".bin": "application/octet-stream",
 }
 
 

@@ -1,0 +1,12 @@
+{
+  "name": "social-murmur",
+  "label": "Murmur™",
+  "description": "Peer-to-peer social: a flock of starlings.",
+  "icon": "Activity",
+  "version": "0.1.1",
+  "tab": {
+    "path": "/murmur",
+    "position": "after:chat"
+  },
+  "entry": "dist/index.js"
+}

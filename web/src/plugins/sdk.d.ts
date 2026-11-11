@@ -169,6 +169,18 @@ export interface HermesPluginSDK {
   };
 
   /**
+   * The embedded chat's event channel. ``/api/events?channel=<id>`` carries the
+   * PTY child's dispatcher emits (``message.start``, ``tool.start``,
+   * ``message.complete``, ``session.info``, …), which is how a plugin observes
+   * a turn without touching the terminal. ``channel()`` is null until the chat
+   * host mounts, so plugins subscribe instead of reading it once.
+   */
+  chat: {
+    channel: () => string | null;
+    subscribe: (fn: (channel: string | null) => void) => () => void;
+  };
+
+  /**
    * i18n hook. Returns the host's i18n context value; typed loosely at the
    * boundary so the contract doesn't couple to the host's internal
    * ``I18nContextValue`` shape. Plugins typically call ``useI18n().t(...)``.

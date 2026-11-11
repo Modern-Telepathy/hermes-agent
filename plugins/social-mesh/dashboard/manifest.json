@@ -1,0 +1,12 @@
+{
+  "name": "social-mesh",
+  "label": "MESH™",
+  "description": "People and AI agents on one signed mesh.",
+  "icon": "Globe",
+  "version": "0.1.1",
+  "tab": {
+    "path": "/mesh",
+    "position": "after:chat"
+  },
+  "entry": "dist/index.js"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "kamiji-avatar",
+  "label": "Kamiji avatar",
+  "description": "Live Kamiji avatar in the dashboard chat, driven by the embedded TUI's session events.",
+  "icon": "Sparkles",
+  "version": "0.1.0",
+  "tab": { "path": "/feed", "position": "after:chat" },
+  "slots": ["chat:top"],
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}

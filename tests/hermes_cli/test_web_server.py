@@ -4840,6 +4840,30 @@ class TestDashboardPluginStaticAssetAllowlist:
         assert body.get("name") == "example"
 
 
+    def test_gltf_assets_are_served(self):
+        """WebGL dashboard plugins ship glTF scenes, so ``.glb``/``.bin`` are browser assets.
+
+        The allowlist still refuses the ``.py`` source beside them (``test_python_source_is_404``):
+        adding a 3D model type must not widen the surface to code.
+        """
+        from hermes_cli.web_server import _get_dashboard_plugins
+
+        plugin_dir = next(
+            Path(p["_dir"])
+            for p in _get_dashboard_plugins(force_rescan=True)
+            if p["name"] == "example"
+        )
+        model = plugin_dir / "assets" / "probe.glb"
+        model.parent.mkdir(parents=True, exist_ok=True)
+        model.write_bytes(b"glTF\x02\x00\x00\x00")
+        try:
+            resp = self.client.get("/dashboard-plugins/example/assets/probe.glb")
+            assert resp.status_code == 200
+            assert resp.headers["content-type"] == "model/gltf-binary"
+            assert resp.content == b"glTF\x02\x00\x00\x00"
+        finally:
+            model.unlink(missing_ok=True)
+
     def test_path_traversal_still_blocked(self):
         """The allowlist is on top of the existing ``.resolve()`` /
         ``is_relative_to()`` check — a ``.js`` named file at an

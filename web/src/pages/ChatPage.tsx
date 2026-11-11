@@ -115,6 +115,7 @@ import {
   terminalTierWidthPx,
 } from "@/lib/terminal-appearance";
 import { PluginSlot } from "@/plugins";
+import { setActiveChatChannel } from "@/lib/active-chat";
 import { useTheme } from "@/themes";
 import { useProfileScope } from "@/contexts/useProfileScope";
 import { errorMessage } from "@/lib/api-error";
@@ -357,6 +358,11 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
     () => generateChannelId(`${resumeParam ?? ""}\0${scopedProfile}`),
     [resumeParam, scopedProfile],
   );
+  // Dashboard plugins observe turn events on this channel (`SDK.chat`).
+  useEffect(() => {
+    setActiveChatChannel(channel);
+    return () => setActiveChatChannel(null);
+  }, [channel]);
   const titleScope = `${channel}\0${reconnectNonce}`;
   const sessionTitle =
     sessionTitleState.scope === titleScope ? sessionTitleState.title : null;

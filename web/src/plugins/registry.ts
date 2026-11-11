@@ -37,6 +37,10 @@ import { Label } from "@nous-research/ui/ui/components/label";
 import { Separator } from "@nous-research/ui/ui/components/separator";
 import { Tabs, TabsList, TabsTrigger } from "@nous-research/ui/ui/components/tabs";
 import { useI18n } from "@/i18n";
+import {
+  getActiveChatChannel,
+  subscribeActiveChatChannel,
+} from "@/lib/active-chat";
 import { clearPluginSlots, registerSlot, PluginSlot } from "./slots";
 
 // ---------------------------------------------------------------------------
@@ -213,6 +217,11 @@ export function exposePluginSDK() {
       Toast,
       PluginSlot,
     },
+
+    // The embedded chat's event channel, for plugins that observe turn events
+    // (`/api/events?channel=…`). Subscribing covers the mount order: the chat
+    // host sets the channel after the plugin bundle has loaded.
+    chat: { channel: getActiveChatChannel, subscribe: subscribeActiveChatChannel },
 
     // Utilities
     utils: { cn, timeAgo, isoTimeAgo },

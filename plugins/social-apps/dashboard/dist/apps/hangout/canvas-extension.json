@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "hangout",
+  "display_name": "Hangout™",
+  "version": "0.1.0",
+  "description": "Message your agents like teammates: a list of agents with their latest update, a chat with each one, and their screen and routines beside it.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "hangout",
+        "title": "Hangout™",
+        "path": "/hangout",
+        "nav_label": "Hangout™",
+        "description": "Chat with your agents."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "violet"
+  }
+}

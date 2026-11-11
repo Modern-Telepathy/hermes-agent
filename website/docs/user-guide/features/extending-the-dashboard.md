@@ -530,6 +530,10 @@ SDK.components.PluginSlot    // render a named slot (useful for nested plugin UI
 SDK.api                      // typed client — getStatus, getSessions, getConfig, ...
 SDK.fetchJSON                // raw fetch for custom endpoints (plugin-registered routes)
 
+// The embedded chat's event channel (see "Observing a turn" below)
+SDK.chat.channel()           // "chat-…", or null until the chat host mounts
+SDK.chat.subscribe(fn)       // fn(channel) on change; returns an unsubscribe function
+
 // Utilities
 SDK.utils.cn                 // Tailwind class merger (clsx + twMerge)
 SDK.utils.timeAgo            // "5m ago" from unix timestamp
@@ -548,6 +552,31 @@ SDK.fetchJSON("/api/plugins/my-plugin/data")
 ```
 
 `fetchJSON` injects the session auth token, surfaces errors as thrown exceptions, and parses JSON automatically. `fetchJSON` and `authedFetch` only call this dashboard's own origin: an absolute URL to another host is rejected rather than sent the session token, so fetch third-party URLs (CDN assets, a game server) with plain `fetch`.
+
+#### Observing a turn
+
+The chat page is the embedded `hermes --tui` PTY, so a plugin cannot read the transcript from the
+DOM. What it can do is subscribe to the same event feed the sidebar uses: the PTY child mirrors
+every dispatcher emit to `/api/events?channel=<chat channel>`, and `SDK.chat` supplies that channel
+(the dashboard picks it after your bundle loads, hence `subscribe`).
+
+```javascript
+SDK.chat.subscribe(async (channel) => {
+  if (!channel) return;
+  const ws = new WebSocket(await SDK.buildWsUrl("/api/events", { channel }));
+  ws.onmessage = (ev) => {
+    const frame = JSON.parse(ev.data);
+    if (frame.method !== "event") return;
+    // { params: { type: "message.start" | "tool.start" | "message.complete" | "session.info" | …, payload } }
+    console.log(frame.params.type, frame.params.payload);
+  };
+});
+```
+
+Event names live in `tui_gateway/agent_callbacks.py` and `tui_gateway/session_notifications.py`
+(`message.start`, `tool.start`, `tool.complete`, `message.complete`, `thinking.delta`,
+`connection.request`, `error`, `status.update`, …). `plugins/kamiji-avatar/` is a worked example: it
+renders a WebGL avatar in `chat:top` and maps those events onto its status protocol.
 
 #### Calling built-in Hermes endpoints
 

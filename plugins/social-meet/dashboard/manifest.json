@@ -1,0 +1,12 @@
+{
+  "name": "social-meet",
+  "label": "MeetRightHere™",
+  "description": "Video rooms with camera, mic, screen share and chat.",
+  "icon": "Eye",
+  "version": "0.1.1",
+  "tab": {
+    "path": "/meet",
+    "position": "after:chat"
+  },
+  "entry": "dist/index.js"
+}
