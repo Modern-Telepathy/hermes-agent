@@ -63,6 +63,7 @@ import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { SidebarFooter } from "@/components/SidebarFooter";
+import { SidebarNavCollapse } from "@/components/SidebarNavCollapse";
 import { SidebarSettingsHoverCard } from "@/components/SidebarSettingsHoverCard";
 import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
 import { SidebarStatusStrip } from "@/components/SidebarStatusStrip";
@@ -663,18 +664,23 @@ export default function App() {
               ref={sidebarNavRef}
               data-dragging={navDrag.dragging ?? undefined}
             >
-              <ul className="flex flex-col" data-nav-group="core">
-                {applySidebarOrder(sidebarNav.coreItems, navOrder.core).map((item) => (
-                  <SidebarNavLink
-                    closeMobile={closeMobile}
-                    collapsed={isDesktopCollapsed}
-                    item={item}
-                    key={item.path}
-                    t={t}
-                    tooltipWarmRef={tooltipWarmRef}
-                  />
-                ))}
-              </ul>
+              <SidebarNavCollapse
+                collapsed={isDesktopCollapsed}
+                hasListBelow={sidebarNav.pluginItems.length > 0}
+              >
+                <ul className="flex flex-col" data-nav-group="core">
+                  {applySidebarOrder(sidebarNav.coreItems, navOrder.core).map((item) => (
+                    <SidebarNavLink
+                      closeMobile={closeMobile}
+                      collapsed={isDesktopCollapsed}
+                      item={item}
+                      key={item.path}
+                      t={t}
+                      tooltipWarmRef={tooltipWarmRef}
+                    />
+                  ))}
+                </ul>
+              </SidebarNavCollapse>
 
               <SidebarPluginNav
                 closeMobile={closeMobile}
@@ -937,12 +943,12 @@ function SidebarPluginNav({
   return (
     <div
       aria-labelledby="hermes-sidebar-plugin-nav-heading"
-      className="flex flex-col border-t border-current/10 pb-2"
+      className="flex flex-col pb-2"
       role="group"
     >
       <span
         className={cn(
-          "px-5 pt-2.5 pb-1",
+          "px-5 pt-1 pb-1",
           "font-sans text-display text-xs text-text-tertiary",
           linkProps.collapsed && "lg:hidden",
         )}
