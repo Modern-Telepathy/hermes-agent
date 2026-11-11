@@ -603,52 +603,18 @@ export default function App() {
               borderImage: "var(--component-sidebar-border-image)",
             }}
           >
-            <div
-              className={cn(
-                "flex h-14 shrink-0 items-center gap-2",
-                "border-b border-current/20",
-                collapsed ? "lg:justify-center lg:px-0" : "px-4 justify-between",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex items-center gap-2",
-                  collapsed && "lg:hidden",
-                )}
-              >
-                <PluginSlot name="header-left" />
-
-                <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
-                  Hermes
-                  <br />
-                  Agent
-                </Typography>
-              </div>
-
+            {/* No brand block and no toggle up here: the drawer close is the only thing that
+                belongs beside the content on mobile, and on desktop the sidebar starts with the
+                profile switcher. */}
+            <div className="flex h-14 shrink-0 items-center justify-end border-b border-current/20 px-4 lg:hidden">
               <Button
                 ghost
                 size="icon"
                 onClick={closeMobile}
                 aria-label={t.app.closeNavigation}
-                className="lg:hidden text-text-secondary hover:text-midground"
+                className="text-text-secondary hover:text-midground"
               >
                 <X />
-              </Button>
-
-              <Button
-                ghost
-                size="icon"
-                onClick={toggleCollapsed}
-                aria-label={
-                  collapsed ? t.common.expand : t.common.collapse
-                }
-                className="hidden lg:flex text-text-secondary hover:text-midground"
-              >
-                {collapsed ? (
-                  <PanelLeftOpen className="h-4 w-4" />
-                ) : (
-                  <PanelLeftClose className="h-4 w-4" />
-                )}
               </Button>
             </div>
 
@@ -705,6 +671,10 @@ export default function App() {
                   isDesktopCollapsed && "lg:flex-col lg:items-start",
                 )}
               >
+                {/* `header-left` used to sit beside the brand wordmark; it lives with the other
+                    top-bar decorations now that the brand block is gone. */}
+                <PluginSlot name="header-left" />
+
                 <PluginSlot name="header-right" />
 
                 <SidebarIconWithTooltip
@@ -721,6 +691,26 @@ export default function App() {
                   tooltipWarmRef={tooltipWarmRef}
                 >
                   <LanguageSwitcher collapsed={isDesktopCollapsed} dropUp />
+                </SidebarIconWithTooltip>
+
+                <SidebarIconWithTooltip
+                  collapsed={isDesktopCollapsed}
+                  label={isDesktopCollapsed ? t.common.expand : t.common.collapse}
+                  tooltipWarmRef={tooltipWarmRef}
+                >
+                  <Button
+                    ghost
+                    size="icon"
+                    onClick={toggleCollapsed}
+                    aria-label={isDesktopCollapsed ? t.common.expand : t.common.collapse}
+                    className="hidden lg:flex text-text-secondary hover:text-midground"
+                  >
+                    {isDesktopCollapsed ? (
+                      <PanelLeftOpen className="h-4 w-4" />
+                    ) : (
+                      <PanelLeftClose className="h-4 w-4" />
+                    )}
+                  </Button>
                 </SidebarIconWithTooltip>
               </div>
             </div>
