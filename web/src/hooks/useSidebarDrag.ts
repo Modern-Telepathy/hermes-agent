@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 /** Pixels a grip must travel before it counts as a drag rather than a nudge. */
 const DRAG_THRESHOLD_PX = 3;
@@ -124,9 +125,12 @@ export function useSidebarDrag({
 
 /**
  * Apply a reorder and animate the rows into their new slots. Rows are measured before the mutation
- * and again on the next frame; the difference becomes the first keyframe of a WAAPI animation, so
+ * and again after it commits; the difference becomes the first keyframe of a WAAPI animation, so
  * the DOM reorder is instant while the movement is visible and nothing is left behind in inline
  * styles (a stuck `transform` would offset a row that later becomes sticky).
+ *
+ * The commit is forced with `flushSync`: React otherwise applies the reorder after this handler,
+ * so a measurement in the same task would still see the old layout and every delta would be zero.
  */
 function reorderWithFlip(group: string, mutate: () => void) {
   const container = document.querySelector(`[data-nav-group="${group}"]`);
@@ -136,20 +140,18 @@ function reorderWithFlip(group: string, mutate: () => void) {
   }
   const rows = Array.from(container.querySelectorAll<HTMLElement>("[data-nav-path]"));
   const before = new Map(rows.map((row) => [row, row.getBoundingClientRect().top]));
-  mutate();
+  flushSync(mutate);
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  requestAnimationFrame(() => {
-    for (const row of container.querySelectorAll<HTMLElement>("[data-nav-path]")) {
-      const from = before.get(row);
-      if (from === undefined) continue;
-      const delta = from - row.getBoundingClientRect().top;
-      if (Math.abs(delta) < 1) continue;
-      row.animate(
-        [{ transform: `translateY(${delta}px)` }, { transform: "none" }],
-        { duration: FLIP_MS, easing: FLIP_EASING },
-      );
-    }
-  });
+  for (const row of container.querySelectorAll<HTMLElement>("[data-nav-path]")) {
+    const from = before.get(row);
+    if (from === undefined) continue;
+    const delta = from - row.getBoundingClientRect().top;
+    if (Math.abs(delta) < 1) continue;
+    row.animate(
+      [{ transform: `translateY(${delta}px)` }, { transform: "none" }],
+      { duration: FLIP_MS, easing: FLIP_EASING },
+    );
+  }
 }
 
 function rowAt(target: EventTarget | null): { path: string; group: string } | null {
