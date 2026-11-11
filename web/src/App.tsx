@@ -62,6 +62,7 @@ import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { SidebarFooter } from "@/components/SidebarFooter";
 import { SidebarHeader } from "@/components/SidebarHeader";
+import { SidebarLists } from "@/components/SidebarLists";
 import { SidebarNavCollapse } from "@/components/SidebarNavCollapse";
 import { SidebarSettingsHoverCard } from "@/components/SidebarSettingsHoverCard";
 import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
@@ -690,6 +691,8 @@ export default function App() {
                 t={t}
                 tooltipWarmRef={tooltipWarmRef}
               />
+
+              <SidebarLists collapsed={isDesktopCollapsed} onNavigate={closeMobile} />
 
               {navFilter &&
                 applySidebarOrder(sidebarNav.coreItems, navOrder.core).filter(matchesNavQuery)
