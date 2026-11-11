@@ -38,6 +38,8 @@ interface SidebarNavCollapseProps {
   children: ReactNode;
   /** Icon rail: the list is icons only, so there is nothing to squish. */
   collapsed: boolean;
+  /** A nav search is filtering the list: show every match, grip disabled. */
+  forceExpanded?: boolean;
   /** Whether another group follows the divider (the plugin section). */
   hasListBelow: boolean;
 }
@@ -58,6 +60,7 @@ interface SidebarNavCollapseProps {
 export function SidebarNavCollapse({
   children,
   collapsed,
+  forceExpanded = false,
   hasListBelow,
 }: SidebarNavCollapseProps) {
   const { t } = useI18n();
@@ -153,7 +156,8 @@ export function SidebarNavCollapse({
     }
   };
 
-  const squashed = hidden && height === null;
+  const squashed = hidden && height === null && !forceExpanded;
+  const renderedHeight = forceExpanded ? null : height;
 
   return (
     <div className="flex min-h-0 flex-col">
@@ -165,12 +169,12 @@ export function SidebarNavCollapse({
         id={contentId}
         inert={squashed}
         ref={contentRef}
-        style={{ height: height ?? (hidden ? 0 : undefined) }}
+        style={{ height: renderedHeight ?? (squashed ? 0 : undefined) }}
       >
         {children}
       </div>
 
-      {hasListBelow && (
+      {hasListBelow && !forceExpanded && (
         <button
           aria-controls={contentId}
           aria-expanded={!hidden && height === null ? true : !squashed}

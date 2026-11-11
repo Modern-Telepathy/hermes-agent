@@ -38,8 +38,6 @@ import {
   Menu,
   MessageSquare,
   Package,
-  PanelLeftClose,
-  PanelLeftOpen,
   Plug,
   Puzzle,
   Radio,
@@ -53,7 +51,6 @@ import {
   Users,
   Webhook,
   Wrench,
-  X,
   Zap,
 } from "lucide-react";
 import { Button } from "@nous-research/ui/ui/components/button";
@@ -63,6 +60,7 @@ import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { SidebarFooter } from "@/components/SidebarFooter";
+import { SidebarHeader } from "@/components/SidebarHeader";
 import { SidebarNavCollapse } from "@/components/SidebarNavCollapse";
 import { SidebarSettingsHoverCard } from "@/components/SidebarSettingsHoverCard";
 import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
@@ -421,6 +419,7 @@ export default function App() {
     },
     [],
   );
+  const [navQuery, setNavQuery] = useState("");
   const sidebarNavRef = useRef<HTMLElement | null>(null);
   const navDrag = useSidebarDrag({
     navRef: sidebarNavRef,
@@ -527,6 +526,10 @@ export default function App() {
   );
 
   const layoutVariant = theme.layoutVariant ?? "standard";
+
+  const navFilter = navQuery.trim().toLowerCase();
+  const matchesNavQuery = (item: NavItem) =>
+    !navFilter || item.label.toLowerCase().includes(navFilter);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -641,20 +644,13 @@ export default function App() {
               borderImage: "var(--component-sidebar-border-image)",
             }}
           >
-            {/* No brand block and no toggle up here: the drawer close is the only thing that
-                belongs beside the content on mobile, and on desktop the sidebar starts with the
-                profile switcher. */}
-            <div className="flex h-14 shrink-0 items-center justify-end border-b border-current/20 px-4 lg:hidden">
-              <Button
-                ghost
-                size="icon"
-                onClick={closeMobile}
-                aria-label={t.app.closeNavigation}
-                className="text-text-secondary hover:text-midground"
-              >
-                <X />
-              </Button>
-            </div>
+            <SidebarHeader
+              collapsed={isDesktopCollapsed}
+              onCloseMobile={closeMobile}
+              onQueryChange={setNavQuery}
+              onToggleCollapsed={toggleCollapsed}
+              query={navQuery}
+            />
 
             <ProfileSwitcher collapsed={isDesktopCollapsed} />
 
@@ -666,10 +662,11 @@ export default function App() {
             >
               <SidebarNavCollapse
                 collapsed={isDesktopCollapsed}
+                forceExpanded={Boolean(navFilter)}
                 hasListBelow={sidebarNav.pluginItems.length > 0}
               >
                 <ul className="flex flex-col" data-nav-group="core">
-                  {applySidebarOrder(sidebarNav.coreItems, navOrder.core).map((item) => (
+                  {applySidebarOrder(sidebarNav.coreItems, navOrder.core).filter(matchesNavQuery).map((item) => (
                     <SidebarNavLink
                       closeMobile={closeMobile}
                       collapsed={isDesktopCollapsed}
@@ -685,10 +682,20 @@ export default function App() {
               <SidebarPluginNav
                 closeMobile={closeMobile}
                 collapsed={isDesktopCollapsed}
-                items={applySidebarOrder(sidebarNav.pluginItems, navOrder.plugins)}
+                items={applySidebarOrder(sidebarNav.pluginItems, navOrder.plugins).filter(matchesNavQuery)}
                 t={t}
                 tooltipWarmRef={tooltipWarmRef}
               />
+
+              {navFilter &&
+                applySidebarOrder(sidebarNav.coreItems, navOrder.core).filter(matchesNavQuery)
+                  .length === 0 &&
+                applySidebarOrder(sidebarNav.pluginItems, navOrder.plugins).filter(matchesNavQuery)
+                  .length === 0 && (
+                  <p className="px-5 py-2 text-xs text-text-tertiary">
+                    No navigation matches “{navQuery}”.
+                  </p>
+                )}
             </nav>
 
             <CockpitSidebarSlot layoutVariant={layoutVariant} />
@@ -722,25 +729,6 @@ export default function App() {
                   tooltipWarmRef={tooltipWarmRef}
                 />
 
-                <SidebarIconWithTooltip
-                  collapsed={isDesktopCollapsed}
-                  label={isDesktopCollapsed ? t.common.expand : t.common.collapse}
-                  tooltipWarmRef={tooltipWarmRef}
-                >
-                  <Button
-                    ghost
-                    size="icon"
-                    onClick={toggleCollapsed}
-                    aria-label={isDesktopCollapsed ? t.common.expand : t.common.collapse}
-                    className="hidden lg:flex text-text-secondary hover:text-midground"
-                  >
-                    {isDesktopCollapsed ? (
-                      <PanelLeftOpen className="h-4 w-4" />
-                    ) : (
-                      <PanelLeftClose className="h-4 w-4" />
-                    )}
-                  </Button>
-                </SidebarIconWithTooltip>
               </div>
             </div>
 
@@ -1225,48 +1213,6 @@ function SystemActionButton({
   );
 }
 
-function SidebarIconWithTooltip({
-  children,
-  collapsed,
-  label,
-  tooltipWarmRef,
-}: SidebarIconWithTooltipProps) {
-  const [hovered, setHovered] = useState(false);
-  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
-  const showTooltip = (event: MouseEvent<HTMLDivElement>) => {
-    setHovered(true);
-    setTooltipAnchor(event.currentTarget);
-  };
-  const hideTooltip = () => {
-    setHovered(false);
-    setTooltipAnchor(null);
-  };
-
-  return (
-    <div
-      className={cn(
-        "relative w-fit",
-        collapsed && "group/icon",
-      )}
-      onMouseEnter={collapsed ? showTooltip : undefined}
-      onMouseLeave={collapsed ? hideTooltip : undefined}
-    >
-      {children}
-
-      {collapsed && (
-        <span
-          aria-hidden
-          className="absolute inset-y-0 inset-x-[-0.375rem] bg-midground opacity-0 pointer-events-none transition-opacity duration-200 group-hover/icon:opacity-5 hidden lg:block"
-        />
-      )}
-
-      {collapsed && hovered && tooltipAnchor && (
-        <SidebarTooltip anchor={tooltipAnchor} label={label} warmRef={tooltipWarmRef} />
-      )}
-    </div>
-  );
-}
-
 function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
   const rect = anchor.getBoundingClientRect();
   const sidebar = document.getElementById("app-sidebar");
@@ -1315,13 +1261,6 @@ interface NavItem {
   label: string;
   labelKey?: string;
   path: string;
-}
-
-interface SidebarIconWithTooltipProps {
-  children: ReactNode;
-  collapsed: boolean;
-  label: string;
-  tooltipWarmRef: TooltipWarmRef;
 }
 
 interface SidebarNavLinkProps {

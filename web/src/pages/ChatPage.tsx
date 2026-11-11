@@ -24,6 +24,7 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 
 import { ChatStreamView } from "@/components/ChatStreamView";
+import { useChatView } from "@/lib/chat-view";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { cn } from "@/lib/utils";
@@ -361,7 +362,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
     [resumeParam, scopedProfile],
   );
   // Transcript by default; the TUI stays mounted underneath so switching views never drops the PTY.
-  const [chatView, setChatView] = useState<"chat" | "terminal">("chat");
+  const [chatView, setChatView] = useChatView();
   const sendFromStream = useCallback((text: string) => {
     try {
       wsRef.current?.send(text + "\r");
