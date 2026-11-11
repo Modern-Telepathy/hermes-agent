@@ -63,8 +63,9 @@ import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { SidebarFooter } from "@/components/SidebarFooter";
+import { SidebarSettingsHoverCard } from "@/components/SidebarSettingsHoverCard";
 import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
-import { SidebarStatusStrip, gatewayLine } from "@/components/SidebarStatusStrip";
+import { SidebarStatusStrip } from "@/components/SidebarStatusStrip";
 import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint";
 
 import { rowsInGroup, useSidebarDrag } from "@/hooks/useSidebarDrag";
@@ -686,13 +687,6 @@ export default function App() {
 
             <CockpitSidebarSlot layoutVariant={layoutVariant} />
 
-            <SidebarSystemActions
-              collapsed={isDesktopCollapsed}
-              onNavigate={closeMobile}
-              status={sidebarStatus}
-              tooltipWarmRef={tooltipWarmRef}
-            />
-
             <div
               className={cn(
                 "flex shrink-0 items-center gap-2",
@@ -715,21 +709,12 @@ export default function App() {
 
                 <PluginSlot name="header-right" />
 
-                <SidebarIconWithTooltip
+                <SidebarSystemActions
                   collapsed={isDesktopCollapsed}
-                  label={t.theme?.switchTheme ?? "Switch theme"}
+                  onNavigate={closeMobile}
+                  status={sidebarStatus}
                   tooltipWarmRef={tooltipWarmRef}
-                >
-                  <ThemeSwitcher collapsed={isDesktopCollapsed} dropUp />
-                </SidebarIconWithTooltip>
-
-                <SidebarIconWithTooltip
-                  collapsed={isDesktopCollapsed}
-                  label={t.language.switchTo}
-                  tooltipWarmRef={tooltipWarmRef}
-                >
-                  <LanguageSwitcher collapsed={isDesktopCollapsed} dropUp />
-                </SidebarIconWithTooltip>
+                />
 
                 <SidebarIconWithTooltip
                   collapsed={isDesktopCollapsed}
@@ -1080,44 +1065,35 @@ function SidebarSystemActions({
 
   return (
     <>
-    <div
-      className={cn(
-        "shrink-0 flex flex-col",
-        "border-t border-current/10",
-        "py-1",
-      )}
+    <SidebarSettingsHoverCard
+      collapsed={collapsed}
+      footer={
+        <>
+          <ThemeSwitcher dropUp />
+          <LanguageSwitcher dropUp />
+        </>
+      }
+      label={t.app.system}
     >
-      <span
-        className={cn(
-          "px-5 pt-0.5 pb-0.5",
-          "font-sans text-display text-xs tracking-[0.12em] text-text-tertiary",
-          collapsed && "lg:hidden",
-        )}
-      >
-        {t.app.system}
-      </span>
-
-      <div className={cn(collapsed && "lg:hidden")}>
+      <div className="flex flex-col py-1">
         <SidebarStatusStrip status={status} />
+
+        <ul className="flex flex-col">
+          {items.map((item) => (
+            <SystemActionButton
+              key={item.action}
+              collapsed={false}
+              disabled={isBusy && !(pendingAction === item.action || (activeAction === item.action && isRunning))}
+              tooltipWarmRef={tooltipWarmRef}
+              isPending={pendingAction === item.action}
+              isRunning={activeAction === item.action && isRunning && pendingAction !== item.action}
+              item={item}
+              onClick={() => handleClick(item.action)}
+            />
+          ))}
+        </ul>
       </div>
-
-      <GatewayDot collapsed={collapsed} status={status} tooltipWarmRef={tooltipWarmRef} />
-
-      <ul className="flex flex-col">
-        {items.map((item) => (
-          <SystemActionButton
-            key={item.action}
-            collapsed={collapsed}
-            disabled={isBusy && !(pendingAction === item.action || (activeAction === item.action && isRunning))}
-            tooltipWarmRef={tooltipWarmRef}
-            isPending={pendingAction === item.action}
-            isRunning={activeAction === item.action && isRunning && pendingAction !== item.action}
-            item={item}
-            onClick={() => handleClick(item.action)}
-          />
-        ))}
-      </ul>
-    </div>
+    </SidebarSettingsHoverCard>
 
     <ConfirmDialog
       cancelLabel={t.common.cancel}
@@ -1285,64 +1261,6 @@ function SidebarIconWithTooltip({
   );
 }
 
-function GatewayDot({ collapsed, status, tooltipWarmRef }: GatewayDotProps) {
-  const { t } = useI18n();
-  const [hovered, setHovered] = useState(false);
-  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
-
-  const toneToColor: Record<string, string> = {
-    "text-success": "bg-success",
-    "text-warning": "bg-warning",
-    "text-destructive": "bg-destructive",
-    "text-muted-foreground": "bg-muted-foreground",
-  };
-
-  let color: string;
-  let label: string;
-
-  if (!status) {
-    color = "bg-midground/20";
-    label = t.status.gateway;
-  } else {
-    const gw = gatewayLine(status, t);
-    color = toneToColor[gw.tone] ?? "bg-muted-foreground";
-    label = `${t.status.gateway} ${gw.label}`;
-  }
-  const showTooltip = (event: MouseEvent<HTMLDivElement> | FocusEvent<HTMLDivElement>) => {
-    setHovered(true);
-    setTooltipAnchor(event.currentTarget);
-  };
-  const hideTooltip = () => {
-    setHovered(false);
-    setTooltipAnchor(null);
-  };
-
-  return (
-    <div
-      className={cn(
-        "hidden lg:flex py-3 pl-[1.625rem] transition-opacity duration-300",
-        collapsed ? "lg:opacity-100" : "lg:opacity-0 lg:h-0 lg:py-0 lg:overflow-hidden",
-      )}
-      role="status"
-      aria-label={label}
-      tabIndex={collapsed ? 0 : -1}
-      onMouseEnter={collapsed ? showTooltip : undefined}
-      onMouseLeave={collapsed ? hideTooltip : undefined}
-      onFocus={collapsed ? showTooltip : undefined}
-      onBlur={collapsed ? hideTooltip : undefined}
-    >
-      <span
-        aria-hidden
-        className={cn("h-1.5 w-1.5 rounded-full", color)}
-      />
-
-      {hovered && tooltipAnchor && (
-        <SidebarTooltip anchor={tooltipAnchor} label={label} warmRef={tooltipWarmRef} />
-      )}
-    </div>
-  );
-}
-
 function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
   const rect = anchor.getBoundingClientRect();
   const sidebar = document.getElementById("app-sidebar");
@@ -1385,12 +1303,6 @@ function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
 }
 
 type TooltipWarmRef = React.RefObject<number>;
-
-interface GatewayDotProps {
-  collapsed: boolean;
-  status: StatusResponse | null;
-  tooltipWarmRef: TooltipWarmRef;
-}
 
 interface NavItem {
   icon: ComponentType<{ className?: string }>;
