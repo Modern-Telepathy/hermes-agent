@@ -22,6 +22,8 @@ import { WebLinksAddon } from "@xterm/addon-web-links";
 import { WebglAddon } from "@xterm/addon-webgl";
 import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
+
+import { ChatStreamView } from "@/components/ChatStreamView";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { cn } from "@/lib/utils";
@@ -358,6 +360,15 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
     () => generateChannelId(`${resumeParam ?? ""}\0${scopedProfile}`),
     [resumeParam, scopedProfile],
   );
+  // Transcript by default; the TUI stays mounted underneath so switching views never drops the PTY.
+  const [chatView, setChatView] = useState<"chat" | "terminal">("chat");
+  const sendFromStream = useCallback((text: string) => {
+    try {
+      wsRef.current?.send(text + "\r");
+    } catch {
+      /* socket closed between render and send: the terminal view can be used to retry */
+    }
+  }, []);
   // Dashboard plugins observe turn events on this channel (`SDK.chat`).
   useEffect(() => {
     setActiveChatChannel(channel);
@@ -1892,12 +1903,40 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
         </div>
       )}
 
+      <div className="flex items-center gap-1.5" role="group" aria-label="Chat view">
+        <Button
+          size="sm"
+          outlined={chatView === "chat"}
+          aria-pressed={chatView === "chat"}
+          onClick={() => setChatView("chat")}
+        >
+          Chat
+        </Button>
+        <Button
+          size="sm"
+          outlined={chatView === "terminal"}
+          aria-pressed={chatView === "terminal"}
+          onClick={() => setChatView("terminal")}
+        >
+          Terminal
+        </Button>
+      </div>
+
       <div className="flex min-h-0 flex-1 flex-col gap-2 lg:flex-row lg:gap-3">
+        {chatView === "chat" && (
+          <ChatStreamView
+            channel={channel}
+            disabled={ptyState !== "open"}
+            onSend={sendFromStream}
+            sessionId={resumeParam ?? null}
+          />
+        )}
         <div
           ref={termWrapRef}
           className={cn(
             "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg",
             "p-2 sm:p-3",
+            chatView === "chat" && "hidden",
           )}
           style={{
             backgroundColor: terminalBg,
