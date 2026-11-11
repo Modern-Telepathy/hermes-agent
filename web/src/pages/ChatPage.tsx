@@ -1919,7 +1919,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
           aria-pressed={chatView === "terminal"}
           onClick={() => setChatView("terminal")}
         >
-          Terminal
+          Code
         </Button>
       </div>
 
