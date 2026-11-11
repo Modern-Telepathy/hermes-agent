@@ -15,7 +15,10 @@ from __future__ import annotations
 import shutil
 import subprocess
 import sys
+import tempfile
+from pathlib import Path
 from typing import Any, Optional
+from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -24,7 +27,6 @@ router = APIRouter()
 
 # A real turn includes model latency plus tools; the app shows its sending state meanwhile.
 TURN_TIMEOUT_SECONDS = 240
-BASH_TIMEOUT_SECONDS = 60
 
 
 class SendBody(BaseModel):
@@ -82,21 +84,23 @@ def send_message(body: SendBody) -> dict[str, Any]:
 
 @router.post("/bash")
 def start_bash_command(body: BashBody) -> dict[str, Any]:
-    """Run a command the app asked the host to start (Meet's meeting server). Bounded output."""
+    """Start a command the app asked the host to run (Meet's meeting server).
+
+    Canvas apps use this the way OpenHands does — to launch a server that outlives the call — so the
+    command is spawned detached and the call returns at once. Waiting on it would hand the app a
+    timeout and kill the very process it asked to start.
+    """
+    log_path = Path(tempfile.gettempdir()) / f"hermes-social-bash-{uuid4().hex}.log"
     try:
-        completed = subprocess.run(
-            ["/bin/sh", "-lc", body.command],
-            cwd=body.cwd or None,
-            capture_output=True,
-            text=True,
-            timeout=BASH_TIMEOUT_SECONDS,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        # A server started in the foreground is expected to outlive the call.
-        return {"status": "running", "output": ""}
+        with log_path.open("wb") as sink:
+            process = subprocess.Popen(
+                ["/bin/sh", "-lc", body.command],
+                cwd=body.cwd or None,
+                stdin=subprocess.DEVNULL,
+                stdout=sink,
+                stderr=subprocess.STDOUT,
+                start_new_session=True,
+            )
     except OSError as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-    output = ((completed.stdout or "") + (completed.stderr or "")).strip()[-2000:]
-    return {"status": "ok" if completed.returncode == 0 else "failed", "output": output,
-            "exit_code": completed.returncode}
+    return {"status": "running", "output": "", "pid": process.pid, "log": str(log_path)}
