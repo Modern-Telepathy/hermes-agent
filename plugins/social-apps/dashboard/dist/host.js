@@ -222,9 +222,35 @@ function fitStage(node) {
 
 const activated = new Map();
 
+/**
+ * Point the window chrome at a mounted app's own design: the caller maps the app's tokens onto the
+ * dashboard's theme variables on :root, so the sidebar, header and controls wear the same palette,
+ * font and radius as the app while its tab is open. Previous values are put back on unmount, so the
+ * user's theme returns rather than a stale copy of the app's.
+ */
+function applyChrome(vars) {
+  const root = document.documentElement;
+  const entries = Object.entries(vars || {}).filter(
+    ([, value]) => typeof value === "string" && value !== "",
+  );
+  const previous = entries.map(([name]) => [
+    name,
+    root.style.getPropertyValue(name),
+    root.style.getPropertyPriority(name),
+  ]);
+  for (const [name, value] of entries) root.style.setProperty(name, value);
+  return () => {
+    for (const [name, value, priority] of previous) {
+      if (value) root.style.setProperty(name, value, priority);
+      else root.style.removeProperty(name);
+    }
+  };
+}
+
 /** Activate the app bundle once per page, mount its page into `node`, and fit it to the stage.
+ *  `options.chrome(container)` may return theme variables for the window chrome.
  *  Returns a disposer the plugin calls on unmount. */
-export function mountSocialApp(node, id) {
+export function mountSocialApp(node, id, options) {
   injectStyle();
   if (!activated.has(id)) {
     activated.set(
@@ -247,6 +273,13 @@ export function mountSocialApp(node, id) {
   }
   return activated.get(id).then((mount) => {
     mount({ container: node, navigate: () => {} });
-    return fitStage(node);
+    const fitted = fitStage(node);
+    const restoreChrome = applyChrome(
+      options && typeof options.chrome === "function" ? options.chrome(node) : null,
+    );
+    return () => {
+      restoreChrome();
+      fitted();
+    };
   });
 }

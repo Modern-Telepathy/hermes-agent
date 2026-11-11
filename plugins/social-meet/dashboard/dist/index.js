@@ -20,6 +20,37 @@
     script && script.src ? script.src : location.href,
   ).href;
 
+  /** The app paints itself from `.mt`'s own custom properties, so read them back and hand the
+   *  window chrome the same palette, font, size and corner radius while this tab is open. */
+  function chromeFromApp(container) {
+    const app = container.querySelector(".mt");
+    if (!app) return null;
+    const css = window.getComputedStyle(app);
+    const token = function (name, fallback) {
+      const value = (css.getPropertyValue(name) || "").trim();
+      return value || fallback;
+    };
+    const font = css.fontFamily || "system-ui, sans-serif";
+    const panel = token("--mt-panel", "#212121");
+    const bg = token("--mt-bg", "#171717");
+    const text = token("--mt-text", "#eeeeee");
+    return {
+      "--theme-font-sans": font,
+      "--theme-font-display": font,
+      "--theme-base-size": css.fontSize || "14px",
+      "--theme-letter-spacing": "0",
+      "--theme-radius": "0.75rem",
+      "--radius": "0.75rem",
+      "--background-base": bg,
+      "--midground-base": text,
+      "--foreground-base": token("--mt-contrast", "#ffffff"),
+      "--component-sidebar-background": panel,
+      "--component-header-background": panel,
+      "--theme-terminal-background": bg,
+      "--theme-terminal-foreground": text,
+    };
+  }
+
   function Page() {
     const mountRef = SDK.hooks.useRef(null);
     const [state, setState] = SDK.hooks.useState("loading");
@@ -31,7 +62,7 @@
       import(HOST_URL)
         .then(function (host) {
           if (!alive || !mountRef.current) return undefined;
-          return host.mountSocialApp(mountRef.current, APP).then(function (teardown) {
+          return host.mountSocialApp(mountRef.current, APP, { chrome: chromeFromApp }).then(function (teardown) {
             dispose = teardown;
             if (alive) setState("ready");
           });
