@@ -276,6 +276,13 @@ code { font-size: 0.875rem; }
   font-style: normal;
 }
 
+/* The design system and plugin bundles bake one-off `tracking-[0.2em]`-style
+   utilities into their own markup, which no source sweep can reach. Catch
+   them by class-name shape: anything tracked is decorative, so flatten it. */
+[class*="tracking-["] {
+  letter-spacing: 0;
+}
+
 /* Titles are upright — italic display type reads as emphasis the words
    don't carry, and it fights the single-face type system. */
 h1,

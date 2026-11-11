@@ -35,7 +35,7 @@ export function CopyLastButton({
     >
       <span className="inline-flex items-center gap-1.5">
         <Copy className="h-3 w-3 shrink-0" />
-        <span className="hidden min-[400px]:inline tracking-wide">
+        <span className="hidden min-[400px]:inline">
           {copied ? "copied" : "copy last response"}
         </span>
       </span>
