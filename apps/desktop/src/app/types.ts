@@ -142,6 +142,8 @@ export interface SidebarNavItem extends Tiered {
   id: SidebarNavId | (string & {})
   label: string
   icon: React.ComponentType<{ className?: string }>
+  /** Codicon name when the row's default icon comes from the shared library. */
+  iconName?: string
   route?: string
   action?: 'new-session'
   /** Keybind action id — when set, the tooltip shows the keybind hint. */

@@ -8,8 +8,6 @@ import { markRightPanePerf } from '@/debug/right-pane-events'
 import { createRendererLoopPauseController } from '@/lib/renderer-loop-pause'
 import { $paneStates } from '@/store/panes'
 
-import { $terminalTakeover } from '../store'
-
 import { ensureTerminal } from './terminals'
 import { TerminalWorkspace } from './workspace'
 
@@ -20,7 +18,20 @@ import { TerminalWorkspace } from './workspace'
  * the host stays put and we chase the slot's bounding rect with position:fixed.
  */
 
-const $slot = atom<HTMLElement | null>(null)
+// Every mounted slot, in mount order — the terminal pane's and the drawer's
+// Console tab both render one. The xterm host chases the slot that is actually
+// laid out: a hidden tab (`display: none`) has no client rects and is skipped,
+// so switching drawer tabs moves the overlay to the visible surface instead of
+// leaving it over a hidden one.
+const $slots = atom<readonly HTMLElement[]>([])
+
+/** Bumped when something outside the DOM changes which slot is on screen (a
+ *  drawer tab switch); the host re-picks the visible slot. */
+const $slotRevision = atom(0)
+
+export function refreshTerminalSlot(): void {
+  $slotRevision.set($slotRevision.get() + 1)
+}
 
 const SLOT_CLASS = 'relative flex min-h-0 min-w-0 flex-1 flex-col'
 
@@ -34,12 +45,10 @@ export function TerminalSlot({ className = SLOT_CLASS }: { className?: string })
       return
     }
 
-    $slot.set(el)
+    $slots.set([...$slots.get().filter(slot => slot !== el), el])
 
     return () => {
-      if ($slot.get() === el) {
-        $slot.set(null)
-      }
+      $slots.set($slots.get().filter(slot => slot !== el))
     }
   }, [])
 
@@ -62,24 +71,41 @@ const sameRect = (a: Rect | null, b: Rect) =>
   !!a && a.hidden === b.hidden && a.top === b.top && a.left === b.left && a.width === b.width && a.height === b.height
 
 export function PersistentTerminal({ onAddSelectionToChat }: PersistentTerminalProps) {
-  const slot = useStore($slot)
-  const terminalTakeover = useStore($terminalTakeover)
+  const slots = useStore($slots)
+  const slotRevision = useStore($slotRevision)
+  const paneStates = useStore($paneStates)
+  const layoutTree = useStore($layoutTree)
+  const [slot, setSlot] = useState<HTMLElement | null>(null)
   const [rect, setRect] = useState<Rect | null>(null)
   const [ready, setReady] = useState(false)
 
-  // VS Code parity: once the pane has ever been opened, keep the terminals
-  // mounted — and their shells alive — even while hidden. Hiding the pane just
-  // collapses the slot, so the overlay below goes invisible; nothing is torn
-  // down. Only an explicit per-tab close kills a PTY. Re-opening re-ensures one
-  // terminal exists (covers having closed the last tab).
+  // Two surfaces can hold a slot at once (the terminal pane and the drawer's
+  // Console tab), and only one of them is laid out at a time. Pick the slot
+  // that is on screen; fall back to the newest one so a hidden pane still
+  // settles its visibility state.
+  useLayoutEffect(() => {
+    const laidOut = slots.filter(element => element.isConnected && element.getClientRects().length > 0)
+
+    setSlot(laidOut[laidOut.length - 1] ?? slots[slots.length - 1] ?? null)
+  }, [layoutTree, paneStates, slotRevision, slots])
+
+  // VS Code parity: once a terminal surface has ever been on screen, keep the
+  // terminals mounted — and their shells alive — even while hidden. Hiding the
+  // surface just collapses the slot, so the overlay below goes invisible;
+  // nothing is torn down. Only an explicit per-tab close kills a PTY.
+  //
+  // `ready` means a slot has real dimensions, so the first mount can never
+  // start a shell at 0×0 (a collapsed terminal rail and a hidden drawer tab
+  // both report no size) — whichever surface the user opens first is the one
+  // that boots xterm.
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (terminalTakeover && ready) {
+    if (ready) {
       setMounted(true)
       ensureTerminal()
     }
-  }, [terminalTakeover, ready])
+  }, [ready])
 
   useLayoutEffect(() => {
     if (!slot) {

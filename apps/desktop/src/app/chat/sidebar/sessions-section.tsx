@@ -129,6 +129,10 @@ interface SidebarSessionsSectionProps {
   emptyState: React.ReactNode
   forceEmptyState?: boolean
   headerAction?: React.ReactNode
+  // Rendered between the header and the rows: the section's own controls (the
+  // session search field), so they sit under the header row that owns them
+  // instead of floating above every section in the sidebar.
+  toolbar?: React.ReactNode
   footer?: React.ReactNode
   groups?: SidebarSessionGroup[]
   // Owner groups inside a messaging platform: the section's footer pages them.
@@ -219,6 +223,7 @@ export function SidebarSessionsSection({
   emptyState,
   forceEmptyState = false,
   headerAction,
+  toolbar,
   footer,
   groups,
   embeddedGroups = false,
@@ -643,6 +648,9 @@ export function SidebarSessionsSection({
         onToggle={onToggle}
         open={sectionOpen}
       />
+      {/* Outside the open gate: collapsing the list must not hide the field the
+          header's own search button just opened. */}
+      {toolbar}
       {sectionOpen && (
         <SidebarGroupContent className={resolvedContentClassName}>
           {inner}

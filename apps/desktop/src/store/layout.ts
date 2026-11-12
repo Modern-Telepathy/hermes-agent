@@ -248,6 +248,12 @@ export const $sidebarDashboardOpen = persistentAtom('hermes.desktop.sidebarDashb
 export const setSidebarDashboardOpen = (open: boolean): void => $sidebarDashboardOpen.set(open)
 export const $sidebarBotsOpen = persistentAtom('hermes.desktop.sidebarBotsOpen', true, Codecs.bool)
 export const setSidebarBotsOpen = (open: boolean): void => $sidebarBotsOpen.set(open)
+/** The Bots section's own row order (profile names). Kept apart from the
+ *  profile rail's `$profileOrder`, which lists named profiles only: the
+ *  section includes the default bot, so sharing the rail's list would push the
+ *  default row to the tail on the first rail drag. Empty = the backend order. */
+export const $sidebarBotOrder = persistentAtom<string[]>('hermes.desktop.sidebarBotOrder', [], Codecs.stringArray)
+export const setSidebarBotOrder = (ids: string[]): void => $sidebarBotOrder.set(ids)
 /** Main-section order (Factories first: it is not a footer). */
 export const $sidebarSectionOrder = persistentAtom(
   'hermes.desktop.sidebarSectionOrder',

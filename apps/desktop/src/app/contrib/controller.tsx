@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { atom, computed } from 'nanostores'
+import { atom } from 'nanostores'
 import type { CSSProperties, ReactElement, PointerEvent as ReactPointerEvent } from 'react'
 
 import { SessionDraftTitle } from '@/app/chat/session-draft-title'
@@ -73,17 +73,10 @@ import {
 import { $profiles } from '@/store/profile'
 import { $profileRailVisible } from '@/store/profile-rail-prefs'
 import { runExportProfileFlow, runImportProfileFlow } from '@/store/profile-share'
-import {
-  $reviewOpen,
-  $reviewScopeCwd,
-  $reviewScopeTarget,
-  closeReview,
-  openReview,
-  REVIEW_PANE_ID
-} from '@/store/review'
+import { $reviewOpen } from '@/store/review'
+import { selectRightDrawerTab } from '@/store/right-drawer-tab'
 import {
   $cronSessions,
-  $currentCwd,
   $messagingSessions,
   $selectedStoredSessionId,
   $sessions,
@@ -113,6 +106,7 @@ import {
 } from '../chat/session-tile'
 import { AppContextMenu } from '../context-menu/app-context-menu'
 import { HudShell } from '../hud/hud-shell'
+import { RightDrawer } from '../right-sidebar/drawer'
 import { $terminalTakeover, setTerminalTakeover } from '../right-sidebar/store'
 import { terminalPaletteToggle } from '../right-sidebar/terminal/reveal-focus'
 import { $workspaceIsPage, WORKSPACE_PAGE_HEADER_AREA } from '../routes'
@@ -121,7 +115,7 @@ import { TermsButterbar } from '../shell/terms-butterbar'
 
 import { BASIC_TREE, DEFAULT_TREE, registerLayoutPresets } from './layout-presets'
 import { bindLayoutSides } from './layout-sides'
-import { FilesPane, LogsPane, ReviewPaneContent } from './panes'
+import { LogsPane } from './panes'
 import { PluginPreviewConsentDialog } from './plugin-preview-consent-dialog'
 import { ContribWiring, WiredPane } from './wiring'
 import { WorkspacePageHeaderHostContext } from './workspace-page-header'
@@ -257,7 +251,10 @@ registry.registerMany([
   {
     id: 'files',
     area: 'panes',
-    title: translateNow('sidebar.files'),
+    // The RIGHT DRAWER (Console / Browser / Folders / Changes / Usage /
+    // Document) lives in the file browser's pane: ⌘J, the titlebar button,
+    // `focus_pane` and every reveal path already address this panel.
+    title: translateNow('rightSidebar.drawer.title'),
     // dock: re-adoption target after a stale dismissal (see sessions).
     data: {
       placement: 'right',
@@ -267,28 +264,10 @@ registry.registerMany([
       width: FILE_BROWSER_DEFAULT_WIDTH,
       minWidth: FILE_BROWSER_MIN_WIDTH,
       maxWidth: FILE_BROWSER_MAX_WIDTH,
-      tabTitle: () => <LocalizedTabTitle select={t => t.sidebar.files} />,
-      tabTitleText: () => translateNow('sidebar.files')
+      tabTitle: () => <LocalizedTabTitle select={t => t.rightSidebar.drawer.title} />,
+      tabTitleText: () => translateNow('rightSidebar.drawer.title')
     },
-    render: () => idle(<FilesPane />)
-  },
-  {
-    id: 'review',
-    area: 'panes',
-    title: translateNow('sidebar.review'),
-    // The second right sidebar: hidden until ⌘G ($reviewOpen) — bound below
-    // like the other chrome toggles; its zone collapses while hidden.
-    data: {
-      placement: 'right',
-      collapsible: true,
-      revealAliases: [REVIEW_PANE_ID],
-      width: FILE_BROWSER_DEFAULT_WIDTH,
-      minWidth: FILE_BROWSER_MIN_WIDTH,
-      maxWidth: FILE_BROWSER_MAX_WIDTH,
-      tabTitle: () => <LocalizedTabTitle select={t => t.sidebar.review} />,
-      tabTitleText: () => translateNow('sidebar.review')
-    },
-    render: () => idle(<ReviewPaneContent />)
+    render: () => idle(<RightDrawer />)
   }
 ])
 
@@ -569,13 +548,6 @@ registerLayoutResetHandler(stackSessionTilesIntoMain)
 
 bindLayoutSides()
 
-// Workspace-scoped surfaces: the file tree and git diff only mean something
-// inside a project. A detached chat (no cwd) hides them — their zones
-// collapse and the chat absorbs the width; picking a project brings them
-// back. The terminal is NOT workspace-gated: unlike the old shell (where it
-// rode the rail's row and vanished with it), its zone stands on its own.
-const $hasWorkspace = computed($currentCwd, cwd => Boolean(cwd.trim()))
-
 // The tree pane's own presence tracks ⌘J directly, not just the column's
 // collapse — otherwise a pane revealed into that shared column would drag the
 // tree along with it.
@@ -586,19 +558,25 @@ const $hasWorkspace = computed($currentCwd, cwd => Boolean(cwd.trim()))
 // writes the store too. Without the opener the boolean went stale the moment
 // anything but the toggle showed the pane — the divergence this whole change
 // is about.
+// The drawer is NOT workspace-gated: Console, Usage, Browser and Document
+// mean something in a detached chat too. Folders and Changes carry their own
+// empty states for "no project" instead of taking the whole panel away.
 bindPaneVisibility(
   'files',
-  computed([$hasWorkspace, $fileBrowserOpen], (workspace, open) => workspace && open),
+  $fileBrowserOpen,
   () => setFileBrowserOpen(false),
   () => setFileBrowserOpen(true)
 )
-// ⌘G — the review sidebar appears/disappears (and comes to the front).
-bindPaneVisibility(
-  'review',
-  computed([$reviewOpen, $hasWorkspace], (open, workspace) => open && workspace),
-  closeReview,
-  () => openReview($reviewScopeCwd.get(), $reviewScopeTarget.get())
-)
+// ⌘G — the diff is the drawer's Changes tab now; the second right column is
+// gone. `openReview`/`revealReview` select the tab themselves; this listener
+// is the mirror, so anything that only writes `$reviewOpen` (a preset, the
+// transcript's changed-files card) still brings the drawer up on Changes.
+$reviewOpen.listen(open => {
+  if (open) {
+    selectRightDrawerTab('changes')
+    setFileBrowserOpen(true)
+  }
+})
 // ⌃` / statusbar toggle — the terminal COLLAPSES to a rail (tab stays), not
 // hides; PTYs stay alive while collapsed (see PersistentTerminal). Simple has
 // no terminal: where chrome is off a closed one hides, rail and all, and ⌃`

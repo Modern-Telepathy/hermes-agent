@@ -25,7 +25,8 @@ const PANE_REVEALERS: Record<string, () => void> = {
 // (#106009). An explicit reveal also un-minimizes and fronts the tree pane.
 const TREE_PANE_OF: Record<string, string> = {
   files: 'files',
-  review: 'review',
+  // The diff is the drawer's Changes tab, not a pane of its own.
+  review: 'files',
   sessions: 'sessions',
   terminal: 'terminal'
 }

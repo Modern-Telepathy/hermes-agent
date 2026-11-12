@@ -5,14 +5,15 @@ from __future__ import annotations
 import argparse
 from typing import Callable
 
+from hermes_branding import PRODUCT_AGENT_NAME
 from hermes_cli.subcommands._shared import add_yes_flag
 
 
 def build_uninstall_parser(subparsers, *, cmd_uninstall: Callable) -> None:
     """Attach the ``uninstall`` subcommand to ``subparsers``."""
     uninstall_parser = subparsers.add_parser(
-        "uninstall", help="Uninstall Hermes Agent",
-        description="Remove Hermes Agent from your system. Can keep configs/data for reinstall.")
+        "uninstall", help=f"Uninstall {PRODUCT_AGENT_NAME}",
+        description=f"Remove {PRODUCT_AGENT_NAME} from your system. Can keep configs/data for reinstall.")
     modes = uninstall_parser.add_mutually_exclusive_group()
     modes.add_argument(
         "--full", action="store_true",

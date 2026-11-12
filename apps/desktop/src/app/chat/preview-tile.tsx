@@ -12,7 +12,7 @@
 
 import { useStore } from '@nanostores/react'
 
-import { findGroup } from '@/components/pane-shell/tree/model'
+import { allPaneIds, findGroup } from '@/components/pane-shell/tree/model'
 import {
   $activeTreeGroup,
   $layoutTree,
@@ -44,6 +44,7 @@ import {
   setPreviewTabPinned
 } from '@/store/preview'
 import { explicitOpenBlocksZone, PREVIEW_TILE_PREFIX } from '@/store/preview-explicit'
+import { RIGHT_DRAWER_PANE_ID } from '@/store/right-drawer-tab'
 import { canOpenBrowserWindow } from '@/store/windows'
 
 import { paneMirror } from './pane-mirror'
@@ -223,6 +224,16 @@ function existingPreviewAnchor(tabId: string): string | undefined {
 
   if (inTree) {
     return inTree
+  }
+
+  // Pages belong in the right drawer (beside Folders, Changes, Console…), so
+  // the FIRST preview stacks into the drawer's zone instead of splitting a new
+  // column off the right edge. Without a drawer (a preset that omits it) the
+  // old dock-beside-main behavior stands.
+  const tree = $layoutTree.get()
+
+  if (tree && allPaneIds(tree).includes(RIGHT_DRAWER_PANE_ID)) {
+    return RIGHT_DRAWER_PANE_ID
   }
 
   const head = $dockedVisiblePreviewTabs.get()[0]

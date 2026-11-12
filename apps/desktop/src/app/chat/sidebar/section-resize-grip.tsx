@@ -4,8 +4,9 @@ import { useRef } from 'react'
 
 import { $sidebarSectionHeights, setSidebarSectionHeight } from '@/store/layout'
 
-/** A section with no stored height starts here when the grip is first pulled
- *  (jsdom measures 0, and a collapsed flex child measures 0 too). */
+/** A section that measures 0 and has no stored cap starts here when the grip
+ *  is first pulled (jsdom measures 0, and a collapsed flex child measures 0
+ *  too). */
 const DEFAULT_SECTION_HEIGHT = 240
 const KEYBOARD_STEP = 16
 
@@ -21,16 +22,18 @@ export function SidebarSectionResizeGrip({ id }: { id: string }) {
   const heights = useStore($sidebarSectionHeights)
   const dragRef = useRef<{ height: number; y: number } | null>(null)
 
+  // Grab where the grip IS, not where the stored cap is: a section renders its
+  // content up to the cap, so a cap recorded when the section was taller would
+  // make the first drag jump by the difference. The cap is only the fallback.
+  //
+  // Measure the section's BODY — the box the cap actually rides — so the first
+  // drag moves by exactly the pixels dragged rather than by the header's (and
+  // gripper's) height on top of it.
   const currentHeight = (element: HTMLElement | null): number => {
-    const stored = heights[id]
+    const body = element?.querySelector<HTMLElement>(':scope > [data-section-body]')
+    const measured = (body ?? element)?.getBoundingClientRect().height ?? 0
 
-    if (stored !== undefined) {
-      return stored
-    }
-
-    const measured = element?.getBoundingClientRect().height ?? 0
-
-    return measured > 0 ? measured : DEFAULT_SECTION_HEIGHT
+    return measured > 0 ? measured : (heights[id] ?? DEFAULT_SECTION_HEIGHT)
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -84,7 +87,10 @@ export function SidebarSectionResizeGrip({ id }: { id: string }) {
       role="separator"
       tabIndex={0}
     >
-      <span className="h-px w-8 rounded-full bg-(--ui-stroke-tertiary) opacity-50 transition-opacity group-hover/resize:opacity-100 group-focus-visible/resize:opacity-100" />
+      {/* The band is the hit area, the mark is the affordance: it only paints
+          while the pointer or the keyboard is on the grip, so five resting
+          dividers never read as five lines drawn under the rows. */}
+      <span className="h-px w-8 rounded-full bg-(--ui-stroke-tertiary) opacity-0 transition-opacity group-focus-visible/resize:opacity-100 group-hover/resize:opacity-100" />
     </div>
   )
 }

@@ -7,6 +7,8 @@ inside each method (``from cli import ...``) — never at module load time (impo
 
 from __future__ import annotations
 
+from hermes_branding import PRODUCT_NAME
+
 import contextlib
 import os
 import shutil
@@ -479,7 +481,7 @@ class CLISessionMixin:
                 continue
 
             _cli_visible_print(
-                f"\n  {t('cli.session.history_assistant_header', agent_name='Hermes', index=visible_index)}{_ts_suffix(msg)}")
+                f"\n  {t('cli.session.history_assistant_header', agent_name=PRODUCT_NAME, index=visible_index)}{_ts_suffix(msg)}")
             n_calls = len(msg.get("tool_calls") or [])
             if not content_text:
                 suffix = ""

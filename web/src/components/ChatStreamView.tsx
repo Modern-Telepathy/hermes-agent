@@ -209,7 +209,7 @@ export function ChatStreamView({
             }
           }}
           placeholder={
-            disabled ? "Waiting for the session to open…" : "Message Hermes…"
+            disabled ? "Waiting for the session to open…" : "Message Techno…"
           }
           className="min-h-0 flex-1 resize-none rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-1 focus-visible:ring-midground"
         />

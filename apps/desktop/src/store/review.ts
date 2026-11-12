@@ -10,9 +10,11 @@ import { isExcludedPath } from '@/lib/excluded-paths'
 import { requestOneShot } from '@/lib/oneshot'
 import { Codecs, persistentAtom } from '@/lib/persisted'
 import { modeBound } from '@/store/interface-mode'
+import { $rightDrawerTab, selectRightDrawerTab } from '@/store/right-drawer-tab'
 
 import { refreshRepoStatus, repoStatusForCwd } from './coding-status'
 import { noteAreaClosed, recordFeatureUse } from './desktop-metrics'
+import { FILES_PANE_ID, setFileBrowserOpen } from './layout'
 import { stampSessionPrBranch } from './pull-requests'
 import { $busy, $currentCwd, $selectedStoredSessionId, $sessions } from './session'
 import { $sessionStates } from './session-states'
@@ -28,8 +30,10 @@ import { $workspaceChangeTick } from './workspace-events'
 // since the current turn began, driven by the $reviewTurnBase HEAD capture).
 // Mutations and the commit/PR ship bar are uncommitted-only.
 
-// Must match the review <Pane id> in desktop-controller (the forced-reveal
-// event is addressed by pane id).
+// Must match the DRAWER pane's id: the diff is the drawer's Changes tab (see
+// `store/right-drawer-tab.ts`), and ⌘G's forced-reveal event addresses the
+// drawer. `REVIEW_PANE_ID` stays exported for chrome that reasons about a
+// right-hand overlay.
 export const REVIEW_PANE_ID = 'review'
 
 const OPEN_KEY = 'hermes.desktop.reviewOpen'
@@ -376,6 +380,9 @@ export function openReview(scopeCwd: null | string = null, scopeTarget = 'main')
   $reviewScopeCwd.set(scopeCwd?.trim() || null)
   $reviewScopeTarget.set(scopeTarget.trim() || 'main')
   $reviewOpen.set(true)
+  // The diff has no column of its own any more: ⌘G fronts the drawer's
+  // Changes tab.
+  selectRightDrawerTab('changes')
   recordFeatureUse('review_pane')
   void refreshReview()
   void refreshShipInfo()
@@ -387,6 +394,13 @@ export function closeReview(): void {
   $reviewScopeCwd.set(null)
   $reviewScopeTarget.set('main')
   clearReviewSelection()
+}
+
+/** True when the diff is the thing on screen: review is open AND the drawer is
+ *  showing its Changes tab. The tree's own pane check is the drawer's, since
+ *  the diff no longer owns a pane of its own. */
+function reviewDrawerShowing(): boolean {
+  return $reviewOpen.get() && $rightDrawerTab.get() === 'changes' && isPaneVisible(FILES_PANE_ID)
 }
 
 export function toggleReview(scopeCwd: null | string = null, scopeTarget = 'main'): void {
@@ -403,7 +417,9 @@ export function toggleReview(scopeCwd: null | string = null, scopeTarget = 'main
       openReview(scopeCwd, target)
     }
 
-    window.dispatchEvent(new CustomEvent(PANE_TOGGLE_REVEAL_EVENT, { detail: { id: REVIEW_PANE_ID } }))
+    selectRightDrawerTab('changes')
+    setFileBrowserOpen(true)
+    window.dispatchEvent(new CustomEvent(PANE_TOGGLE_REVEAL_EVENT, { detail: { id: FILES_PANE_ID } }))
 
     return
   }
@@ -413,7 +429,7 @@ export function toggleReview(scopeCwd: null | string = null, scopeTarget = 'main
   // boolean flip spent the press re-asserting a value it already held and ⌘G
   // read as a dead key. `revealReview` fronts and un-minimizes; only close when
   // the diff is genuinely the thing on screen.
-  if (isPaneVisible(REVIEW_PANE_ID)) {
+  if (reviewDrawerShowing()) {
     closeReview()
   } else {
     revealReview(scopeCwd, scopeTarget)
@@ -443,13 +459,17 @@ export function revealReview(scopeCwd: null | string = null, scopeTarget = 'main
     // The reveal pin is a toggle, so only fire it when the overlay isn't
     // already slid in — otherwise "show me the diff" would hide the pane.
     if (!wasOpen) {
-      window.dispatchEvent(new CustomEvent(PANE_TOGGLE_REVEAL_EVENT, { detail: { id: REVIEW_PANE_ID } }))
+      selectRightDrawerTab('changes')
+      setFileBrowserOpen(true)
+      window.dispatchEvent(new CustomEvent(PANE_TOGGLE_REVEAL_EVENT, { detail: { id: FILES_PANE_ID } }))
     }
 
     return
   }
 
-  revealTreePane(REVIEW_PANE_ID)
+  selectRightDrawerTab('changes')
+  setFileBrowserOpen(true)
+  revealTreePane(FILES_PANE_ID)
 }
 
 /** The changed file matching a tool-reported path (absolute or repo-relative). */

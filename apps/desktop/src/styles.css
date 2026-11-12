@@ -4295,17 +4295,22 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
   z-index: 2;
 }
 
-/* A collapsed section is just its heading: drop a stored resize height so the
-   grip follows the heading up instead of leaving an empty gap below it. The
-   marker is the section's OWN open state, never a nested collapsible row. */
-[data-sidebar-section]:has(> [data-section-open='false']),
-[data-sidebar-section][data-section-open='false'] {
+/* A collapsed section is just its heading, so a stored resize cap has nothing
+   left to cap and would only clip that heading: the BODY drops the cap. The
+   marker is the section's OWN open state (on the body's first child), never a
+   nested collapsible row. */
+[data-sidebar-section][data-section-open='false'],
+[data-sidebar-section] > [data-section-body]:has(> [data-section-open='false']) {
   height: auto !important;
+  max-height: none !important;
   overflow: visible !important;
 }
 
 /* A closed group keeps no floor either: Sessions' root carries min-h-32, which
-   otherwise leaves a 128px blank block under its heading. */
-[data-sidebar-section]:has(> [data-section-open='false']) [data-slot='sidebar-group'] {
+   otherwise leaves a 128px blank block under its heading. The collapsed marker
+   sits on the group INSIDE the body (see above), so the selector has to reach
+   through the body — the earlier `[data-sidebar-section]:has(> …)` form matched
+   nothing and the floor survived the collapse. */
+[data-sidebar-section] > [data-section-body]:has(> [data-section-open='false']) > * {
   min-height: 0 !important;
 }

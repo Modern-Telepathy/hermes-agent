@@ -1,3 +1,4 @@
+# health: allow FILE_LINES -- brand switch point: the only growth is the hermes_branding import for the response-label fallback
 """Slash-command handlers for the interactive CLI (``HermesCLI`` inherits ``CLICommandsMixin``).
 
 cli.py-internal symbols (``_cprint``/``_ACCENT``/``save_config_value``…) are imported LAZILY inside
@@ -5,6 +6,8 @@ the helpers/handlers via ``from cli import ...`` — cli.py imports this module 
 """
 
 from __future__ import annotations
+
+from hermes_branding import PRODUCT_NAME
 
 import argparse
 import atexit
@@ -208,7 +211,7 @@ def _print_side_result_panel(cli, *, header_lines, body, title_suffix, empty_not
     try:
         from hermes_cli.skin_engine import get_active_skin
         _skin = get_active_skin()
-        label = _skin.get_branding("response_label", "☤ Hermes")
+        label = _skin.get_branding("response_label", f"☤ {PRODUCT_NAME}")
         _resp_color = _maybe_remap_for_light_mode(_skin.get_color("response_border", "#CD7F32"))
         _resp_text = _maybe_remap_for_light_mode(_skin.get_color("banner_text", "#FFF8DC"))
     except Exception:

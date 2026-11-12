@@ -45,7 +45,13 @@ import { ReviewShipBar } from './ship-bar'
 // the rest of the app's icon-action rows.
 const ACTION_BTN = 'size-5'
 
-export function ReviewPane() {
+interface ReviewPaneProps {
+  /** Rendered inside the right drawer (a standing Changes tab): the drawer
+   *  owns the surface, so the pane drops its own Close. */
+  embedded?: boolean
+}
+
+export function ReviewPane({ embedded = false }: ReviewPaneProps) {
   const { t } = useI18n()
   const c = t.statusStack.coding
   const panesFlipped = useStore($panesFlipped)
@@ -137,9 +143,11 @@ export function ReviewPane() {
               <Codicon name="refresh" size="0.8125rem" spinning={loading} />
             </Button>
           </Tip>
-          <Button aria-label={c.close} className={ACTION_BTN} onClick={closeReview} size="icon-xs" variant="ghost">
-            <Codicon name="close" size="0.8125rem" />
-          </Button>
+          {!embedded && (
+            <Button aria-label={c.close} className={ACTION_BTN} onClick={closeReview} size="icon-xs" variant="ghost">
+              <Codicon name="close" size="0.8125rem" />
+            </Button>
+          )}
         </RightSidebarSectionHeader>
       )}
 
