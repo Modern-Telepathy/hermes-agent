@@ -18,13 +18,35 @@ export const dashboardAppUrl = (base: string, path: string): string =>
   `${base.replace(/\/+$/, '')}${path.startsWith('/') ? path : `/${path}`}`
 
 /** A dashboard page opened as an embedded desktop surface: the dashboard
- *  hides its own sidebar/page header for `embed=1` (see preview-pane). */
-export const dashboardPageUrl = (base: string, path: string): string => {
+ *  hides its own sidebar/page header for `embed=1` (see preview-pane). The
+ *  profile is explicit because the dashboard otherwise uses its own remembered
+ *  management profile, which can differ from the chat profile on screen. */
+export const dashboardPageUrl = (base: string, path: string, profile?: null | string): string => {
   const url = new URL(dashboardAppUrl(base, path))
+
+  if (profile) {
+    url.searchParams.set('profile', profile)
+  }
 
   url.searchParams.set('embed', '1')
 
   return url.toString()
+}
+
+/** Compare two dashboard URLs without caring about query-parameter order, so a
+ *  tab opened before a parameter-order change is still found and fronted. */
+export const sameDashboardUrl = (a: string, b: string): boolean => {
+  try {
+    const left = new URL(a)
+    const right = new URL(b)
+
+    left.searchParams.sort()
+    right.searchParams.sort()
+
+    return left.toString() === right.toString()
+  } catch {
+    return a === b
+  }
 }
 
 const bridge = () => (typeof window === 'undefined' ? undefined : window.hermesDesktop)

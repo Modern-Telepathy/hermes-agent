@@ -208,7 +208,15 @@ def _get_pty_active_session_files(app: FastAPI) -> dict[str, Path]:
     return _app_state_default(app, "pty_active_session_files", dict)
 
 
-app = FastAPI(title="Hermes Agent", version=get_version_info().base_version, lifespan=app_lifespan)
+app = FastAPI(
+    title="Hermes Agent",
+    version=get_version_info().base_version,
+    lifespan=app_lifespan,
+    # `/docs` is the dashboard's Documentation page; keep the API explorer beside
+    # the API namespace so the SPA route is not shadowed.
+    docs_url="/api/docs",
+    redoc_url=None,
+)
 
 from hermes_cli.dashboard_auth.body_limit import AuthBodyLimitMiddleware
 
