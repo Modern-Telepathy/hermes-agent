@@ -449,7 +449,9 @@ describe('ChatSidebar empty-profile sections', () => {
     // (and the messaging sections inside it) rendered.
     expect(screen.queryByPlaceholderText('Search sessions…')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
-    expect(screen.getByPlaceholderText('Search sessions…')).toBeTruthy()
+    // …and the field opens under the header that owns the search button (inside
+    // the Sessions section), not above the whole section stack.
+    expect(screen.getByPlaceholderText('Search sessions…').closest('[data-sidebar-section="sessions"]')).not.toBeNull()
   })
 
   it('still shows the blank state when a profile has nothing at all', () => {

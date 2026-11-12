@@ -1588,6 +1588,23 @@ export function ChatSidebar({
       })
     )
 
+  // The search field hangs under the header that owns the search button — the
+  // list it filters (results while typing, recents otherwise), not the whole
+  // section stack. Those two sections are mutually exclusive, so one field
+  // covers both.
+  const sessionSearchField =
+    showSessionSections && searchOpen ? (
+      <div className="shrink-0 px-2 pb-1.5 pt-0.5">
+        <SearchField
+          aria-label={s.searchAria}
+          inputRef={searchInputRef}
+          onChange={setSearchQuery}
+          placeholder={s.searchPlaceholder}
+          value={searchQuery}
+        />
+      </div>
+    ) : null
+
   return (
     <Sidebar
       className={cn(
@@ -1764,18 +1781,6 @@ export function ChatSidebar({
 
         <SidebarStorageCorruptNotice />
 
-        {showSessionSections && searchOpen && (
-          <div className="shrink-0 px-2 pb-1 pt-1">
-            <SearchField
-              aria-label={s.searchAria}
-              inputRef={searchInputRef}
-              onChange={setSearchQuery}
-              placeholder={s.searchPlaceholder}
-              value={searchQuery}
-            />
-          </div>
-        )}
-
         {showSessionSections && (
           <div
             className={cn('flex min-h-0 flex-1 flex-col pb-1.75', SCROLL_Y, SCROLL_GUTTER)}
@@ -1809,6 +1814,7 @@ export function ChatSidebar({
                 rootClassName="min-h-32 flex-1 overflow-hidden p-0"
                 sessions={searchResults}
                 showProfileTags={showAllProfiles}
+                toolbar={sessionSearchField}
               />
             )}
 
@@ -2064,6 +2070,7 @@ export function ChatSidebar({
                   )}
                   sessions={displayAgentSessions}
                   sortable={!showAllProfiles && agentSessions.length > 1}
+                  toolbar={sessionSearchField}
                 />
               )}
               </SidebarSection>
