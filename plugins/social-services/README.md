@@ -22,9 +22,13 @@ installer — a command field that runs whatever you paste.
 Bitkin's commands pin npm's prefix to `$HOME/.local`: npm's own global prefix resolves to
 `/usr/local` on a no-prefix install, which needs root (`EACCES`), and the login `PATH` does not always
 carry the prefix npm actually used. Install and start therefore agree on one user-writable place, and
-`installed` is detected on `PATH` or in that prefix. The start command also prefers an installed Node
-20-25 (nvm) over the shell's default, because the daemon's native sqlite module is built for those
-ABIs and fails with `NODE_MODULE_VERSION` under a newer one.
+`installed` is detected on `PATH` or in that prefix.
+
+The daemon also pins a Node version, because it needs a window the shell default rarely lands in:
+22.15-25. Below 22.15 its bundled undici calls `zlib.createZstdDecompress` at import (undefined, so
+`Cannot read properties of undefined (reading 'bind')`); above 25 its native sqlite module refuses
+with `NODE_MODULE_VERSION`. Both commands run the same picker — the first installed nvm Node that
+satisfies both — and install rebuilds `better-sqlite3` for that ABI, so the pair always agrees.
 
 ## Behaviour that matters
 

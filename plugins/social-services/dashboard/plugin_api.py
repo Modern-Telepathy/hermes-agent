@@ -35,13 +35,37 @@ LOG_TAIL_BYTES = 4_000
 # npm's global prefix is not writable everywhere: a Homebrew/no-prefix npm resolves it to
 # /usr/local, which needs root, and a login shell does not always put the real prefix on PATH. Both
 # commands pin $HOME/.local, so install and start agree and neither needs elevation.
-_BITSOCIAL_INSTALL = 'npm install -g --prefix "$HOME/.local" @bitsocial/bitsocial-cli'
-# Its native sqlite module is built for Node 20-25, and a shell whose default is newer loads it with
-# a NODE_MODULE_VERSION mismatch, so an nvm-era Node wins over the default when one is installed.
-_BITSOCIAL_START = (
-    'export PATH="$HOME/.local/bin:$PATH"; '
-    'for d in "$HOME"/.nvm/versions/node/v2[0-5]*/bin; do [ -x "$d/node" ] && export PATH="$d:$PATH" && break; done; '
-    "bitsocial daemon"
+_PREFIX = 'export PATH="$HOME/.local/bin:$PATH"'
+# The daemon needs a Node that has BOTH zlib.createZstdDecompress (22.15+, its bundled undici calls it
+# at import time) and a supported better-sqlite3 ABI (<=25). The shell's default may be Node 26 or an
+# nvm 20, either of which dies in a different way, so the first installed Node that passes both wins —
+# and install runs the same picker, so the native module is rebuilt for the ABI that will start it.
+_PICK_NODE = (
+    _PREFIX
+    + '; for d in "$HOME"/.nvm/versions/node/v2*/bin; do '
+    + '[ -x "$d/node" ] && "$d/node" -e \'process.exit(typeof require("zlib").createZstdDecompress === "function" && parseInt(process.versions.node) <= 25 ? 0 : 1)\' '
+    + '&& export PATH="$d:$PATH" && break; done'
+)
+_BITSOCIAL_INSTALL = (
+    _PICK_NODE
+    + '; npm install -g --prefix "$HOME/.local" @bitsocial/bitsocial-cli'
+    + ' && npm rebuild -g --prefix "$HOME/.local" better-sqlite3'
+)
+_BITSOCIAL_START = _PICK_NODE + "; bitsocial daemon"
+
+# The MESH node is source-only upstream (no package, no image): clone it, give it its own venv, run
+# uvicorn on the port the app dials. Served from a directory of its own so a checkout is not needed in
+# the Hermes tree, matching what the install command writes.
+_MESH_HOME = '"$HOME/.local/share/hermes-social"'
+_MESH_INSTALL = (
+    f"mkdir -p {_MESH_HOME} && cd {_MESH_HOME} && "
+    "(git clone --depth 1 https://github.com/FraterCCCLXIII/mesh-protocol.git 2>/dev/null || true) && "
+    "python3 -m venv mesh-venv && ./mesh-venv/bin/pip install --quiet --upgrade pip && "
+    "./mesh-venv/bin/pip install --quiet fastapi uvicorn aiosqlite pydantic httpx pynacl"
+)
+_MESH_START = (
+    f"cd {_MESH_HOME}/mesh-protocol/app/server && exec {_MESH_HOME}/mesh-venv/bin/python "
+    "-m uvicorn main:app --host 127.0.0.1 --port 12000"
 )
 # Byte for byte the command Meet's own Start it runs, so both paths install and run the same server.
 _LIVEKIT_START = "command -v livekit-server >/dev/null || brew install livekit; livekit-server --dev"
@@ -53,7 +77,7 @@ SERVICES: tuple[dict[str, Any], ...] = (
         "route": "/bitkin",
         "service": "Bitsocial node",
         "endpoint": {"host": "127.0.0.1", "port": 9138},
-        "requirement": "Bitkin reads communities over the Bitsocial daemon's RPC socket. The daemon needs Node 20-25: its native sqlite module will not load under a newer Node without a rebuild.",
+        "requirement": "Bitkin reads communities over the Bitsocial daemon's RPC socket. The daemon needs Node 22.15-25: newer for zstd in zlib, not newer than 25 for its native sqlite module. Install and start pick such a Node automatically.",
         "probe_binary": "bitsocial",
         "install": _BITSOCIAL_INSTALL,
         "start": _BITSOCIAL_START,
@@ -79,9 +103,9 @@ SERVICES: tuple[dict[str, Any], ...] = (
         "endpoint": {"host": "127.0.0.1", "port": 12000},
         "requirement": "A MESH node (Python, FastAPI) answering /.well-known/mesh-node. The app also accepts any node URL you can share, so a remote node works instead.",
         "probe_binary": "",
-        "install": "",
-        "start": "",
-        "docs": "",
+        "install": _MESH_INSTALL,
+        "start": _MESH_START,
+        "docs": "https://github.com/FraterCCCLXIII/mesh-protocol",
     },
     {
         "id": "holons",
