@@ -4018,6 +4018,27 @@ class TestThemeBootstrapCSS:
         head = resp.text.split("</head>")[0]
         assert "hermes-theme-bootstrap" in head
 
+    def test_serve_index_paints_the_builtin_surface(self, tmp_path, monkeypatch):
+        """A built-in theme still paints its canvas first: the white default one is the flash the
+        desktop's embedded dashboard panes show on every plugin tab."""
+        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setattr(
+            _cfg_mod, "load_config", lambda: {"dashboard": {"theme": "default"}}
+        )
+        client = self._mount_spa_client(tmp_path, monkeypatch)
+        resp = client.get("/chat")
+        assert resp.status_code == 200
+        assert "html,body{background-color:#171717;}" in resp.text
+
+    def test_serve_index_paints_the_light_builtin_surface(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+        monkeypatch.setattr(
+            _cfg_mod, "load_config", lambda: {"dashboard": {"theme": "nous-blue"}}
+        )
+        client = self._mount_spa_client(tmp_path, monkeypatch)
+        resp = client.get("/chat")
+        assert "html,body{background-color:#E8F2FD;}" in resp.text
+
 
 class TestNormaliseThemeExtensions:
     """Tests for the extended normaliser fields (assets, customCSS,

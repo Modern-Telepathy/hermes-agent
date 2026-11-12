@@ -45,23 +45,44 @@ def _layer_hex(palette: dict[str, Any], key: str, default: str) -> str:
     return layer.get("hex", default) if isinstance(layer, dict) else default
 
 
-def _render_active_theme_bootstrap_css() -> str:
-    """Critical-CSS ``<style>`` shim for the active *user* theme, so the first paint uses the
-    target palette instead of flashing the bundle's default Hermes Teal until
-    ``ThemeProvider.applyTheme()`` runs. Built-in themes return "" (the bundle owns them).
+# The dashboard's first paint, before its bundle's CSS arrives. A browser's default canvas is
+# white, which the desktop's embedded dashboard panes (every plugin tab is one) show as a flash;
+# painting the theme's own surface instead makes the load invisible. These are the built-in
+# palette backgrounds in ``web/src/themes/presets.ts``: every built-in is dark but Nous Blue, so
+# the light one is named here rather than the whole palette table being duplicated.
+_DASHBOARD_DARK_SURFACE = "#171717"
+_DASHBOARD_LIGHT_SURFACE = "#E8F2FD"
+_LIGHT_BUILTIN_THEMES = frozenset({"nous-blue"})
 
+
+def _dashboard_surface_style(background_hex: str) -> str:
+    """The one rule a page needs to paint its surface before the bundle loads."""
+    return (
+        '<style id="hermes-theme-bootstrap">'
+        f"html,body{{background-color:{background_hex};}}"
+        "</style>"
+    )
+
+
+def _render_active_theme_bootstrap_css() -> str:
+    """Critical-CSS ``<style>`` shim for the active theme, so the first paint is the target page
+    rather than a white canvas (or the bundle's default Hermes Teal, for a user YAML theme).
+
+    A built-in theme gets the surface rule alone — the bundle owns its variables and applies them
+    as soon as it runs. A *user* theme gets its variables too, so even that handover is invisible.
     Variable names MUST match what the bundle consumes (``layerVars()`` /
-    ``typographyVars()`` in ``web/src/themes/context.tsx``). The ``html,body`` rule
-    references the variables rather than literals so runtime theme switches stay live:
-    ``applyTheme()`` writes inline styles on ``documentElement`` which outrank this block.
+    ``typographyVars()`` in ``web/src/themes/context.tsx``). The ``html,body`` rule references the
+    variables rather than literals so runtime theme switches stay live: ``applyTheme()`` writes
+    inline styles on ``documentElement`` which outrank this block.
     """
     from hermes_cli.config import load_config
     try:
         active = cfg_get(load_config(), "dashboard", "theme", default="default")
         if not active or not isinstance(active, str):
-            return ""
+            active = "default"
         if any(b["name"] == active for b in _BUILTIN_DASHBOARD_THEMES):
-            return ""
+            surface = _DASHBOARD_LIGHT_SURFACE if active in _LIGHT_BUILTIN_THEMES else _DASHBOARD_DARK_SURFACE
+            return _dashboard_surface_style(surface)
         for theme in _discover_user_themes():
             if theme.get("name") != active:
                 continue
@@ -86,10 +107,11 @@ def _render_active_theme_bootstrap_css() -> str:
                 "font-size:var(--theme-base-size);}"
                 "</style>"
             )
-        return ""
+        # A remembered theme whose YAML is gone: the bundle falls back to its default, so does this.
+        return _dashboard_surface_style(_DASHBOARD_DARK_SURFACE)
     except Exception:
         _log.debug("theme bootstrap render failed", exc_info=True)
-        return ""
+        return _dashboard_surface_style(_DASHBOARD_DARK_SURFACE)
 
 
 # Hashed bundle assets are immutable by construction (content hash in the filename; index.html
