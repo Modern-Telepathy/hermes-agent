@@ -51,7 +51,7 @@ export function SidebarSection({
   id: string
 }) {
   const { dragging, dragHandleProps, ref, style } = useSortableBindings(id)
-  const height = useStore($sidebarSectionHeights)[id]
+  const cap = useStore($sidebarSectionHeights)[id]
 
   const handlePointerDown = (event: React.PointerEvent<HTMLElement>) => {
     const target = event.target
@@ -74,14 +74,22 @@ export function SidebarSection({
         // A stored height CAPS the section, it never reserves the space: a
         // fixed height left the rows' leftover as a blank block between the
         // last row and the next section (Sessions, whose body is `flex-1`,
-        // stretched into whatever height the grip last recorded). The section
-        // still scrolls on its own once its content outgrows the cap.
-        ...(height === undefined
-          ? null
-          : { boxSizing: 'border-box' as const, flex: '0 0 auto', maxHeight: height, overflowY: 'auto' as const })
+        // stretched into whatever height the grip last recorded).
+        ...(cap === undefined ? null : { boxSizing: 'border-box' as const, flex: '0 0 auto' as const })
       }}
     >
-      {children}
+      {/* The cap and the scroller live on the BODY, never on the section: the
+          grip is its sibling below, so it stays on the section's bottom edge
+          (where the next section starts) instead of scrolling away with the
+          rows it sizes. The body always exists so the grip measures the same
+          box it caps, capped or not. */}
+      <div
+        className="min-h-0 overflow-y-auto"
+        data-section-body=""
+        style={cap === undefined ? undefined : { maxHeight: cap }}
+      >
+        {children}
+      </div>
       <SidebarSectionResizeGrip id={id} />
     </div>
   )

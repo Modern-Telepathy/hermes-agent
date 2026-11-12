@@ -28,21 +28,28 @@ function renderSection(id: string, children: React.ReactNode = 'rows') {
   return section
 }
 
-// The stored resize height is a CAP. Applied as a fixed height, a section whose
-// rows had since shrunk kept the old height as a blank block between its last
-// row and the next section — the gap under the Sessions list.
-it('caps a resized section at its stored height instead of reserving that space', () => {
+// The stored resize height is a CAP on the body. Applied to the section itself
+// it both reserved space the rows did not fill and put the grip inside that
+// scroll box, so the grip scrolled out of sight on a long list instead of
+// sitting on the boundary with the next section.
+it('caps the section body so the grip stays on the section boundary', () => {
   $sidebarSectionHeights.set({ sessions: 420 })
 
   const section = renderSection('sessions')
+  const body = section.querySelector<HTMLElement>('[data-section-body]')
 
-  expect(section.style.maxHeight).toBe('420px')
-  expect(section.style.height).toBe('')
+  expect(body?.style.maxHeight).toBe('420px')
+  expect(section.style.maxHeight).toBe('')
+
+  // The grip must sit beside the scroller, never inside it.
+  expect(body?.querySelector('[data-section-resize]')).toBeNull()
+  expect(section.querySelector(':scope > [data-section-resize]')).not.toBeNull()
 })
 
-it('leaves an unresized section unbounded', () => {
+it('leaves an unresized section body unbounded', () => {
   const section = renderSection('bots')
 
+  expect(section.querySelector<HTMLElement>(':scope > [data-section-body]')?.style.maxHeight).toBe('')
   expect(section.style.maxHeight).toBe('')
   expect(section.style.height).toBe('')
 })

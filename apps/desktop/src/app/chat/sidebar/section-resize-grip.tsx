@@ -25,8 +25,13 @@ export function SidebarSectionResizeGrip({ id }: { id: string }) {
   // Grab where the grip IS, not where the stored cap is: a section renders its
   // content up to the cap, so a cap recorded when the section was taller would
   // make the first drag jump by the difference. The cap is only the fallback.
+  //
+  // Measure the section's BODY — the box the cap actually rides — so the first
+  // drag moves by exactly the pixels dragged rather than by the header's (and
+  // gripper's) height on top of it.
   const currentHeight = (element: HTMLElement | null): number => {
-    const measured = element?.getBoundingClientRect().height ?? 0
+    const body = element?.querySelector<HTMLElement>(':scope > [data-section-body]')
+    const measured = (body ?? element)?.getBoundingClientRect().height ?? 0
 
     return measured > 0 ? measured : (heights[id] ?? DEFAULT_SECTION_HEIGHT)
   }

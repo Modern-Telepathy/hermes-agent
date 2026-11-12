@@ -39,9 +39,6 @@ export function SidebarPluginNavSection({
       data-section-open={open ? 'true' : 'false'}
       data-sidebar-section="plugins"
       data-slot="sidebar-plugins"
-      // A cap, never a fixed box: a stored plugins height must not leave a blank
-      // block under the rows the way a fixed one did (see section-stack.tsx).
-      style={open && height !== undefined ? { boxSizing: 'border-box', maxHeight: height, overflow: 'hidden' } : undefined}
     >
       <div className="group/section flex shrink-0 items-center justify-between gap-1 pb-1" data-section-heading="">
         <button
@@ -61,7 +58,15 @@ export function SidebarPluginNavSection({
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto" data-plugin-nav-scroll="">
+      {/* The cap rides the scroller, never the nav: capping the nav put the grip
+          inside the clipped area, so a resized Plugins section lost its grip.
+          A closed section takes no cap at all — its body is empty. */}
+      <div
+        className="min-h-0 flex-1 overflow-y-auto"
+        data-plugin-nav-scroll=""
+        data-section-body=""
+        style={open && height !== undefined ? { maxHeight: height } : undefined}
+      >
       {open && (
         <ul className="flex flex-col gap-px" id="sidebar-plugins-rows">
           {items.map(item => (
