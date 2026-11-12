@@ -7,6 +7,7 @@ Usage: ``python -m hermes_cli.main web [--port 8080]``.
 """
 
 from contextlib import asynccontextmanager
+from hermes_branding import PRODUCT_AGENT_NAME
 
 import asyncio
 from collections import deque
@@ -209,7 +210,7 @@ def _get_pty_active_session_files(app: FastAPI) -> dict[str, Path]:
 
 
 app = FastAPI(
-    title="Hermes Agent",
+    title=PRODUCT_AGENT_NAME,
     version=get_version_info().base_version,
     lifespan=app_lifespan,
     # `/docs` is the dashboard's Documentation page; keep the API explorer beside

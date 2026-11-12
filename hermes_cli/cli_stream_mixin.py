@@ -7,6 +7,8 @@ never imports ``cli`` at module load time (import cycle).
 
 from __future__ import annotations
 
+from hermes_branding import PRODUCT_NAME
+
 import json
 import re
 import shutil
@@ -479,7 +481,7 @@ class CLIStreamMixin:
             try:
                 from hermes_cli.skin_engine import get_active_skin
                 _skin = get_active_skin()
-                label = _skin.get_branding("response_label", "☤ Hermes")
+                label = _skin.get_branding("response_label", f"☤ {PRODUCT_NAME}")
                 _text_hex = _skin.get_color("banner_text", "#FFF8DC")
             except Exception:
                 label = "☤ Hermes"

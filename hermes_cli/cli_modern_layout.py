@@ -8,6 +8,8 @@ region, which is redrawn on every resize. ``display.cli_layout: classic`` restor
 
 from __future__ import annotations
 
+from hermes_branding import PRODUCT_GLYPH, PRODUCT_NAME
+
 import logging
 import os
 import re
@@ -53,7 +55,7 @@ def _fg(hex_color: str, bold: bool = False) -> str:
 def _brand_glyph() -> tuple[str, str]:
     """(glyph, name) from the skin's response label, e.g. ``" ☤ Hermes "`` → ("☤", "Hermes")."""
     from hermes_cli.skin_engine import get_active_skin
-    label = get_active_skin().get_branding("response_label", " ☤ Hermes ")
+    label = get_active_skin().get_branding("response_label", f" {PRODUCT_GLYPH} {PRODUCT_NAME} ")
     parts = label.split(None, 1)
     return (parts[0], parts[1].strip()) if len(parts) == 2 else ("☤", label.strip() or "Hermes")
 

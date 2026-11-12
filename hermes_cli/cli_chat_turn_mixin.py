@@ -6,6 +6,8 @@ inside each method — importing ``cli`` at module load time would be a cycle.
 
 from __future__ import annotations
 
+from hermes_branding import PRODUCT_NAME
+
 import logging
 import os
 import queue
@@ -720,7 +722,7 @@ class CLIChatTurnMixin:
             try:
                 from hermes_cli.skin_engine import get_active_skin
                 _skin = get_active_skin()
-                label = _skin.get_branding("response_label", "☤ Hermes")
+                label = _skin.get_branding("response_label", f"☤ {PRODUCT_NAME}")
                 _resp_color = _maybe_remap_for_light_mode(_skin.get_color("response_border", "#CD7F32"))
                 _resp_text = _maybe_remap_for_light_mode(_skin.get_color("banner_text", "#FFF8DC"))
             except Exception:

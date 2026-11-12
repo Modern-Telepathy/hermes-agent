@@ -5,6 +5,8 @@ LAZILY inside each method (``from cli import ...``) — never at module load (im
 
 from __future__ import annotations
 
+from hermes_branding import PRODUCT_AGENT_NAME, PRODUCT_NAME
+
 import errno
 import json
 import os
@@ -68,7 +70,7 @@ def _approval_choice_label(choice: str) -> str:
 def _agent_name() -> str:
     try:
         from hermes_cli.skin_engine import get_active_skin
-        return get_active_skin().get_branding("agent_name", "Hermes")
+        return get_active_skin().get_branding("agent_name", PRODUCT_NAME)
     except Exception:
         return "Hermes"
 
@@ -1104,7 +1106,7 @@ class CLITuiMixin:
         import signal as _sig
         from prompt_toolkit.application import run_in_terminal
         from hermes_cli.skin_engine import get_active_skin
-        agent_name = get_active_skin().get_branding("agent_name", "Hermes Agent")
+        agent_name = get_active_skin().get_branding("agent_name", PRODUCT_AGENT_NAME)
         msg = "\n" + t("cli.tui.suspended", agent_name=agent_name)
 
         def _suspend():

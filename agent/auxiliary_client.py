@@ -1,3 +1,4 @@
+# health: allow FILE_LINES -- brand switch point: the only growth is the hermes_branding import for the X-Title attribution header
 """Shared auxiliary client router for side tasks (compression, search, vision, ...).
 
 Text auto chain: main provider+model → OpenRouter → Nous Portal → custom endpoint →
@@ -12,6 +13,7 @@ import contextlib
 import contextvars
 import functools
 import hashlib
+from hermes_branding import PRODUCT_AGENT_NAME
 import inspect
 import json
 import logging
@@ -877,7 +879,7 @@ _PROVIDERS_WITHOUT_VISION: frozenset = frozenset({"kimi-coding", "kimi-coding-cn
 # OpenRouter app attribution (always sent). `X-Title` is what the dashboard reads.
 _OR_HEADERS_BASE = {
     "HTTP-Referer": "https://hermes-agent.nousresearch.com",
-    "X-Title": "Hermes Agent",
+    "X-Title": PRODUCT_AGENT_NAME,
     "X-OpenRouter-Categories": "productivity,cli-agent",
 }
 

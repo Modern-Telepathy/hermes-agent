@@ -1,6 +1,34 @@
 // The right sidebar's copy (file tree, folder picker, terminals); `Translations.rightSidebar`.
 export interface RightSidebarTranslations {
   aria: string
+  /** The right drawer's tab strip and its per-tab copy. */
+  drawer: {
+    aria: string
+    browser: string
+    browserAddress: string
+    browserAddressPlaceholder: string
+    browserEmptyBody: string
+    browserEmptyTitle: string
+    browserNewTab: string
+    browserOpen: string
+    browserTabs: string
+    changes: string
+    console: string
+    document: string
+    documentClose: string
+    documentEmptyBody: string
+    documentEmptyTitle: string
+    files: string
+    title: string
+    usage: string
+    usageCacheHit: string
+    usageCost: string
+    usageEmptyTitle: string
+    usageInput: string
+    usageNoSession: string
+    usageOutput: string
+    usageThroughput: string
+  }
   panelsAria: string
   files: string
   terminal: string

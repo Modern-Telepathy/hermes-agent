@@ -6,6 +6,8 @@ cli-level names through ``from cli import ...`` at call time so facade monkeypat
 
 from __future__ import annotations
 
+from hermes_branding import PRODUCT_AGENT_NAME, PRODUCT_NAME
+
 import functools
 import itertools
 import os
@@ -932,9 +934,9 @@ def _build_compact_banner() -> str:
     dim_color = _color("banner_dim", "#B8860B")
 
     if (getattr(_skin, "name", "default") if _skin else "default") == "default":
-        tiny_line = "☤ NOUS HERMES"
+        tiny_line = f"☤ NOUS {PRODUCT_NAME.upper()}"
     else:
-        tiny_line = _skin.get_branding("agent_name", "Hermes Agent") if _skin else "Hermes Agent"
+        tiny_line = _skin.get_branding("agent_name", PRODUCT_AGENT_NAME) if _skin else PRODUCT_AGENT_NAME
     line1 = t("cli.render.banner_tagline", name=tiny_line)
 
     if os.environ.get("HERMES_FAST_STARTUP_BANNER") == "1":

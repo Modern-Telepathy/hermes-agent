@@ -9,6 +9,7 @@ Document URL (CIMD) when the server supports it, else RFC 7591 DCR. ``mcp_server
 redirect_host, client_name, client_metadata_url, cimd, user_agent, timeout."""
 
 from pm import install_hint
+from hermes_branding import PRODUCT_AGENT_NAME
 import asyncio
 import contextlib
 import contextvars
@@ -1140,7 +1141,7 @@ def _build_client_metadata(cfg: dict) -> "OAuthClientMetadata":
     # Public client by default; confidential only with a known secret or a provider (Figma) needing confidential-style token posts.
     auth_method = cfg.get("token_endpoint_auth_method") or ("client_secret_post" if cfg.get("client_secret") else "none")
     metadata_kwargs: dict[str, Any] = {
-        "client_name": cfg.get("client_name", "Hermes Agent"),
+        "client_name": cfg.get("client_name", PRODUCT_AGENT_NAME),
         "redirect_uris": [AnyUrl(_resolve_redirect_uri(cfg, port))],
         "grant_types": ["authorization_code", "refresh_token"],
         "response_types": ["code"],

@@ -5,9 +5,10 @@ import { registerBundledPresets } from '@/components/pane-shell/tree/presets'
 // Layout presets — CHAT (main) always dominates.
 // ---------------------------------------------------------------------------
 
-// The REAL default: sessions left, chat main, and the right sidebars in column
-// order main | … | review | file-browser (files outermost). Each is its OWN
-// zone. Review collapses to nothing while its pane is hidden (⌘G off).
+// The REAL default: sessions left, chat main, and the right DRAWER (Console /
+// Browser / Folders / Changes / Usage / Document) as one tabbed column, with
+// the terminal rail under it. The drawer is the file browser's pane, so ⌘J and
+// every reveal path still address it.
 //
 // Preview tiles are DYNAMIC panes (like session tiles), so no preset names one:
 // they're registered by watchPreviewTiles as tabs open, and dockPaneBeside lands
@@ -21,15 +22,7 @@ export const DEFAULT_TREE = split(
     group(['workspace'], { id: 'grp-main' }),
     split(
       'column',
-      [
-        split(
-          'row',
-          [group(['review'], { id: 'grp-review' }), group(['files'], { id: 'grp-files' })],
-          [1, 1.2],
-          'spl-rail'
-        ),
-        group(['terminal'], { id: 'grp-terminal' })
-      ],
+      [group(['files'], { id: 'grp-drawer' }), group(['terminal'], { id: 'grp-terminal' })],
       [1.6, 1],
       'spl-right'
     )
@@ -43,7 +36,7 @@ export const DEFAULT_TREE = split(
 // cover the conversation, which a terminal tab did.
 const FOCUS_TREE = split(
   'row',
-  [group(['sessions']), split('column', [group(['workspace', 'files', 'review']), group(['terminal'])], [3, 1])],
+  [group(['sessions']), split('column', [group(['workspace', 'files']), group(['terminal'])], [3, 1])],
   [1, 4.6]
 )
 
@@ -58,17 +51,17 @@ export const BASIC_TREE = split(
   [
     group(['sessions']),
     split('column', [group(['workspace']), group(['terminal'])], [3, 1]),
-    split('row', [group(['review']), group(['files'])], [1, 1.2])
+    group(['files'])
   ],
   [1, 3.4, 1.25]
 )
 
-const BASIC_RESTING = ['terminal', 'files', 'review'] as const
+const BASIC_RESTING = ['terminal', 'files'] as const
 
 const TERMINAL_TREE = split(
   'column',
   [
-    split('row', [group(['sessions']), group(['workspace']), group(['files', 'review'])], [1, 3.2, 1.2]),
+    split('row', [group(['sessions']), group(['workspace']), group(['files'])], [1, 3.2, 1.2]),
     group(['terminal'])
   ],
   [3, 1]
@@ -79,7 +72,7 @@ const TERMINAL_TREE = split(
 // each one in its deck slot. Review rests with files: closing the file tree
 // collapses their shared column, and an open review there would leave ⌘G
 // reading open while nothing shows.
-const TERMINAL_RESTING = ['terminal', 'files', 'review'] as const
+const TERMINAL_RESTING = ['terminal', 'files'] as const
 
 // The first-run intro's borrowed layout: the chat alone, no tab strip. Unlisted,
 // and applied while layout persistence is held (onboarding/first-run/assembly.ts).
@@ -90,8 +83,8 @@ export const DEMO_TREE = group(['workspace'], { tabStrip: 'never' })
 const QUAD_TREE = split(
   'column',
   [
-    split('row', [group(['sessions', 'files']), group(['workspace'])], [1, 3]),
-    split('row', [group(['terminal']), group(['review'])], [1.4, 1])
+    split('row', [group(['sessions']), group(['workspace'])], [1, 3]),
+    split('row', [group(['terminal']), group(['files'])], [1.4, 1])
   ],
   [3, 1]
 )

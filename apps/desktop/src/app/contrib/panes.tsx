@@ -1,20 +1,16 @@
 /**
  * Real-data panes + composable bar items for the contrib root:
  *
- *  - `PreviewRailPane` — the REAL ChatPreviewRail; files-pane clicks feed it.
- *  - `FilesPane` — real file browser; activating a file opens it in preview.
+ *  - `LogsPane` — the ⌘K-summoned agent log tail.
  *  - Core statusbar items with LIVE store-backed labels, registered as DATA
  *    contributions (`area: 'statusBar.left' / 'statusBar.right'`, payload =
  *    StatusbarItem) — plugins add theirs through the identical call.
  */
 
-import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
 import { atom } from 'nanostores'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { RightSidebarPane } from '@/app/right-sidebar'
-import { ReviewPane } from '@/app/right-sidebar/review'
 import type { GroupSetter } from '@/app/shell/group-setter'
 import type { StatusbarItem } from '@/app/shell/statusbar-controls'
 import type { TitlebarTool } from '@/app/shell/titlebar-controls'
@@ -23,10 +19,6 @@ import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
 import { useContributions } from '@/contrib/react/use-contributions'
 import { registry } from '@/contrib/registry'
 import { getLogs } from '@/hermes'
-import { normalizeOrLocalPreviewTarget } from '@/lib/local-preview'
-import { cn } from '@/lib/utils'
-import { openPreview } from '@/store/preview'
-import { $focusedWorkspaceCwd } from '@/store/session-states'
 
 // ---------------------------------------------------------------------------
 // Logs — live agent-log tail. ⌘K-only chrome: the pane contribution exists
@@ -104,46 +96,6 @@ export function LogsPane() {
 /** Preview-server restart handler, provided by the wiring (usePreviewRouting).
  *  Atom-bridged: this module can't import contrib-wiring (it imports us). */
 export const $restartPreviewServer = atom<((url: string, context?: string) => Promise<string>) | null>(null)
-
-/** Open a file from the tree in the real preview pipeline. */
-function previewFile(path: string) {
-  void normalizeOrLocalPreviewTarget(path, $focusedWorkspaceCwd.get() || undefined)
-    .then(target => {
-      if (target) {
-        openPreview(target)
-      }
-    })
-    .catch(() => undefined)
-}
-
-// Layout fit for wrapped asides. Edge chrome (borders/shadows) is neutralized
-// GLOBALLY by the tree's seam invariant (see LayoutTreeRoot) — only sizing
-// and titlebar clearance are per-wrapper concerns.
-const ZONE_CONTENT = 'h-full [&>aside]:h-full [&>aside]:w-full [&>aside]:pt-0'
-
-export function FilesPane() {
-  return (
-    <div className={ZONE_CONTENT}>
-      <RightSidebarPane onActivateFile={previewFile} onActivateFolder={previewFile} />
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Review — the real git diff pane (⌘G / $reviewOpen)
-// ---------------------------------------------------------------------------
-
-export function ReviewPaneContent() {
-  const cwd = useStore($focusedWorkspaceCwd)
-
-  // Keyed by cwd like DesktopController so switching projects rebuilds the
-  // diff state instead of showing the previous repo's files.
-  return (
-    <div className={cn(ZONE_CONTENT, 'flex min-h-0 flex-col [&>aside]:min-h-0 [&>aside]:flex-1')}>
-      <ReviewPane key={cwd || 'no-cwd'} />
-    </div>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Statusbar composability: plugins contribute DATA items into

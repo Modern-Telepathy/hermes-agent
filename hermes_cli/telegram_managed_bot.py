@@ -4,6 +4,7 @@ service (no BotFather copy-paste); the raw Telegram token is saved locally after
 from __future__ import annotations
 
 from pm import install_hint
+from hermes_branding import PRODUCT_AGENT_NAME
 import os
 import re
 import sys
@@ -16,7 +17,7 @@ import httpx
 # Nous-hosted pairing API; override for PoC/staging with TELEGRAM_ONBOARDING_URL.
 DEFAULT_API_URL = "https://setup.hermes-agent.nousresearch.com"
 TELEGRAM_ONBOARDING_URL_ENV = "TELEGRAM_ONBOARDING_URL"
-DEFAULT_BOT_NAME = "Hermes Agent"
+DEFAULT_BOT_NAME = PRODUCT_AGENT_NAME
 DEFAULT_POLL_TIMEOUT = 180
 POLL_INTERVAL = 2
 
