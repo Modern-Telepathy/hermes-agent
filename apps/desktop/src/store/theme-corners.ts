@@ -20,7 +20,9 @@ export interface ThemeCorners {
 
 export const DEFAULT_THEME_CORNERS: ThemeCorners = { button: null, container: null }
 
-const CSS_VARS: Record<CornerKind, string> = {
+/** The custom property each corner family paints with, so a control can read the
+ *  radius a theme is using right now. */
+export const THEME_CORNER_VARS: Record<CornerKind, string> = {
   button: '--theme-radius-button',
   container: '--theme-radius-container'
 }
@@ -62,9 +64,9 @@ export function applyThemeCorners(corners: ThemeCorners): void {
     const value = corners[kind]
 
     if (value === null) {
-      root.style.removeProperty(CSS_VARS[kind])
+      root.style.removeProperty(THEME_CORNER_VARS[kind])
     } else {
-      root.style.setProperty(CSS_VARS[kind], `${value}px`)
+      root.style.setProperty(THEME_CORNER_VARS[kind], `${value}px`)
     }
   }
 }

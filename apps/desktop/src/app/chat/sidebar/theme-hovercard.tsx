@@ -3,9 +3,20 @@ import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
+import { controlVariants } from '@/components/ui/control'
+import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
-import { $themeCorners, MAX_CORNER_RADIUS, MIN_CORNER_RADIUS, setThemeCorner } from '@/store/theme-corners'
+import {
+  $themeCorners,
+  clampCornerRadius,
+  type CornerKind,
+  MAX_CORNER_RADIUS,
+  MIN_CORNER_RADIUS,
+  setThemeCorner,
+  THEME_CORNER_VARS
+} from '@/store/theme-corners'
 import {
   $themePadding,
   resetThemePadding,
@@ -17,38 +28,75 @@ import { $zoomPercent, setZoomPercent } from '@/store/zoom'
 import { committedTheme, useTheme } from '@/themes/context'
 import { ownAccent, persistAccent } from '@/themes/persist-accent'
 
-const ROW = 'flex items-center justify-between gap-3 text-[0.75rem] text-(--ui-text-secondary)'
+const ROW = 'flex min-h-7 items-center justify-between gap-3 text-[0.75rem] text-(--ui-text-secondary)'
 
-const FIELD =
-  'h-7 rounded-md border border-(--ui-stroke-tertiary) bg-(--ui-bg-input) px-2 text-[0.75rem] text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring'
+// One column for every value, so the numbers under each other line up instead
+// of drifting with the label lengths.
+const VALUE_WIDTH = 'w-[4.75rem]'
 
-/** One labelled number field: empty means "follow the theme". */
-function NumberSetting({
+const SELECT = cn(controlVariants({ size: 'xs' }), 'cursor-pointer')
+
+/** The radius the theme is painting right now, so turning an override on starts
+ *  from the look already on screen instead of a made-up number. */
+function themeRadius(kind: CornerKind): number {
+  const probe = document.createElement('div')
+
+  probe.style.cssText = `position:absolute;width:0;height:0;visibility:hidden;border-radius:var(${THEME_CORNER_VARS[kind]})`
+  document.body.appendChild(probe)
+
+  const radius = Number.parseFloat(getComputedStyle(probe).borderTopLeftRadius)
+
+  probe.remove()
+
+  return clampCornerRadius(Number.isFinite(radius) ? radius : MIN_CORNER_RADIUS)
+}
+
+/**
+ * One appearance row: label, the on/off slider that owns the override, and the
+ * value that slider enables. Off means "follow the theme", which is why the
+ * value is disabled rather than merely dimmed — a stale number must not read as
+ * the setting in force.
+ */
+function OverrideRow({
+  enabled,
   label,
   max,
   min,
   onChange,
+  onToggle,
   placeholder,
   suffix,
   value
 }: {
+  enabled: boolean
   label: string
   max: number
   min: number
   onChange: (value: number) => void
+  onToggle: (on: boolean) => void
   placeholder?: string
-  suffix?: string
+  suffix: string
   value: null | number
 }) {
   return (
-    <label className={ROW}>
+    <div className={ROW}>
       <span className="min-w-0 truncate">{label}</span>
-      <span className="flex items-center gap-1">
-        <input
-          className={cn(FIELD, 'w-14 text-right')}
+      <span className="flex shrink-0 items-center gap-2">
+        <Switch aria-label={label} checked={enabled} onCheckedChange={onToggle} size="xs" />
+        <Input
+          aria-label={`${label} value`}
+          className="text-right tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+          containerClassName={VALUE_WIDTH}
+          disabled={!enabled}
           max={max}
           min={min}
           onChange={event => {
+            // Clearing the field is how you start typing a new number; it is
+            // not a request to set 0.
+            if (event.target.value.trim() === '') {
+              return
+            }
+
             const next = Number(event.target.value)
 
             if (Number.isFinite(next)) {
@@ -56,21 +104,15 @@ function NumberSetting({
             }
           }}
           placeholder={placeholder}
+          size="xs"
+          // A unit on an empty field reads as "Auto px"; the unit belongs to a
+          // number, so it only shows once there is one.
+          suffix={value === null ? undefined : suffix}
           type="number"
           value={value ?? ''}
         />
-        {suffix && <span className="text-(--ui-text-tertiary)">{suffix}</span>}
       </span>
-    </label>
-  )
-}
-
-function Switch({ checked, label, onChange }: { checked: boolean; label: string; onChange: (on: boolean) => void }) {
-  return (
-    <label className="flex items-center gap-2">
-      <input checked={checked} className="size-3.5 accent-(--dt-primary-solid)" onChange={e => onChange(e.target.checked)} type="checkbox" />
-      <span className="text-[0.6875rem] text-(--ui-text-tertiary)">{label}</span>
-    </label>
+    </div>
   )
 }
 
@@ -89,7 +131,6 @@ export function ThemeHovercard() {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const currentTheme = committedTheme().name
   const themes = (theme.availableThemes ?? []) as { name?: string }[]
-  const fontScaled = zoom !== 100
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -119,7 +160,7 @@ export function ThemeHovercard() {
       </span>
       <PopoverContent
         align="end"
-        className="w-80 space-y-3"
+        className="w-80 space-y-2.5"
         onMouseEnter={() => {
           if (closeTimer.current) {
             clearTimeout(closeTimer.current)
@@ -136,7 +177,7 @@ export function ThemeHovercard() {
         <label className={ROW}>
           <span>Mode</span>
           <select
-            className={cn(FIELD, 'w-24')}
+            className={cn(SELECT, 'w-28')}
             onChange={event => theme.setMode(event.target.value as 'dark' | 'light' | 'system')}
             value={theme.mode}
           >
@@ -149,7 +190,7 @@ export function ThemeHovercard() {
         <label className={ROW}>
           <span>Theme</span>
           <select
-            className={cn(FIELD, 'max-w-44')}
+            className={cn(SELECT, 'w-36')}
             onChange={event => theme.setTheme(event.target.value)}
             value={currentTheme}
           >
@@ -165,9 +206,9 @@ export function ThemeHovercard() {
           </select>
         </label>
 
-        <label className={ROW}>
+        <div className={ROW}>
           <span>Accent</span>
-          <span className="flex items-center gap-2">
+          <span className="flex shrink-0 items-center gap-2">
             <input
               aria-label="Primary accent"
               className="size-6 cursor-pointer rounded-md border border-(--ui-stroke-tertiary) bg-transparent p-0"
@@ -187,67 +228,55 @@ export function ThemeHovercard() {
               size="sm"
               variant="ghost"
             >
-              Theme
+              Use theme
             </Button>
           </span>
-        </label>
+        </div>
 
-        <NumberSetting
+        <div className="border-t border-(--ui-stroke-tertiary)" />
+
+        <OverrideRow
+          enabled={corners.button !== null}
           label="Button corners"
           max={MAX_CORNER_RADIUS}
           min={MIN_CORNER_RADIUS}
           onChange={value => setThemeCorner('button', value)}
+          onToggle={on => setThemeCorner('button', on ? themeRadius('button') : null)}
           placeholder="Auto"
           suffix="px"
           value={corners.button}
         />
-        <NumberSetting
+        <OverrideRow
+          enabled={corners.container !== null}
           label="Component corners"
           max={MAX_CORNER_RADIUS}
           min={MIN_CORNER_RADIUS}
           onChange={value => setThemeCorner('container', value)}
+          onToggle={on => setThemeCorner('container', on ? themeRadius('container') : null)}
           placeholder="Auto"
           suffix="px"
           value={corners.container}
         />
-
-        <div className={ROW}>
-          <span>Font size</span>
-          <span className="flex items-center gap-2">
-            <Switch
-              checked={fontScaled}
-              label={fontScaled ? 'On' : 'Off'}
-              onChange={on => setZoomPercent(on ? 110 : 100)}
-            />
-            <NumberSetting
-              label=""
-              max={200}
-              min={50}
-              onChange={value => setZoomPercent(value)}
-              suffix="%"
-              value={zoom}
-            />
-          </span>
-        </div>
-
-        <div className={ROW}>
-          <span>Row padding</span>
-          <span className="flex items-center gap-2">
-            <Switch
-              checked={padding.enabled}
-              label={padding.enabled ? 'On' : 'Off'}
-              onChange={on => setThemePadding({ enabled: on })}
-            />
-            <NumberSetting
-              label=""
-              max={THEME_PADDING_MAX}
-              min={THEME_PADDING_MIN}
-              onChange={value => setThemePadding({ enabled: true, px: value })}
-              suffix="px"
-              value={padding.px}
-            />
-          </span>
-        </div>
+        <OverrideRow
+          enabled={zoom !== 100}
+          label="Font size"
+          max={200}
+          min={50}
+          onChange={value => setZoomPercent(value)}
+          onToggle={on => setZoomPercent(on ? 110 : 100)}
+          suffix="%"
+          value={zoom}
+        />
+        <OverrideRow
+          enabled={padding.enabled}
+          label="Row padding"
+          max={THEME_PADDING_MAX}
+          min={THEME_PADDING_MIN}
+          onChange={value => setThemePadding({ enabled: true, px: value })}
+          onToggle={on => setThemePadding({ enabled: on })}
+          suffix="px"
+          value={padding.px}
+        />
 
         <div className="flex items-center justify-between border-t border-(--ui-stroke-tertiary) pt-2">
           <Button
