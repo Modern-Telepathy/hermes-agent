@@ -3166,6 +3166,23 @@ export const en: Translations = {
   },
 
   sidebar: {
+    navIconEditor: {
+      menu: 'Change icon…',
+      title: 'Change icon',
+      description: 'Choose an emoji or icon, then give it a background if you like.',
+      emoji: 'Emoji',
+      icons: 'Icons',
+      searchIcons: 'Search icons',
+      emojiPlaceholder: 'Type or paste an emoji',
+      background: 'Background',
+      none: 'None',
+      cornerRadius: 'Corner radius',
+      custom: 'Custom…',
+      customColor: 'Custom color',
+      apply: 'Apply',
+      reset: 'Reset',
+      noIcons: 'No icons match.'
+    },
     filter: {
       grouping: 'Grouping',
       ordering: 'Ordering',

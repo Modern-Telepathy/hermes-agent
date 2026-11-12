@@ -9,7 +9,13 @@ import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { PlatformAvatar } from '@/app/messaging/platform-icon'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
-import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger
+} from '@/components/ui/context-menu'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { KbdGroup } from '@/components/ui/kbd'
 import { SearchField } from '@/components/ui/search-field'
@@ -140,6 +146,7 @@ import { ackAllSessionsRead } from '@/store/session-unread'
 import { markSessionUnread } from '@/store/session-unread-remote'
 import { $archivedSessions, loadArchivedSessions } from '@/store/sidebar-archive'
 import { applySidebarNavPrefs, SIDEBAR_NAV_PREFS_AREA } from '@/store/sidebar-nav'
+import { $sidebarNavIcons } from '@/store/sidebar-nav-icons'
 import { $sidebarNavOrder, applyNavOrder, setSidebarNavOrder } from '@/store/sidebar-nav-order'
 import { $sidebarSessionRankIds } from '@/store/sidebar-sort'
 
@@ -156,6 +163,7 @@ import { SidebarFactoriesSection } from './factories-section'
 import { SidebarFilterMenu } from './filter-menu'
 import { buildGatewaySessionGroups, scopeGatewaySessionGroups, useGatewaySessionGroups } from './gateway-group-model'
 import { SidebarLoadMoreRow } from './load-more-row'
+import { NavIconEditor } from './nav-icon-editor'
 import { SIDEBAR_NAV, SortableNavRow } from './nav-sortable'
 import { orderByIds, reconcileOrderIds, resolveManualSessionOrderIds, sameIds } from './order'
 import { SidebarPluginNavSection } from './plugin-nav-section'
@@ -197,6 +205,7 @@ import {
 } from './section-states'
 import { buildSessionByAnyId, resolvePinnedSessions } from './session-index'
 import { SidebarSessionsSection, VIRTUALIZE_THRESHOLD } from './sessions-section'
+import { SidebarNavGlyph } from './sidebar-nav-glyph'
 import { CONTEXT_SPLIT_KIT, SplitSubmenu } from './split-submenu'
 import { useEnteredProjectSessions } from './use-entered-project-sessions'
 import { useServerSessionSearch } from './use-server-session-search'
@@ -375,6 +384,8 @@ export function ChatSidebar({
   const { t } = useI18n()
   const s = t.sidebar
   const { pathname, search } = useLocation()
+  const navIcons = useStore($sidebarNavIcons)
+  const [iconEditorItem, setIconEditorItem] = useState<null | SidebarNavItem>(null)
   // Contributed nav rows (plugins pairing a page with a sidebar entry) render
   // below the built-ins with the same chrome; active = at their route.
   const navContributions = useContributions(SIDEBAR_NAV_AREA)
@@ -1678,7 +1689,9 @@ export function ChatSidebar({
                     }
                     type="button"
                   >
-                    <item.icon className="size-4 shrink-0 text-[color-mix(in_srgb,currentColor_72%,transparent)]" />
+                    <SidebarNavGlyph override={navIcons[item.id]}>
+                      <item.icon className="size-4 shrink-0 text-[color-mix(in_srgb,currentColor_72%,transparent)]" />
+                    </SidebarNavGlyph>
                     {/* Shrink-to-fit, not flex-1: the label carries the row's
                         `data-tour` handle, and anything anchored to it should
                         land at the end of the WORD, not out at the sidebar's
@@ -1706,26 +1719,34 @@ export function ChatSidebar({
                 return (
                   <SortableNavRow id={item.id} key={item.id}>
                   <SidebarMenuItem>
-                    {isNewSession || item.route ? (
-                      <ContextMenu>
-                        <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
-                        <ContextMenuContent aria-label={s.nav[item.id] ?? item.label}>
-                          <SplitSubmenu
-                            kit={CONTEXT_SPLIT_KIT}
-                            label={s.row.openInSplit}
-                            onSplit={dir => {
-                              if (isNewSession) {
-                                onNewSessionSplit(dir)
-                              } else if (item.route) {
-                                openRouteTile(item.route, dir)
-                              }
-                            }}
-                          />
-                        </ContextMenuContent>
-                      </ContextMenu>
-                    ) : (
-                      button
-                    )}
+                    <ContextMenu>
+                      <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
+                      <ContextMenuContent aria-label={s.nav[item.id] ?? item.label}>
+                        {(isNewSession || item.route) && (
+                          <>
+                            <SplitSubmenu
+                              kit={CONTEXT_SPLIT_KIT}
+                              label={s.row.openInSplit}
+                              onSplit={dir => {
+                                if (isNewSession) {
+                                  onNewSessionSplit(dir)
+                                } else if (item.route) {
+                                  openRouteTile(item.route, dir)
+                                }
+                              }}
+                            />
+                            <ContextMenuSeparator />
+                          </>
+                        )}
+                        <ContextMenuItem
+                          disabled={!item.iconName}
+                          onSelect={() => setIconEditorItem(item)}
+                        >
+                          <Codicon name="symbol-color" />
+                          {s.navIconEditor.menu}
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
                   </SidebarMenuItem>
                   </SortableNavRow>
                 )
@@ -2148,6 +2169,13 @@ export function ChatSidebar({
       <ProjectDialog />
       {/* One mount for the whole app. The header of WorktreeDialog tells why. */}
       <WorktreeDialog />
+      {iconEditorItem && (
+        <NavIconEditor
+          item={iconEditorItem}
+          label={s.nav[iconEditorItem.id] ?? iconEditorItem.label}
+          onClose={() => setIconEditorItem(null)}
+        />
+      )}
     </Sidebar>
   )
 }

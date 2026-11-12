@@ -2780,6 +2780,23 @@ export interface Translations extends NoticeTranslations {
   }
 
   sidebar: {
+    navIconEditor: {
+      menu: string
+      title: string
+      description: string
+      emoji: string
+      icons: string
+      searchIcons: string
+      emojiPlaceholder: string
+      background: string
+      none: string
+      cornerRadius: string
+      custom: string
+      customColor: string
+      apply: string
+      reset: string
+      noIcons: string
+    }
     filter: {
       grouping: string
       ordering: string

@@ -14,6 +14,7 @@ import { useSortableBindings } from './reorderable-list'
 export const SIDEBAR_NAV: SidebarNavItem[] = [
   {
     id: 'new-session',
+    iconName: 'add',
     label: '',
     icon: props => <Codicon name="add" {...props} />,
     action: 'new-session',
@@ -21,6 +22,7 @@ export const SIDEBAR_NAV: SidebarNavItem[] = [
   },
   {
     id: 'capabilities',
+    iconName: 'tools',
     label: '',
     icon: props => <Codicon name="tools" {...props} />,
     route: CAPABILITIES_ROUTE,
@@ -28,12 +30,14 @@ export const SIDEBAR_NAV: SidebarNavItem[] = [
   },
   {
     id: 'plugins',
+    iconName: 'extensions',
     label: 'Plugins',
     icon: props => <Codicon name="extensions" {...props} />,
     route: `${CAPABILITIES_ROUTE}?tab=plugins`
   },
   {
     id: 'messaging',
+    iconName: 'comment',
     label: '',
     icon: props => <Codicon name="comment" {...props} />,
     route: MESSAGING_ROUTE,
@@ -43,6 +47,7 @@ export const SIDEBAR_NAV: SidebarNavItem[] = [
   // way; Toolkit and Messaging are how anyone sets it up.
   {
     id: 'artifacts',
+    iconName: 'files',
     label: '',
     icon: props => <Codicon name="files" {...props} />,
     route: ARTIFACTS_ROUTE,
@@ -51,6 +56,7 @@ export const SIDEBAR_NAV: SidebarNavItem[] = [
   },
   {
     id: 'cron',
+    iconName: 'clock',
     label: '',
     icon: props => <Codicon name="clock" {...props} />,
     route: CRON_ROUTE,
