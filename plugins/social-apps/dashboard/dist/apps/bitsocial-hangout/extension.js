@@ -1301,6 +1301,21 @@ const CSS = `
 .bh .card .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .bh .card .errtext { color: var(--bh-bad); font-size: 13px; }
 .bh .card .hint { color: var(--bh-muted); font-size: 12px; }
+/* the "no node yet" tutorial: two commands to copy, a start button, and the docs */
+.bh .card .setup { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--bh-border); border-radius: 12px; background: var(--bh-bg); }
+.bh .card .setuph { font-size: 13px; font-weight: 600; color: var(--bh-contrast); }
+/* the dashboard's reset strips list markers, and this list IS the steps: restore them */
+.bh .card .steps { margin: 0; padding-left: 22px; list-style: decimal; font-size: 12.5px; line-height: 1.45; }
+.bh .card .steps > li + li { margin-top: 10px; }
+.bh .card .steps > li::marker { color: var(--bh-muted); }
+.bh .card .steps code { font: 12px ui-monospace, SF Mono, Menlo, monospace; color: var(--bh-contrast); }
+.bh .card .cmd { display: flex; align-items: stretch; gap: 8px; margin-top: 5px; }
+.bh .card .cmd code { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid var(--bh-border); border-radius: 8px; background: var(--bh-panel); overflow-x: auto; white-space: nowrap; }
+.bh .card .cmd .btn { flex: none; padding: 4px 10px; font-size: 12px; }
+.bh .card .setupbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.bh .card .setupbtns a.btn { display: inline-flex; align-items: center; text-decoration: none; color: inherit; }
+.bh .side > .setupbtn { align-self: flex-start; margin: 0 18px 6px; padding: 3px 10px; border: 1px solid var(--bh-border); border-radius: 999px; background: var(--bh-panel); font-size: 12px; cursor: pointer; }
+.bh .side > .setupbtn:hover { background: var(--bh-raised); }
 /* markdown + orb styles, copied from Hangout */
 .bh .md { display: grid; gap: 8px; min-width: 0; line-height: 1.5; }
 .bh .md > :first-child { margin-top: 0; }
@@ -1456,7 +1471,7 @@ function avatar(address, size) {
 
 export function activate(host, options = {}) {
   if (host.apiVersion !== "1") throw new Error("Bitkin requires Canvas host API 1.");
-  return host.registerPage("bitsocial-hangout", (ctx) => mount(ctx.container, options, (ctx && ctx.navigate) || host.navigate));
+  return host.registerPage("bitsocial-hangout", (ctx) => mount(ctx.container, options, (ctx && ctx.navigate) || host.navigate, host));
 }
 
 const IDENTITY_KEY = "bitsocial-hangout:identity:v1";
@@ -1886,7 +1901,7 @@ function mountComingSoonSplash(root, opts) {
   return { dismiss: () => close(true), destroy: () => close(false) };
 }
 
-function mount(container, options, navigateHost) {
+function mount(container, options, navigateHost, canvasHost = null) {
   container.append(el("style", "", CSS));
   const root = el("div", "bh");
   container.append(root);
@@ -1909,6 +1924,7 @@ function mount(container, options, navigateHost) {
     view: saved.welcomed ? "chat" : "welcome", // welcome | chat | settings
     status: "demo", // demo | connecting | connected
     error: "",
+    starting: false, // a node launch is in flight: the setup card shows progress meanwhile
     identity: savedIdentity && typeof savedIdentity.privateKey === "string" && typeof savedIdentity.address === "string" && typeof savedIdentity.publicKey === "string" ? savedIdentity : null,
     joined: strings(saved.joined) || [], // communities joined by address on a node
     joinedDemo: strings(saved.joinedDemo) || demoCommunities().map((c) => c.address), // joined demo communities
@@ -2010,6 +2026,51 @@ function mount(container, options, navigateHost) {
       if (manual) state.view = "settings";
     }
     if (state.status === "connected") { state.view = "chat"; ensureSelected(); watchSelected(); }
+    render();
+  }
+
+  // ─── starting a node ────────────────────────────────────────────────────────────────────
+  // The RPC endpoint is a local daemon, so "no node" is a setup step, not an error state:
+  // the settings card shows the two commands and a button that asks the host to run the
+  // daemon (the same Canvas path Meet uses for its meeting server) and then polls the socket.
+  const NODE_INSTALL = "npm install -g @bitsocial/bitsocial-cli";
+  const NODE_COMMAND = "bitsocial daemon";
+  const NODE_DOCS = "https://docs.bitsocial.net/developer-tools/cli";
+  const NODE_BOOT_ATTEMPTS = 10;
+  const NODE_BOOT_DELAY_MS = 2000;
+
+  const hostCanRunCommands = () => Boolean(canvasHost && canvasHost.agentServer && canvasHost.agentServer.request);
+
+  /** Launch the daemon through the host, then keep reconnecting while it boots. */
+  async function startNode(url) {
+    if (state.starting || !hostCanRunCommands()) return;
+    state.starting = true;
+    state.error = "";
+    state.view = "settings";
+    render();
+    try {
+      await canvasHost.agentServer.request({
+        method: "POST",
+        path: "/api/bash/start_bash_command",
+        body: { command: NODE_COMMAND },
+      });
+    } catch (err) {
+      state.starting = false;
+      state.error = `Could not start the node: ${describeError(err)}`;
+      render();
+      return;
+    }
+    for (let i = 0; i < NODE_BOOT_ATTEMPTS && !disposed && state.status !== "connected"; i += 1) {
+      await new Promise((resolve) => later(resolve, NODE_BOOT_DELAY_MS));
+      if (disposed || state.status === "connected") break;
+      await connect(url);
+    }
+    const connected = state.status === "connected";
+    state.starting = false;
+    if (!connected) {
+      state.view = "settings";
+      state.error = `Ran “${NODE_COMMAND}”, but ${url} still refuses. If the CLI is not installed yet, run the install command in step 1.`;
+    }
     render();
   }
 
@@ -3459,7 +3520,16 @@ function mount(container, options, navigateHost) {
     status.dataset.state = state.status;
     status.setAttribute("role", "status");
     status.title = state.status === "connected" ? `Connected to ${state.url}` : state.error || "No node connected. Showing sample communities.";
-    if (state.error && state.status === "demo") { const e = el("div", "status", state.error); e.style.cssText = "white-space: normal; border-radius: 10px; color: var(--bh-bad);"; e.setAttribute("role", "alert"); side.append(brand, status, e); } else side.append(brand, status);
+    if (state.error && state.status === "demo") {
+      const e = el("div", "status", state.error);
+      e.style.cssText = "white-space: normal; border-radius: 10px; color: var(--bh-bad);";
+      e.setAttribute("role", "alert");
+      // The banner names the problem; this is the way out of it.
+      const setup = el("button", "setupbtn", "Set up a node →");
+      setup.type = "button";
+      setup.addEventListener("click", () => { state.view = "settings"; render(); });
+      side.append(brand, status, e, setup);
+    } else side.append(brand, status);
     const list = el("div", "list");
     communities().forEach((c) => {
       const row = el("button", "row");
@@ -3625,6 +3695,86 @@ function mount(container, options, navigateHost) {
     return row;
   }
 
+  /** The tutorial behind "no node yet": what to install, what to run, and the docs. */
+  function nodeSetupCard() {
+    const box = el("div", "setup");
+    box.append(el("div", "setuph", "No node yet? Start one"));
+    const steps = el("ol", "steps");
+    const step = (text, command) => {
+      const li = el("li", "", text);
+      if (!command) return li;
+      const row = el("div", "cmd");
+      const code = document.createElement("code");
+      code.textContent = command;
+      const copy = el("button", "btn", "Copy");
+      copy.type = "button";
+      copy.setAttribute("aria-label", `Copy ${command}`);
+      copy.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(command);
+          copy.textContent = "Copied";
+        } catch (err) {
+          // A webview can refuse the async clipboard; the copy command still reaches it, and if
+          // that fails too the command is left selected so it can be copied by hand.
+          let copied = false;
+          try {
+            const area = document.createElement("textarea");
+            area.value = command;
+            area.style.cssText = "position: fixed; top: -1000px";
+            document.body.append(area);
+            area.select();
+            copied = document.execCommand("copy");
+            area.remove();
+          } catch (fallbackErr) {
+            copied = false;
+          }
+          if (copied) {
+            copy.textContent = "Copied";
+          } else {
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            const sel = window.getSelection();
+            if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+            copy.textContent = "Selected";
+          }
+        }
+        later(() => { if (!disposed) copy.textContent = "Copy"; }, 1600);
+      });
+      row.append(code, copy);
+      li.append(row);
+      return li;
+    };
+    steps.append(
+      step("Install the node. It needs Node.js 22.19 or newer.", NODE_INSTALL),
+      step("Start it. It prints “pkc rpc: listening on ws://localhost:9138”.", NODE_COMMAND),
+      step("Come back here and press Connect above.")
+    );
+    box.append(steps);
+    const btns = el("div", "setupbtns");
+    if (hostCanRunCommands()) {
+      const start = el("button", "btn primary", state.starting ? "Starting the node…" : "Start a node");
+      start.type = "button";
+      start.disabled = state.starting;
+      start.title = `Runs “${NODE_COMMAND}” and waits for it to answer`;
+      start.addEventListener("click", () => startNode(state.url));
+      btns.append(start);
+    }
+    const again = el("button", "btn", state.starting ? "Checking…" : "Check again");
+    again.type = "button";
+    again.disabled = state.starting;
+    again.title = "Try the URL above once more";
+    again.addEventListener("click", () => connect(state.url, true));
+    const docs = document.createElement("a");
+    docs.className = "btn";
+    docs.href = NODE_DOCS;
+    docs.target = "_blank";
+    docs.rel = "noopener noreferrer";
+    docs.textContent = "Node docs";
+    btns.append(again, docs);
+    box.append(btns);
+    return box;
+  }
+
   function settingsCard() {
     const card = el("div", "card");
     const label = el("label", "", "Node (RPC WebSocket URL)");
@@ -3653,6 +3803,7 @@ function mount(container, options, navigateHost) {
     card.append(label, input, nameLabel, nameInput, actions);
     if (state.error) { const e = el("div", "errtext", state.error); e.setAttribute("role", "alert"); card.append(e); }
     card.append(el("div", "hint", state.status === "connected" ? `Connected to ${state.url}.` : "Not connected: showing in-memory demo communities. The URL is saved in this browser."));
+    if (state.status !== "connected") card.append(nodeSetupCard());
     return card;
   }
 

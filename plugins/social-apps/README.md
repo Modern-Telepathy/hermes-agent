@@ -13,8 +13,20 @@ plugin system:
 | MeetRightHere™ | `apps/meet` | 146 KB | WebRTC · LiveKit |
 
 Each `dist/apps/<name>/extension.js` is the **committed Canvas App bundle**, copied byte for byte
-with its `canvas-extension.json` and icon. Nothing in the apps was edited: they are activated the
-way Agent Canvas activates them, `activate(host)` with host API version `1`.
+with its `canvas-extension.json` and icon, and activated the way Agent Canvas activates them,
+`activate(host)` with host API version `1`. One local patch exists — see "Starting a node" below;
+every other bundle is untouched.
+
+## Starting a node (Bitkin)
+
+Bitkin's RPC endpoint is a local Bitsocial daemon, so "can't reach the node" is a setup step rather
+than an error. Its settings card now carries the two commands (`npm install -g
+@bitsocial/bitsocial-cli`, then `bitsocial daemon`, which listens on `ws://localhost:9138`) with a
+copy button each, a **Start a node** button that runs the daemon through `host.agentServer`'s
+`start_bash_command` — the same Canvas path Meet uses — and then polls the socket for 20s, a
+**Check again** button, and the CLI docs link. `activate()` passes the host into `mount()` for that;
+the sidebar's connection banner links to the same card. Carrying the patch upstream keeps this
+vendored copy honest.
 
 ## The host shim
 
