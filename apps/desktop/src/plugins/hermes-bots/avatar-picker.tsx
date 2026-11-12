@@ -39,6 +39,8 @@ import {
   probeImagen
 } from './avatar-image'
 import { useBots } from './i18n'
+import { isKamijiShape, type KamijiLook, kamijiLookFor, kamijiShapeString } from './kamiji-look'
+import { KamijiStudio } from './kamiji-studio'
 import { PetTab } from './pet'
 
 interface AvatarPickerProps {
@@ -61,6 +63,18 @@ export function AvatarPicker({ shape, color, image, onShape, onColor, onImage, g
   const [tab, setTab] = useState('bot')
   const [describe, setDescribe] = useState('')
   const [genBusy, setGenBusy] = useState(false)
+  // The studio's working look. Re-seeded on every entry so "Classic shapes"
+  // then "Kamiji studio" comes back to the stored face, not a stale draft.
+  const [kamiji, setKamiji] = useState<KamijiLook>(() => kamijiLookFor(shape, pickerName))
+  const kamijiMode = isKamijiShape(shape)
+
+  const openStudio = () => {
+    const next = kamijiLookFor(shape, pickerName)
+
+    setKamiji(next)
+    onImage(null)
+    onShape(kamijiShapeString(next))
+  }
 
   if (imagen === null) {
     void probeImagen()
@@ -138,7 +152,21 @@ export function AvatarPicker({ shape, color, image, onShape, onColor, onImage, g
         </Button>
       ) : null}
       {tab === 'bot' ? (
-        isBlobShape(shape) && blobatarSvg ? (
+        kamijiMode && blobatarSvg ? (
+          <div className="grid justify-items-center gap-3">
+            <KamijiStudio
+              look={kamiji}
+              name={pickerName}
+              onChange={next => {
+                setKamiji(next)
+                onShape(kamijiShapeString(next))
+              }}
+            />
+            <Button onClick={() => onShape(defaultShapeFor(pickerName))} size="sm" type="button" variant="ghost">
+              {b.avatar.classicShapes}
+            </Button>
+          </div>
+        ) : isBlobShape(shape) && blobatarSvg ? (
           (() => {
             const { seedPart, kind } = parseBlobShape(shape, pickerName)
             const locked = Boolean(seedPart)
@@ -200,6 +228,15 @@ export function AvatarPicker({ shape, color, image, onShape, onColor, onImage, g
                 <div className="text-center text-[0.65rem] text-(--ui-text-quaternary)">
                   {locked ? b.editor.lockedHint : b.editor.unlockedHint}
                 </div>
+                <Button
+                  className="text-(--ui-text-tertiary)"
+                  onClick={openStudio}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  Kamiji studio
+                </Button>
                 <Button
                   className="text-(--ui-text-tertiary)"
                   onClick={() => onShape(defaultShapeFor(pickerName))}

@@ -9,6 +9,7 @@
 import * as sdk from '@hermes/plugin-sdk'
 import { profileColor } from '@hermes/plugin-sdk'
 
+import { isKamijiShape, kamijiOptions, parseKamijiShape } from './kamiji-look'
 import type { AvatarAppearance, AvatarShape, BotMeta, FaceMood } from './types'
 
 // Deterministic blob avatars (name → face). Feature-detected: older SDKs
@@ -143,7 +144,7 @@ export const BLOB_KINDS = [
 // 0.915 / 0.95 / 0.98).
 // Keyed by BlobKind, but indexed with the free-form segment parseBlobShape
 // pulls out of a stored shape string, which no guard here can narrow.
-const BLOB_KIND_TRAIT: Record<string, number> = {
+export const BLOB_KIND_TRAIT: Record<string, number> = {
   round: 0.11,
   organic: 0.35,
   boxy: 0.54,
@@ -195,23 +196,23 @@ function attributeText(text: string): string {
 }
 
 /** Static SVG markup for a blob face, tagged data-bot-face so the roster's
- *  PNG backfill (pushLocalAvatars → rasterizeSvgToPng) still finds it. */
+ *  PNG backfill (pushLocalAvatars → rasterizeSvgToPng) still finds it. A
+ *  `kamiji:` shape carries the full studio look (pinned axes, pose, colour) and
+ *  renders through the same generator. */
 function blobMarkup(shape: null | string | undefined, name: string, size: number) {
   if (!blobatarSvg) {
     return null
   }
 
   const { seed, kind } = parseBlobShape(shape, name)
+  const kamiji = isKamijiShape(shape)
 
-  const opts: { size: number; traits?: Record<string, number> } = {
-    size
-  }
-
-  if (kind) {
-    opts.traits = {
-      shape: BLOB_KIND_TRAIT[kind]
-    }
-  }
+  const opts = kamiji
+    ? kamijiOptions(parseKamijiShape(shape, name).look, size)
+    : ({
+        size,
+        ...(kind ? { traits: { shape: BLOB_KIND_TRAIT[kind] } } : null)
+      } as { size: number; traits?: Record<string, number> })
 
   try {
     // The name goes in as escaped text, through a replacer so `$&`-style patterns in it stay literal.
@@ -990,7 +991,8 @@ interface BotFaceProps {
   mood?: FaceMood
   name?: string
   /** Free-form appearance string, not just AvatarShape: also `sigil-<n>`,
-   *  a platonic solid, or `blobatar[:seed[:kind]]`. */
+   *  a platonic solid, `blobatar[:seed[:kind]]`, or the studio's
+   *  `kamiji:v1:<seed>:<pose>:<hue>:<tone>:<axis>=<pos>;…`. */
   shape: string
   size?: number
 }
@@ -1024,7 +1026,7 @@ export function BotFace({ shape, color, image, size = 36, name = 'agent', mood =
   // backfill's `svg[data-bot-face=…]` query still finds it; the math clock
   // ignores it (no data-hb-math). Falls back to the legacy math face when the
   // SDK predates the export.
-  if (isBlobShape(shape)) {
+  if (isBlobShape(shape) || isKamijiShape(shape)) {
     const markup = blobMarkup(shape, name, size)
 
     if (markup) {
