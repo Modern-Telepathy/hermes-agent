@@ -22,7 +22,6 @@ from pathlib import Path
 from typing import Any, Optional
 from uuid import uuid4
 
-import psutil
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -33,9 +32,17 @@ PROBE_TIMEOUT_SECONDS = 0.35
 # The panel shows the last lines a command wrote, not a log viewer.
 LOG_TAIL_BYTES = 4_000
 
-# npm's global prefix is not on a login shell's PATH on every layout (~/node, ~/.nvm), so the start
-# command re-derives it instead of assuming the daemon landed next to an existing binary.
-_BITSOCIAL_START = 'export PATH="$(npm prefix -g)/bin:$PATH"; bitsocial daemon'
+# npm's global prefix is not writable everywhere: a Homebrew/no-prefix npm resolves it to
+# /usr/local, which needs root, and a login shell does not always put the real prefix on PATH. Both
+# commands pin $HOME/.local, so install and start agree and neither needs elevation.
+_BITSOCIAL_INSTALL = 'npm install -g --prefix "$HOME/.local" @bitsocial/bitsocial-cli'
+# Its native sqlite module is built for Node 20-25, and a shell whose default is newer loads it with
+# a NODE_MODULE_VERSION mismatch, so an nvm-era Node wins over the default when one is installed.
+_BITSOCIAL_START = (
+    'export PATH="$HOME/.local/bin:$PATH"; '
+    'for d in "$HOME"/.nvm/versions/node/v2[0-5]*/bin; do [ -x "$d/node" ] && export PATH="$d:$PATH" && break; done; '
+    "bitsocial daemon"
+)
 # Byte for byte the command Meet's own Start it runs, so both paths install and run the same server.
 _LIVEKIT_START = "command -v livekit-server >/dev/null || brew install livekit; livekit-server --dev"
 
@@ -46,9 +53,9 @@ SERVICES: tuple[dict[str, Any], ...] = (
         "route": "/bitkin",
         "service": "Bitsocial node",
         "endpoint": {"host": "127.0.0.1", "port": 9138},
-        "requirement": "Bitkin reads communities over the Bitsocial daemon's RPC socket.",
+        "requirement": "Bitkin reads communities over the Bitsocial daemon's RPC socket. The daemon needs Node 20-25: its native sqlite module will not load under a newer Node without a rebuild.",
         "probe_binary": "bitsocial",
-        "install": "npm install -g @bitsocial/bitsocial-cli",
+        "install": _BITSOCIAL_INSTALL,
         "start": _BITSOCIAL_START,
         "docs": "https://docs.bitsocial.net/developer-tools/cli",
     },
@@ -128,9 +135,23 @@ def _port_open(endpoint: Optional[dict[str, Any]]) -> bool:
         return False
 
 
-def _pid_alive(pid: int) -> bool:
-    # psutil rather than ``os.kill(pid, 0)``: on Windows that is not a no-op probe.
-    return psutil.pid_exists(pid)
+def _live_process(service_id: str) -> Optional[subprocess.Popen]:
+    """The process this page started for a service, or None once it has exited.
+
+    Liveness is the Popen handle rather than the pid: ``poll()`` reaps a finished child, so a
+    completed install is not a zombie that still answers a pid probe and blocks the next Start.
+    """
+    record = _PROCS.get(service_id)
+    if not record:
+        return None
+    proc = record.get("proc")
+    if proc is None:
+        return None
+    if proc.poll() is not None:
+        # Exited (or crashed): keep the record, because the log it wrote is what explains why.
+        record["proc"] = None
+        return None
+    return proc
 
 
 def _stop_process(pid: int) -> None:
@@ -143,6 +164,13 @@ def _stop_process(pid: int) -> None:
         os.killpg(os.getpgid(pid), signal.SIGTERM)  # windows-footgun: ok — POSIX branch, groups exist here
     except OSError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+def _installed(binary: str) -> bool:
+    """Whether the binary is on PATH or in the ~/.local prefix the install command writes to."""
+    if not binary:
+        return False
+    return bool(shutil.which(binary)) or (Path.home() / ".local" / "bin" / binary).exists()
 
 
 def _tail(path: Optional[str]) -> str:
@@ -158,18 +186,16 @@ def _tail(path: Optional[str]) -> str:
 
 
 def _status(item: dict[str, Any]) -> dict[str, Any]:
+    proc = _live_process(item["id"])
     record = _PROCS.get(item["id"]) or {}
-    pid = record.get("pid")
-    if pid and not _pid_alive(pid):
-        _PROCS.pop(item["id"], None)
-        record, pid = {}, None
     binary = item["probe_binary"]
     return {
         **item,
         "running": _port_open(item["endpoint"]),
-        "installed": bool(shutil.which(binary)) if binary else None,
-        "pid": pid,
-        "log_tail": _tail(record.get("log")) if pid else "",
+        "installed": _installed(binary) if binary else None,
+        "pid": proc.pid if proc else None,
+        # The last run's log outlives the process: a crash is exactly when it is needed.
+        "log_tail": _tail(record.get("log")),
     }
 
 
@@ -186,9 +212,8 @@ def run_service(service_id: str, body: RunBody) -> dict[str, Any]:
     command = (body.command or "").strip() if body.step == "command" else item[body.step]
     if not command:
         raise HTTPException(status_code=400, detail=f"{item['service']} has no {body.step} command; type one to run")
-    running = (_PROCS.get(service_id) or {}).get("pid")
-    if running and _pid_alive(running):
-        raise HTTPException(status_code=409, detail=f"{item['service']} is already running from here; stop it first")
+    if _live_process(service_id):
+        raise HTTPException(status_code=409, detail=f"{item['service']} already has a command running from here; stop it first")
 
     log_path = Path(tempfile.gettempdir()) / f"hermes-social-service-{service_id}-{uuid4().hex}.log"
     try:
@@ -198,11 +223,12 @@ def run_service(service_id: str, body: RunBody) -> dict[str, Any]:
                 stdin=subprocess.DEVNULL,
                 stdout=sink,
                 stderr=subprocess.STDOUT,
-                start_new_session=True,
+                # Detached on purpose: an install or a daemon must outlive the request that started it.
+                start_new_session=True,  # detached-spawn: ok — the service outlives the request
             )
     except OSError as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-    _PROCS[service_id] = {"pid": process.pid, "log": str(log_path), "step": body.step}
+    _PROCS[service_id] = {"proc": process, "log": str(log_path), "step": body.step}
     return {"status": "running", "step": body.step, "pid": process.pid, "log": str(log_path)}
 
 
@@ -210,13 +236,12 @@ def run_service(service_id: str, body: RunBody) -> dict[str, Any]:
 def stop_service(service_id: str) -> dict[str, Any]:
     """Stop the process this page started; a service started elsewhere is left alone."""
     item = _service(service_id)
-    pid = (_PROCS.get(service_id) or {}).get("pid")
-    if not pid or not _pid_alive(pid):
-        _PROCS.pop(service_id, None)
+    proc = _live_process(service_id)
+    if proc is None:
         raise HTTPException(
             status_code=409,
             detail=f"nothing started here to stop; if {item['service']} is running, it was launched elsewhere",
         )
-    _stop_process(pid)
+    _stop_process(proc.pid)
     _PROCS.pop(service_id, None)
     return {"status": "stopped"}

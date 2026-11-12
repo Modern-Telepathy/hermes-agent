@@ -13,14 +13,18 @@ installer — a command field that runs whatever you paste.
 
 | App | Service | Endpoint | Install / start |
 |---|---|---|---|
-| Bitkin™ | Bitsocial node | `127.0.0.1:9138` | `npm install -g @bitsocial/bitsocial-cli`, then `bitsocial daemon` |
+| Bitkin™ | Bitsocial node | `127.0.0.1:9138` | `npm install -g --prefix "$HOME/.local" @bitsocial/bitsocial-cli`, then `bitsocial daemon` |
 | MeetRightHere™ | LiveKit | `127.0.0.1:7880` | `brew install livekit`; `livekit-server --dev` (the app's own command) |
 | MESH™ | MESH node | `127.0.0.1:12000` | none bundled — paste your node's command |
 | Holons™ | holons-api | `127.0.0.1:3000` | none bundled — paste your server's command |
 | Murmur™ | libp2p peers | — | nothing to install; it needs a relay or a neighbour |
 
-Bitkin's start command puts npm's global prefix on `PATH` first: a prefix outside the login shell's
-`PATH` (Homebrew and nvm layouts) is the usual reason an installed `bitsocial` reads as missing.
+Bitkin's commands pin npm's prefix to `$HOME/.local`: npm's own global prefix resolves to
+`/usr/local` on a no-prefix install, which needs root (`EACCES`), and the login `PATH` does not always
+carry the prefix npm actually used. Install and start therefore agree on one user-writable place, and
+`installed` is detected on `PATH` or in that prefix. The start command also prefers an installed Node
+20-25 (nvm) over the shell's default, because the daemon's native sqlite module is built for those
+ABIs and fails with `NODE_MODULE_VERSION` under a newer one.
 
 ## Behaviour that matters
 

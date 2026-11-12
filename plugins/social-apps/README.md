@@ -63,9 +63,10 @@ localStorage); after it, the dashboard's sessions appear as live agents ("8 agen
 `plugins/social-services` is the dashboard tab that owns the other half of each app's setup: it
 probes the port the app dials, shows the exact command that installs and starts that service, runs it
 detached through the same `/bin/sh -lc` path Meet's Start it uses, keeps the pid so **Stop** only ends
-what it started, and tails the command's log. Bitkin's row is exact — `npm install -g
-@bitsocial/bitsocial-cli`, then `bitsocial daemon` with npm's global prefix added to `PATH`, because a
-prefix outside the login shell's `PATH` is the usual reason an installed daemon reads as missing.
+what it started, and tails the command's log. Bitkin's row is exact — `npm install -g --prefix
+"$HOME/.local" @bitsocial/bitsocial-cli`, then `bitsocial daemon` with that prefix's `bin` on `PATH`,
+because npm's own global prefix resolves to `/usr/local` on a no-prefix install (root, so `EACCES`)
+and the login `PATH` does not always carry the real one.
 Meet's start string is byte for byte the command its own Start it runs.
 
 MESH, Holons and Murmur ship no installer: those rows take any command you paste, because their
