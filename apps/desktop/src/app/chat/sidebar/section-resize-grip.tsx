@@ -87,7 +87,10 @@ export function SidebarSectionResizeGrip({ id }: { id: string }) {
       role="separator"
       tabIndex={0}
     >
-      <span className="h-px w-8 rounded-full bg-(--ui-stroke-tertiary) opacity-50 transition-opacity group-hover/resize:opacity-100 group-focus-visible/resize:opacity-100" />
+      {/* The band is the hit area, the mark is the affordance: it only paints
+          while the pointer or the keyboard is on the grip, so five resting
+          dividers never read as five lines drawn under the rows. */}
+      <span className="h-px w-8 rounded-full bg-(--ui-stroke-tertiary) opacity-0 transition-opacity group-focus-visible/resize:opacity-100 group-hover/resize:opacity-100" />
     </div>
   )
 }
