@@ -1,18 +1,21 @@
 import { useStore } from '@nanostores/react'
+import { useEffect, useState } from 'react'
 
+import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import { $sidebarDashboardOpen, setSidebarDashboardOpen } from '@/store/layout'
 import { notifyError } from '@/store/notifications'
+import { $activeProfile } from '@/store/profile'
 
 import { openDashboardPage } from './open-dashboard-app'
 
 /** Dashboard pages with no native desktop equivalent. They open as embedded
  *  pages in the workspace, chromeless, the same surface plugin apps use. */
 const DASHBOARD_PAGES = [
-  { icon: 'graph', label: 'Analytics', path: '/analytics' },
+  { icon: 'graph', label: 'Analytics', path: '/analytics', requiresTokenAnalytics: true },
   { icon: 'shield', label: 'Pairing', path: '/pairing' },
   // Trailing slash avoids the gateway's FastAPI Swagger UI, which owns `/docs`.
   { icon: 'book', label: 'Documentation', path: '/docs/' },
@@ -21,6 +24,31 @@ const DASHBOARD_PAGES = [
 
 export function SidebarDashboardPagesSection() {
   const open = useStore($sidebarDashboardOpen)
+  const profile = useStore($activeProfile)
+  const { gateway, requestGateway } = useGatewayRequest()
+  const [showTokenAnalytics, setShowTokenAnalytics] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    void requestGateway('config.get', { key: 'dashboard.show_token_analytics', profile })
+      .then(result => {
+        if (!cancelled) {
+          setShowTokenAnalytics((result as { value?: unknown } | null)?.value === true)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setShowTokenAnalytics(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [gateway, profile, requestGateway])
+
+  const pages = DASHBOARD_PAGES.filter(page => !('requiresTokenAnalytics' in page) || showTokenAnalytics)
 
   return (
     <nav
@@ -49,7 +77,7 @@ export function SidebarDashboardPagesSection() {
 
       {open && (
         <ul className="flex flex-col gap-px" id="sidebar-dashboard-rows">
-          {DASHBOARD_PAGES.map(page => (
+          {pages.map(page => (
             <SidebarMenuItem key={page.path}>
               <SidebarMenuButton
                 className={cn(

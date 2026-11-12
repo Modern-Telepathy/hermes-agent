@@ -2055,9 +2055,11 @@ export function ChatSidebar({
                 <SidebarBotsSection />
               </SidebarSection>
 
-              <SidebarSection className="shrink-0" id="dashboard">
-                <SidebarDashboardPagesSection />
-              </SidebarSection>
+              {interfaceMode === 'advanced' && (
+                <SidebarSection className="shrink-0" id="dashboard">
+                  <SidebarDashboardPagesSection />
+                </SidebarSection>
+              )}
             </SidebarSectionStack>
 
             {!trimmedQuery &&

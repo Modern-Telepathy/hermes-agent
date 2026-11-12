@@ -75,6 +75,7 @@ import {
 import { type ConsoleEntry } from './preview-console-state'
 import { previewConsoleState } from './preview-console-store'
 import { runPreviewGuestScript, usePreviewDriveChannels, withPreviewDeadline } from './preview-drive-channels'
+import { EMBEDDED_DASHBOARD_CSS, isEmbeddedDashboardUrl } from './preview-embed'
 import { LocalFilePreview, PreviewEmptyState, PreviewModeSwitcher } from './preview-file'
 import { usePreviewGuestOffscreen } from './preview-guest-offscreen'
 import { type PreviewInputEvent } from './preview-input'
@@ -1265,9 +1266,9 @@ export function PreviewPane({
       })
     }
 
-    // A dashboard plugin opened with `embed=1` is meant to be the whole pane.
-    // The dashboard bundle renders its own navigation and page header around
-    // every plugin route, so strip that chrome inside the guest on each load.
+    // A dashboard page opened with `embed=1` is meant to be the whole pane.
+    // The dashboard bundle renders its own navigation, page header and alerts
+    // around every route, so strip that chrome inside the guest on each load.
     // Kept on the desktop side (a guest stylesheet, not a dashboard rebuild).
     const stripEmbeddedChrome = () => {
       let url = ''
@@ -1278,15 +1279,13 @@ export function PreviewPane({
         return
       }
 
-      if (!/[?&]embed=1(?:&|$)/.test(url)) {
+      if (!isEmbeddedDashboardUrl(url)) {
         return
       }
 
       void (
         webview as unknown as { insertCSS?: (css: string) => Promise<string> }
-      ).insertCSS?.(
-        '#app-sidebar,[data-dashboard-chrome],[data-dashboard-page-header],header[role="banner"]{display:none!important}'
-      )?.catch(() => undefined)
+      ).insertCSS?.(EMBEDDED_DASHBOARD_CSS)?.catch(() => undefined)
     }
 
     // The WEBVIEW is the source of truth for DevTools, not our click handler:

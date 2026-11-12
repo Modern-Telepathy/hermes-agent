@@ -1,8 +1,9 @@
 import { findGroupOfPane } from '@/components/pane-shell/tree/model'
 import { $layoutTree, moveTreePanes, revealTreePane } from '@/components/pane-shell/tree/store'
-import { dashboardPageUrl, resolveDashboardBaseUrl } from '@/store/dashboard-apps'
-import { $rightRailActiveTabId } from '@/store/layout'
+import { dashboardPageUrl, resolveDashboardBaseUrl, sameDashboardUrl } from '@/store/dashboard-apps'
+import { $rightRailActiveTabId, selectRightRailTab } from '@/store/layout'
 import { PREVIEW_TILE_PREFIX } from '@/store/preview-explicit'
+import { $activeProfile } from '@/store/profile'
 
 import type { SidebarNavItem } from '../../types'
 
@@ -38,16 +39,33 @@ function promoteToWorkspace(tabId: string): void {
  * travel this one path. Returns false when no dashboard answers or the preview
  * never adopted the tab, so the caller can surface the failure.
  */
-export async function openDashboardPage(label: string, path: string): Promise<boolean> {
+export async function openDashboardPage(
+  label: string,
+  path: string,
+  profile: null | string = $activeProfile.get()
+): Promise<boolean> {
   const base = await resolveDashboardBaseUrl()
 
   if (!base) {
     return false
   }
 
-  const url = dashboardPageUrl(base, path)
-  const { openPreview } = await import('@/store/preview')
-  openPreview({ kind: 'url', label, source: url, url })
+  const url = dashboardPageUrl(base, path, profile)
+  const { $previewTabs, newBrowserTab, openPreview } = await import('@/store/preview')
+
+  const existing = $previewTabs
+    .get()
+    .find(tab => tab.target.kind === 'url' && sameDashboardUrl(tab.target.url, url))
+
+  if (existing) {
+    selectRightRailTab(existing.id)
+  } else {
+    // A dashboard view is a workspace surface of its own. Mint the blank tab
+    // first: openPreview adopts the active blank browser instead of reusing
+    // whichever dashboard page happened to be open before.
+    newBrowserTab()
+    openPreview({ kind: 'url', label, source: url, url })
+  }
 
   const tabId = $rightRailActiveTabId.get()
 
