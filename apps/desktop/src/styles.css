@@ -4301,6 +4301,7 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
 [data-sidebar-section]:has(> [data-section-open='false']),
 [data-sidebar-section][data-section-open='false'] {
   height: auto !important;
+  max-height: none !important;
   overflow: visible !important;
 }
 

@@ -39,7 +39,9 @@ export function SidebarPluginNavSection({
       data-section-open={open ? 'true' : 'false'}
       data-sidebar-section="plugins"
       data-slot="sidebar-plugins"
-      style={open && height !== undefined ? { boxSizing: 'border-box', height, overflow: 'hidden' } : undefined}
+      // A cap, never a fixed box: a stored plugins height must not leave a blank
+      // block under the rows the way a fixed one did (see section-stack.tsx).
+      style={open && height !== undefined ? { boxSizing: 'border-box', maxHeight: height, overflow: 'hidden' } : undefined}
     >
       <div className="group/section flex shrink-0 items-center justify-between gap-1 pb-1" data-section-heading="">
         <button

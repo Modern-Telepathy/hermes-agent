@@ -71,7 +71,14 @@ export function SidebarSection({
       ref={ref}
       style={{
         ...style,
-        ...(height === undefined ? null : { boxSizing: 'border-box' as const, flex: '0 0 auto', height, overflowY: 'auto' as const })
+        // A stored height CAPS the section, it never reserves the space: a
+        // fixed height left the rows' leftover as a blank block between the
+        // last row and the next section (Sessions, whose body is `flex-1`,
+        // stretched into whatever height the grip last recorded). The section
+        // still scrolls on its own once its content outgrows the cap.
+        ...(height === undefined
+          ? null
+          : { boxSizing: 'border-box' as const, flex: '0 0 auto', maxHeight: height, overflowY: 'auto' as const })
       }}
     >
       {children}

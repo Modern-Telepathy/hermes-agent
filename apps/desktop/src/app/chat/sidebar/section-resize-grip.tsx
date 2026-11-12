@@ -4,8 +4,9 @@ import { useRef } from 'react'
 
 import { $sidebarSectionHeights, setSidebarSectionHeight } from '@/store/layout'
 
-/** A section with no stored height starts here when the grip is first pulled
- *  (jsdom measures 0, and a collapsed flex child measures 0 too). */
+/** A section that measures 0 and has no stored cap starts here when the grip
+ *  is first pulled (jsdom measures 0, and a collapsed flex child measures 0
+ *  too). */
 const DEFAULT_SECTION_HEIGHT = 240
 const KEYBOARD_STEP = 16
 
@@ -21,16 +22,13 @@ export function SidebarSectionResizeGrip({ id }: { id: string }) {
   const heights = useStore($sidebarSectionHeights)
   const dragRef = useRef<{ height: number; y: number } | null>(null)
 
+  // Grab where the grip IS, not where the stored cap is: a section renders its
+  // content up to the cap, so a cap recorded when the section was taller would
+  // make the first drag jump by the difference. The cap is only the fallback.
   const currentHeight = (element: HTMLElement | null): number => {
-    const stored = heights[id]
-
-    if (stored !== undefined) {
-      return stored
-    }
-
     const measured = element?.getBoundingClientRect().height ?? 0
 
-    return measured > 0 ? measured : DEFAULT_SECTION_HEIGHT
+    return measured > 0 ? measured : (heights[id] ?? DEFAULT_SECTION_HEIGHT)
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
