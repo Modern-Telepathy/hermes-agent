@@ -83,7 +83,7 @@ export function AuthWidget({ className }: AuthWidgetProps) {
     return (
       <div
         className={cn(
-          "px-5 py-2 text-[0.65rem] tracking-[0.05em] text-muted-foreground/70",
+          "px-5 py-2 text-[0.65rem] text-muted-foreground/70",
           className,
         )}
       >
@@ -123,7 +123,7 @@ export function AuthWidget({ className }: AuthWidgetProps) {
         "flex shrink-0 items-center justify-between gap-2",
         "px-5 py-2",
         "border-t border-current/10",
-        "text-[0.65rem] tracking-[0.05em]",
+        "text-[0.65rem]",
         className,
       )}
       role="status"

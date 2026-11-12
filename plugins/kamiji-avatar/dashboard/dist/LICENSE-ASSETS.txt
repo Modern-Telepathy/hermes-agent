@@ -1,0 +1,3 @@
+Kamiji code: MIT. Kamiji GLB models and props (assets/): CC BY-NC 4.0, non-commercial use only.
+Commercial use needs the Kamiji Premium Licence (see LICENSE.md and LICENSE-COMMERCIAL.md in the Kamiji repository).
+This plugin is unofficial and not affiliated with or endorsed by the Hermes WebUI authors. three.js: MIT.

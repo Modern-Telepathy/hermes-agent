@@ -47,7 +47,7 @@ function ReasoningSegment({
 
   return (
     <div className="border border-border bg-secondary/40">
-      <div className="border-b border-border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
+      <div className="border-b border-border px-3 py-1 text-[11px] font-semibold text-text-tertiary">
         {label}
       </div>
       <pre className="px-3 py-2.5 text-xs font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap text-foreground">

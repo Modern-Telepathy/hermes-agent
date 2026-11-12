@@ -248,7 +248,7 @@ export function ProjectDialog() {
                       {folder}
                     </span>
                     {index === 0 && (
-                      <span className="shrink-0 text-[0.625rem] uppercase text-(--ui-text-quaternary)">
+                      <span className="shrink-0 text-[0.625rem] text-(--ui-text-quaternary)">
                         {p.primaryBadge}
                       </span>
                     )}

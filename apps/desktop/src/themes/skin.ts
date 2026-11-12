@@ -21,7 +21,7 @@ import type { HermesSkin, SkinColors } from '@hermes/shared/skin'
 import { luminance, normalizeHex, readableInk } from './color'
 import type { DesktopTheme, DesktopThemeColors } from './types'
 
-// The accent labels the sidebar in small uppercase text, so it must clear WCAG AA
+// The accent labels the sidebar in small text, so it must clear WCAG AA
 // for normal text or section headers go invisible — mirrors the VS Code importer.
 const ACCENT_MIN_CONTRAST = 4.5
 

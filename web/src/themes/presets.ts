@@ -23,11 +23,13 @@ import type { DashboardTheme, ThemePalette, ThemeTypography, ThemeLayout } from 
 /** Default system stack — neutral, safe fallback for every platform. */
 const SYSTEM_SANS =
   'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+/** The dashboard's one UI face (self-hosted in `index.css`), system fallback. */
+const INTER_SANS = `"Inter", ${SYSTEM_SANS}`;
 const SYSTEM_MONO =
   'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace';
 
 const DEFAULT_TYPOGRAPHY: ThemeTypography = {
-  fontSans: SYSTEM_SANS,
+  fontSans: INTER_SANS,
   fontMono: SYSTEM_MONO,
   baseSize: "15px",
   lineHeight: "1.55",
@@ -67,17 +69,26 @@ export function webPresetFromShared(
 
 export const defaultTheme: DashboardTheme = {
   name: "default",
-  label: "Hermes Teal",
-  description: "Classic dark teal — the canonical Hermes look",
+  label: "Neutral",
+  description: "Neutral dark canvas, Inter type, rounded panels — the Meet look",
+  // Matches the MeetRightHere app (`--mt-bg` / `--mt-panel` / `--mt-text`), so the shell and the
+  // apps inside it read as one product instead of two palettes side by side.
   palette: {
-    background: { hex: "#041c1c", alpha: 1 },
-    midground: { hex: "#ffe6cb", alpha: 1 },
+    background: { hex: "#171717", alpha: 1 },
+    midground: { hex: "#eeeeee", alpha: 1 },
     foreground: { hex: "#ffffff", alpha: 0 },
-    warmGlow: "rgba(255, 189, 56, 0.35)",
+    warmGlow: "rgba(238, 238, 238, 0.2)",
     noiseOpacity: 1,
   },
-  typography: DEFAULT_TYPOGRAPHY,
-  layout: DEFAULT_LAYOUT,
+  typography: {
+    ...DEFAULT_TYPOGRAPHY,
+    baseSize: "14px",
+    lineHeight: "1.45",
+  },
+  layout: {
+    ...DEFAULT_LAYOUT,
+    radius: "0.75rem",
+  },
   terminalBackground: "#000000",
 };
 
@@ -91,10 +102,10 @@ export const midnightTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Inter", ${SYSTEM_SANS}`,
+    fontSans: INTER_SANS,
     fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap",
     letterSpacing: "-0.005em",
   },
   layout: {
@@ -113,10 +124,10 @@ export const emberTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Spectral", Georgia, "Times New Roman", serif`,
+    fontSans: INTER_SANS,
     fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap",
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -138,10 +149,10 @@ export const monoTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"IBM Plex Sans", ${SYSTEM_SANS}`,
+    fontSans: INTER_SANS,
     fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
+      "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap",
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -159,7 +170,7 @@ export const cyberpunkTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Share Tech Mono", "JetBrains Mono", ${SYSTEM_MONO}`,
+    fontSans: INTER_SANS,
     fontMono: `"Share Tech Mono", "JetBrains Mono", ${SYSTEM_MONO}`,
     fontUrl:
       "https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap",
@@ -188,10 +199,10 @@ export const roseTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Fraunces", Georgia, serif`,
+    fontSans: INTER_SANS,
     fontMono: `"DM Mono", ${SYSTEM_MONO}`,
     fontUrl:
-      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Mono:wght@400;500&display=swap",
+      "https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap",
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -225,20 +236,20 @@ export const nousBlueTheme: DashboardTheme = {
 /**
  * Same look as ``defaultTheme`` but with a larger root font size, looser
  * line-height, and ``spacious`` density so every rem-based size in the
- * dashboard scales up. For users who find the default 15px UI too dense.
+ * dashboard scales up. For users who find the default 14px UI too dense.
  */
 export const defaultLargeTheme: DashboardTheme = {
   name: "default-large",
-  label: "Hermes Teal (Large)",
-  description: "Hermes Teal with bigger fonts and roomier spacing",
+  label: "Neutral (Large)",
+  description: "Neutral with bigger fonts and roomier spacing",
   palette: defaultTheme.palette,
   typography: {
-    ...DEFAULT_TYPOGRAPHY,
+    ...defaultTheme.typography,
     baseSize: "18px",
     lineHeight: "1.65",
   },
   layout: {
-    ...DEFAULT_LAYOUT,
+    ...defaultTheme.layout,
     density: "spacious",
   },
 };

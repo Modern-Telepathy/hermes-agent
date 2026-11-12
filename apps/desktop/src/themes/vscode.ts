@@ -21,7 +21,7 @@ import { luminance, normalizeHex, readableInk } from './color'
 import type { DesktopTerminalPalette, DesktopTheme, DesktopThemeColors } from './types'
 
 // Section headers / sidebar labels render in --theme-primary directly on the
-// sidebar surface as small (~10px) uppercase text, so the accent has to clear
+// sidebar surface as small (~10px) text, so the accent has to clear
 // WCAG AA for normal text (4.5:1) or it's unreadable — the "invisible purple
 // label" case. Imported accents below this get nudged lighter/darker.
 const ACCENT_MIN_CONTRAST = 4.5

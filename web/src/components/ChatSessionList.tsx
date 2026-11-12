@@ -256,7 +256,7 @@ export function ChatSessionList({
       )}
     >
       <div className="flex items-center justify-between gap-2 px-2 pb-2">
-        <span className="text-display text-xs tracking-wider text-text-tertiary">
+        <span className="text-display text-xs text-text-tertiary">
           {t.sessions.title}
         </span>
         <Button

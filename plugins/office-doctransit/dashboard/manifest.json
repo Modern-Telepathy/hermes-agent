@@ -1,0 +1,12 @@
+{
+  "name": "office-doctransit",
+  "label": "DocTransit\u2122",
+  "description": "DocTransit e-signature: connect with an API key, list documents, copy signing links and open DocTransit's own pages.",
+  "icon": "Shield",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/office/doctransit",
+    "position": "end"
+  },
+  "entry": "dist/index.js"
+}

@@ -239,7 +239,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
         {/* Header — toolset identity + enable toggle */}
         <header className="p-5 pb-3 border-b border-border">
           <div className="flex items-center gap-3 pr-8">
-            <span className="font-mondwest text-display text-base tracking-wider">
+            <span className="font-mondwest text-display text-base">
               {labelText}
             </span>
             <Badge tone={enabled ? "success" : "outline"} className="text-xs">

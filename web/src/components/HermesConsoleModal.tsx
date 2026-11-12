@@ -521,7 +521,7 @@ export function HermesConsoleModal({ open, onClose }: HermesConsoleModalProps) {
           <div className="min-w-0 flex-1">
             <h2
               id="hermes-console-title"
-              className="font-mondwest text-display text-base tracking-wider"
+              className="font-mondwest text-display text-base"
             >
               Hermes Console
             </h2>

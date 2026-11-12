@@ -171,7 +171,7 @@ export const KEYBIND_ACTIONS: readonly KeybindActionMeta[] = [
 
   // ── Session ──────────────────────────────────────────────────────────────
   // `shift+n` was dropped from the defaults (#76185): a bare shifted letter
-  // hijacked normal typing — pressing uppercase N outside an input (or via an
+  // hijacked normal typing — pressing N outside an input (or via an
   // IME) created a new session unexpectedly.
   hostAction('session.new', 'session', ['mod+n'], { mac: 'mod+ctrl+n', other: 'alt+n' }),
   hostAction('session.newTab', 'session', ['mod+t'], { mac: 'mod+ctrl+t', other: 'alt+t' }),

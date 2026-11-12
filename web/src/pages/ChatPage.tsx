@@ -22,6 +22,9 @@ import { WebLinksAddon } from "@xterm/addon-web-links";
 import { WebglAddon } from "@xterm/addon-webgl";
 import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
+
+import { ChatStreamView } from "@/components/ChatStreamView";
+import { useChatView } from "@/lib/chat-view";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { cn } from "@/lib/utils";
@@ -115,6 +118,7 @@ import {
   terminalTierWidthPx,
 } from "@/lib/terminal-appearance";
 import { PluginSlot } from "@/plugins";
+import { setActiveChatChannel } from "@/lib/active-chat";
 import { useTheme } from "@/themes";
 import { useProfileScope } from "@/contexts/useProfileScope";
 import { errorMessage } from "@/lib/api-error";
@@ -357,6 +361,20 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
     () => generateChannelId(`${resumeParam ?? ""}\0${scopedProfile}`),
     [resumeParam, scopedProfile],
   );
+  // Transcript by default; the TUI stays mounted underneath so switching views never drops the PTY.
+  const [chatView, setChatView] = useChatView();
+  const sendFromStream = useCallback((text: string) => {
+    try {
+      wsRef.current?.send(text + "\r");
+    } catch {
+      /* socket closed between render and send: the terminal view can be used to retry */
+    }
+  }, []);
+  // Dashboard plugins observe turn events on this channel (`SDK.chat`).
+  useEffect(() => {
+    setActiveChatChannel(channel);
+    return () => setActiveChatChannel(null);
+  }, [channel]);
   const titleScope = `${channel}\0${reconnectNonce}`;
   const sessionTitle =
     sessionTitleState.scope === titleScope ? sessionTitleState.title : null;
@@ -469,7 +487,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
         aria-controls="chat-side-panel"
         className={cn(
           "shrink-0 rounded border border-current/20",
-          "px-2 py-1 text-xs font-medium tracking-wide",
+          "px-2 py-1 text-xs font-medium",
           "text-text-secondary hover:text-midground hover:bg-midground/5",
         )}
       >
@@ -1820,7 +1838,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
           >
             <Typography
               mondwest
-              className="text-display font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground"
+              className="text-display font-bold text-[1.125rem] leading-[0.95] text-midground"
             >
               {t.app.modelToolsSheetTitle}
               <br />
@@ -1875,7 +1893,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
       {visibleBanner && (
         <div
           role="alert"
-          className="flex flex-wrap items-center gap-2 border border-warning/50 bg-warning/10 text-warning px-3 py-2 text-xs tracking-wide"
+          className="flex flex-wrap items-center gap-2 border border-warning/50 bg-warning/10 text-warning px-3 py-2 text-xs"
         >
           <span className="min-w-0 flex-1">{visibleBanner}</span>
           {banner && bannerAction === "reload" && (
@@ -1886,12 +1904,40 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
         </div>
       )}
 
+      <div className="flex items-center gap-1.5" role="group" aria-label="Chat view">
+        <Button
+          size="sm"
+          outlined={chatView === "chat"}
+          aria-pressed={chatView === "chat"}
+          onClick={() => setChatView("chat")}
+        >
+          Chat
+        </Button>
+        <Button
+          size="sm"
+          outlined={chatView === "terminal"}
+          aria-pressed={chatView === "terminal"}
+          onClick={() => setChatView("terminal")}
+        >
+          Code
+        </Button>
+      </div>
+
       <div className="flex min-h-0 flex-1 flex-col gap-2 lg:flex-row lg:gap-3">
+        {chatView === "chat" && (
+          <ChatStreamView
+            channel={channel}
+            disabled={ptyState !== "open"}
+            onSend={sendFromStream}
+            sessionId={resumeParam ?? null}
+          />
+        )}
         <div
           ref={termWrapRef}
           className={cn(
             "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg",
             "p-2 sm:p-3",
+            chatView === "chat" && "hidden",
           )}
           style={{
             backgroundColor: terminalBg,
@@ -1908,7 +1954,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
           {showReconnectOverlay && (
             <div className="absolute inset-x-3 top-3 z-20 flex justify-center sm:inset-x-auto sm:right-3 sm:justify-end">
               <div className="flex max-w-[min(28rem,calc(100vw-3rem))] flex-col items-start gap-2 border border-warning/60 bg-black/80 px-3 py-2 text-xs text-warning shadow-lg">
-                <div className="tracking-wide">
+                <div className="">
                   {ptyState === "reconnecting"
                     ? "Chat is reconnecting."
                     : reconnectGaveUp
@@ -1947,7 +1993,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
               aria-live="polite"
               aria-label={PTY_RESUME_LOADING_MESSAGE}
             >
-              <div className="max-w-[min(28rem,calc(100vw-3rem))] border border-current/30 bg-black/80 px-4 py-3 text-center text-xs tracking-wide text-white/85 shadow-lg">
+              <div className="max-w-[min(28rem,calc(100vw-3rem))] border border-current/30 bg-black/80 px-4 py-3 text-center text-xs text-white/85 shadow-lg">
                 {PTY_RESUME_LOADING_MESSAGE}
               </div>
             </div>
@@ -1958,7 +2004,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
               whole page to get a working chat back. */}
           {ptyState === "ended" && (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/60">
-              <div className="max-w-[min(32rem,calc(100vw-3rem))] text-center text-sm tracking-wide text-white/80">
+              <div className="max-w-[min(32rem,calc(100vw-3rem))] text-center text-sm text-white/80">
                 {endedReason === "start-failed"
                   ? PTY_START_FAILED_MESSAGE
                   : PTY_SESSION_ENDED_MESSAGE}
@@ -2009,7 +2055,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
             >
               <span className="inline-flex items-center gap-1">
                 <PanelRight className="h-3 w-3 shrink-0" />
-                <span className="hidden min-[400px]:inline tracking-wide">
+                <span className="hidden min-[400px]:inline">
                   panel
                 </span>
               </span>

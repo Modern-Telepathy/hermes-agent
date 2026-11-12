@@ -1,0 +1,12 @@
+{
+  "name": "social-bitkin",
+  "label": "Bitkin™",
+  "description": "Communities as channels, posts as threads, signed in the browser.",
+  "icon": "Users",
+  "version": "0.1.1",
+  "tab": {
+    "path": "/bitkin",
+    "position": "after:chat"
+  },
+  "entry": "dist/index.js"
+}

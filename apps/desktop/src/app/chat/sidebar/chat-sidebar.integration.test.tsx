@@ -157,10 +157,10 @@ describe('ChatSidebar navigation activity', () => {
     })
 
     for (const [pathname, currentView, label] of [
-      ['/capabilities', 'capabilities', 'Capabilities'],
+      ['/capabilities', 'capabilities', 'Toolkit'],
       ['/messaging', 'messaging', 'Messaging'],
       ['/artifacts', 'artifacts', 'Artifacts'],
-      ['/cron', 'cron', 'Scheduled jobs']
+      ['/cron', 'cron', 'Automations']
     ] as const) {
       cleanup()
       focus('workspace-group')
@@ -447,6 +447,8 @@ describe('ChatSidebar empty-profile sections', () => {
     // …and the sidebar did not collapse to the blank state: the search field
     // only renders inside the session area, so its presence proves the area
     // (and the messaging sections inside it) rendered.
+    expect(screen.queryByPlaceholderText('Search sessions…')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
     expect(screen.getByPlaceholderText('Search sessions…')).toBeTruthy()
   })
 
@@ -479,7 +481,9 @@ describe('ChatSidebar empty-profile sections', () => {
         node => node.dataset.gatewayGroup
       )
 
-      expect(screen.getByPlaceholderText('Search sessions…')).toBeTruthy()
+      expect(screen.queryByPlaceholderText('Search sessions…')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+    expect(screen.getByPlaceholderText('Search sessions…')).toBeTruthy()
       expect(groups.some(id => id?.includes('"default"'))).toBe(true)
       expect(groups.some(id => id?.includes('"work"'))).toBe(true)
     } finally {

@@ -109,7 +109,7 @@ export function ChatWorkspacePicker({
       <div className="flex items-center gap-2 text-xs">
         <div className="flex items-center gap-1.5 text-text-tertiary">
           <FolderGit2 className="h-3.5 w-3.5" />
-          <span className="text-display tracking-wider">{t.sessions.workspace}</span>
+          <span className="text-display">{t.sessions.workspace}</span>
         </div>
         <Button
           ghost

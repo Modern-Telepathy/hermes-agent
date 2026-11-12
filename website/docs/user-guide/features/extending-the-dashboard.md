@@ -284,15 +284,15 @@ Each built-in ships its own palette, typography, and layout — switching produc
 
 | Theme | Palette | Typography | Layout |
 |-------|---------|------------|--------|
-| **Hermes Teal** (`default`) | Dark teal + cream | System stack, 15px | 0.5rem radius, comfortable |
-| **Hermes Teal (Large)** (`default-large`) | Same as default | System stack, 18px, line-height 1.65 | 0.5rem radius, spacious |
+| **Neutral** (`default`) | Charcoal + light grey | Inter, 14px, line-height 1.45 | 0.75rem radius, comfortable |
+| **Neutral (Large)** (`default-large`) | Same as default | Inter, 18px, line-height 1.65 | 0.75rem radius, spacious |
 | **Midnight** (`midnight`) | Deep blue-violet | Inter + JetBrains Mono, 14px | 0.75rem radius, comfortable |
-| **Ember** (`ember`) | Warm crimson + bronze | Spectral (serif) + IBM Plex Mono, 15px | 0.25rem radius, comfortable |
-| **Mono** (`mono`) | Grayscale | IBM Plex Sans + IBM Plex Mono, 13px | 0 radius, compact |
-| **Cyberpunk** (`cyberpunk`) | Neon green on black | Share Tech Mono everywhere, 14px | 0 radius, compact |
-| **Rosé** (`rose`) | Pink + ivory | Fraunces (serif) + DM Mono, 16px | 1rem radius, spacious |
+| **Ember** (`ember`) | Warm crimson + bronze | Inter + IBM Plex Mono, 15px | 0.25rem radius, comfortable |
+| **Mono** (`mono`) | Grayscale | Inter + IBM Plex Mono, 13px | 0 radius, compact |
+| **Cyberpunk** (`cyberpunk`) | Neon green on black | Inter + Share Tech Mono, 14px | 0 radius, compact |
+| **Rosé** (`rose`) | Pink + ivory | Inter + DM Mono, 16px | 1rem radius, spacious |
 
-Themes that reference Google Fonts (all except Hermes Teal) load the stylesheet on demand — the first time you switch to them a `<link>` tag is injected into `<head>`.
+Inter is the dashboard's one UI face and ships self-hosted in the bundle, so the interface needs no network and no `<link>` tag. Only the monospace faces differ per theme: those reference Google Fonts (all except Neutral) and load on demand — the first time you switch to such a theme a `<link>` tag is injected into `<head>`.
 
 ### Full theme YAML reference
 
@@ -530,6 +530,10 @@ SDK.components.PluginSlot    // render a named slot (useful for nested plugin UI
 SDK.api                      // typed client — getStatus, getSessions, getConfig, ...
 SDK.fetchJSON                // raw fetch for custom endpoints (plugin-registered routes)
 
+// The embedded chat's event channel (see "Observing a turn" below)
+SDK.chat.channel()           // "chat-…", or null until the chat host mounts
+SDK.chat.subscribe(fn)       // fn(channel) on change; returns an unsubscribe function
+
 // Utilities
 SDK.utils.cn                 // Tailwind class merger (clsx + twMerge)
 SDK.utils.timeAgo            // "5m ago" from unix timestamp
@@ -548,6 +552,31 @@ SDK.fetchJSON("/api/plugins/my-plugin/data")
 ```
 
 `fetchJSON` injects the session auth token, surfaces errors as thrown exceptions, and parses JSON automatically. `fetchJSON` and `authedFetch` only call this dashboard's own origin: an absolute URL to another host is rejected rather than sent the session token, so fetch third-party URLs (CDN assets, a game server) with plain `fetch`.
+
+#### Observing a turn
+
+The chat page is the embedded `hermes --tui` PTY, so a plugin cannot read the transcript from the
+DOM. What it can do is subscribe to the same event feed the sidebar uses: the PTY child mirrors
+every dispatcher emit to `/api/events?channel=<chat channel>`, and `SDK.chat` supplies that channel
+(the dashboard picks it after your bundle loads, hence `subscribe`).
+
+```javascript
+SDK.chat.subscribe(async (channel) => {
+  if (!channel) return;
+  const ws = new WebSocket(await SDK.buildWsUrl("/api/events", { channel }));
+  ws.onmessage = (ev) => {
+    const frame = JSON.parse(ev.data);
+    if (frame.method !== "event") return;
+    // { params: { type: "message.start" | "tool.start" | "message.complete" | "session.info" | …, payload } }
+    console.log(frame.params.type, frame.params.payload);
+  };
+});
+```
+
+Event names live in `tui_gateway/agent_callbacks.py` and `tui_gateway/session_notifications.py`
+(`message.start`, `tool.start`, `tool.complete`, `message.complete`, `thinking.delta`,
+`connection.request`, `error`, `status.update`, …). `plugins/kamiji-avatar/` is a worked example: it
+renders a WebGL avatar in `chat:top` and maps those events onto its status protocol.
 
 #### Calling built-in Hermes endpoints
 
@@ -585,8 +614,8 @@ window.__HERMES_PLUGINS__.registerSlot("my-plugin", "header-left", MyCrest);
 | `sidebar` | Cockpit sidebar rail — **only rendered when `layoutVariant === "cockpit"`**. |
 | `pre-main` | Above the route outlet (inside `<main>`). |
 | `post-main` | Below the route outlet (inside `<main>`). |
-| `footer-left` | Footer cell content (replaces default). |
-| `footer-right` | Footer cell content (replaces default). |
+| `footer-left` | Footer cell content (the bar renders only once a slot is claimed). |
+| `footer-right` | Footer cell content (the bar renders only once a slot is claimed). |
 | `overlay` | Fixed-position layer above everything else. Useful for chrome (scanlines, vignettes) `customCSS` can't achieve alone. |
 
 **Page-scoped slots** (render only on the named built-in page — use these to inject widgets, cards, or toolbars into an existing page without overriding the whole route):
@@ -864,7 +893,7 @@ The [`strike-freedom-cockpit`](https://github.com/NousResearch/hermes-example-pl
 - A slot-only plugin (`tab.hidden: true`) that registers into three slots:
   - `sidebar` — an MS-STATUS panel with live telemetry bars driven by `SDK.api.getStatus()`.
   - `header-left` — a faction crest that reads `--theme-asset-crest` from the active theme.
-  - `footer-right` — a custom tagline replacing the default org line.
+  - `footer-right` — a custom tagline; the built-in version/org line lives in the settings card.
 - The plugin reads theme-supplied artwork via CSS vars, so swapping themes changes the hero/crest without plugin code changes.
 
 **Install:**
@@ -880,7 +909,7 @@ cp hermes-example-plugins/strike-freedom-cockpit/theme/strike-freedom.yaml \
 cp -r hermes-example-plugins/strike-freedom-cockpit ~/.hermes/plugins/
 ```
 
-Open the dashboard, pick **Strike Freedom** from the theme switcher. The cockpit sidebar appears, the crest shows in the header, the tagline replaces the footer. Switch back to **Hermes Teal** and the plugin remains installed but invisible (the `sidebar` slot only renders under the `cockpit` layout variant).
+Open the dashboard, pick **Strike Freedom** from the theme switcher. The cockpit sidebar appears, the crest shows in the header, the tagline replaces the footer. Switch back to **Neutral** and the plugin remains installed but invisible (the `sidebar` slot only renders under the `cockpit` layout variant).
 
 Read the plugin source (`strike-freedom-cockpit/dashboard/dist/index.js` in the companion repo) to see how it reads CSS vars, guards against older dashboards without slot support, and registers three slots from one bundle.
 

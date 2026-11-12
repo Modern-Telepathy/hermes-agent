@@ -333,8 +333,8 @@ Dashboard 内置六个主题，并可通过用户自定义主题、插件标签�
 
 | 主题 | 特点 |
 |-------|-----------|
-| **Hermes Teal** (`default`) | 深青色 + 奶油色，系统字体，舒适间距 |
-| **Hermes Teal (Large)** (`default-large`) | 与 default 相同，但使用 18px 文字和更宽松的间距 |
+| **Neutral**（`default`） | 炭灰画布 + 浅灰文字，系统字体，12px 圆角——与 Meet 应用一致 |
+| **Neutral (Large)**（`default-large`） | 与 default 相同，但使用 18px 文字和更宽松的间距 |
 | **Midnight** (`midnight`) | 深蓝紫色，Inter + JetBrains Mono |
 | **Ember** (`ember`) | 暖深红 + 古铜色，Spectral 衬线体 + IBM Plex Mono |
 | **Mono** (`mono`) | 灰度，IBM Plex，紧凑 |

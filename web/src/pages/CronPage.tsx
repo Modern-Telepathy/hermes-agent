@@ -222,7 +222,7 @@ function CronAdvancedFields({
 
   return (
     <details className="border border-border bg-background/30 p-3" open>
-      <summary className="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
         Advanced fields
       </summary>
       <div className="mt-3 grid gap-3">
@@ -862,7 +862,7 @@ export default function CronPage() {
   useLayoutEffect(() => {
     setEnd(
       <Button
-        className="uppercase"
+        className=""
         size="sm"
         onClick={() => {
           setCreateProfile(selectedProfile === "all" ? "default" : selectedProfile);
@@ -967,7 +967,7 @@ export default function CronPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="create-cron-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 {t.cron.newJob}
               </h2>
@@ -1004,7 +1004,7 @@ export default function CronPage() {
 
               <div className="flex justify-end">
                 <Button
-                  className="uppercase"
+                  className=""
                   size="sm"
                   onClick={handleCreate}
                   disabled={creating}
@@ -1042,7 +1042,7 @@ export default function CronPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="edit-cron-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 Edit job
               </h2>
@@ -1067,7 +1067,7 @@ export default function CronPage() {
                   {editJob.id}
                 </span>
                 <Button
-                  className="uppercase"
+                  className=""
                   size="sm"
                   onClick={handleEdit}
                   disabled={saving}
@@ -1114,7 +1114,7 @@ export default function CronPage() {
             <CardContent className="flex flex-col items-center gap-3 py-8 text-center text-sm text-muted-foreground">
               <span>{t.cron.noJobs}</span>
               <Button
-                className="uppercase"
+                className=""
                 size="sm"
                 onClick={() => {
                   setCreateProfile(

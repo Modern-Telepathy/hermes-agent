@@ -1,14 +1,15 @@
 import { useCallback } from 'react'
 
 import { useTheme } from './context'
+import { DEFAULT_SKIN_NAME } from './presets'
 
 // Old names land on a shipped theme so muscle memory works. `gold`/`hermes`
 // only ever meant the classic gold look, so they reach Classic Hermes; `default`
-// stays Nous because it is also the stock config value, which Desktop reads as
-// "the Desktop default" everywhere else (boot, backend sync, setTheme).
+// follows the Desktop default everywhere else (boot, backend sync, setTheme),
+// so it must not name a specific skin here either.
 const ALIASES: Record<string, string> = {
   ares: 'ember',
-  default: 'nous',
+  default: DEFAULT_SKIN_NAME,
   gold: 'classic',
   hermes: 'classic',
   'nous-light': 'nous'

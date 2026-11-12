@@ -304,8 +304,8 @@ def mount_spa(application: FastAPI):
 
 # Built-in themes — label + description only; colors live in web/src/themes/presets.ts.
 _BUILTIN_DASHBOARD_THEMES = [
-    {"name": "default",       "label": "Hermes Teal",         "description": "Classic dark teal — the canonical Hermes look"},
-    {"name": "default-large", "label": "Hermes Teal (Large)", "description": "Hermes Teal with bigger fonts and roomier spacing"},
+    {"name": "default",       "label": "Neutral",            "description": "Neutral dark canvas, system type, rounded panels — the Meet look"},
+    {"name": "default-large", "label": "Neutral (Large)",    "description": "Neutral with bigger fonts and roomier spacing"},
     {"name": "nous-blue",     "label": "Nous Blue",           "description": "Light mode — vivid Nous-blue accents on cream canvas"},
     {"name": "midnight",      "label": "Midnight",            "description": "Deep blue-violet with cool accents"},
     {"name": "ember",     "label": "Ember",          "description": "Warm crimson and bronze — forge vibes"},
@@ -646,6 +646,15 @@ def _discover_dashboard_plugins(search_dirs: Optional[list] = None) -> list:
 
 def _strip_dashboard_manifest(p: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in p.items() if not k.startswith("_")}
+
+
+def dashboard_plugin_manifests() -> list[dict[str, Any]]:
+    """Every ``<plugin>/dashboard/manifest.json`` as a plain manifest dict.
+
+    The dashboard's own sidebar and the Desktop's Plugins nav both read this,
+    so the two surfaces can never disagree about which plugins have a page.
+    """
+    return [_strip_dashboard_manifest(p) for p in _discover_dashboard_plugins()]
 
 
 _PLUGINS_HUB_CACHE_TTL_SECONDS = 5.0

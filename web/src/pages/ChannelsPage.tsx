@@ -324,7 +324,7 @@ export default function ChannelsPage() {
   useLayoutEffect(() => {
     setEnd(
       <Button
-        className="uppercase"
+        className=""
         size="sm"
         onClick={handleRestart}
         disabled={restarting}
@@ -366,7 +366,7 @@ export default function ChannelsPage() {
             </div>
             <Button
               size="sm"
-              className="uppercase shrink-0"
+              className=" shrink-0"
               onClick={handleRestart}
               disabled={restarting}
               prefix={restarting ? <Spinner /> : <RotateCw className="h-4 w-4" />}
@@ -429,7 +429,7 @@ export default function ChannelsPage() {
             <header className="p-5 pb-3 border-b border-border">
               <h2
                 id="channel-config-title"
-                className="font-mondwest text-display text-base tracking-wider"
+                className="font-mondwest text-display text-base"
               >
                 {editing.id === "telegram"
                   ? "Use your own Telegram bot"
@@ -576,7 +576,7 @@ export default function ChannelsPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="w-full uppercase sm:w-auto"
+                  className="w-full sm:w-auto"
                   size="sm"
                   onClick={handleSave}
                   disabled={saving}
@@ -679,7 +679,7 @@ export default function ChannelsPage() {
                     {platform.id !== "telegram" && (
                       <Button
                         size="sm"
-                        className="uppercase"
+                        className=""
                         onClick={() => openConfig(platform)}
                         prefix={<Settings2 className="h-4 w-4" />}
                       >
@@ -971,7 +971,7 @@ export function WhatsAppOnboardingPanel({
         <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
-            className="uppercase"
+            className=""
             onClick={() => void start()}
             disabled={pairingBusy}
             prefix={phase === "starting" ? <Spinner /> : <QrCode className="h-4 w-4" />}
@@ -1005,7 +1005,7 @@ export function WhatsAppOnboardingPanel({
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
           <div className="grid gap-1.5">
-            <span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               Mode
             </span>
             <div className="flex flex-wrap gap-2">
@@ -1097,7 +1097,7 @@ export function WhatsAppOnboardingPanel({
                   <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
-                      className="uppercase"
+                      className=""
                       onClick={() => void apply()}
                       disabled={phase === "applying"}
                       prefix={phase === "applying" ? <Spinner /> : <Save className="h-4 w-4" />}
@@ -1379,7 +1379,7 @@ function TelegramOnboardingPanel({
       <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:divide-x sm:divide-border">
         <div className="grid content-start gap-3 sm:pr-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium uppercase text-foreground">
+            <span className="text-xs font-medium text-foreground">
               Quick setup
             </span>
             <Badge tone="success">recommended</Badge>
@@ -1390,7 +1390,7 @@ function TelegramOnboardingPanel({
           </p>
           <Button
             size="sm"
-            className="w-fit uppercase"
+            className="w-fit"
             onClick={() => void start()}
             disabled={phase !== "idle"}
             prefix={phase === "starting" ? <Spinner /> : <QrCode className="h-4 w-4" />}
@@ -1400,7 +1400,7 @@ function TelegramOnboardingPanel({
         </div>
 
         <div className="grid content-start gap-3 border-t border-border pt-4 sm:border-t-0 sm:pl-4 sm:pt-0">
-          <span className="text-xs font-medium uppercase text-foreground">
+          <span className="text-xs font-medium text-foreground">
             Use your own bot
           </span>
           <p className="text-xs text-muted-foreground">
@@ -1410,7 +1410,7 @@ function TelegramOnboardingPanel({
           <Button
             size="sm"
             outlined
-            className="w-fit uppercase"
+            className="w-fit"
             onClick={onManualSetup}
             disabled={phase !== "idle"}
             prefix={<Bot className="h-4 w-4" />}
@@ -1457,7 +1457,7 @@ function TelegramOnboardingPanel({
 
                 <div className="grid gap-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       Allowed users
                     </span>
                     {detectedOwnerId && allowedIds.includes(detectedOwnerId) && (
@@ -1503,7 +1503,7 @@ function TelegramOnboardingPanel({
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    className="uppercase"
+                    className=""
                     onClick={() => void apply()}
                     disabled={phase === "applying"}
                     prefix={phase === "applying" ? <Spinner /> : <Save className="h-4 w-4" />}
@@ -1535,7 +1535,7 @@ function TelegramOnboardingPanel({
                 href={setup.deep_link}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-8 items-center gap-1 border border-border px-3 text-xs uppercase text-foreground hover:border-foreground/40"
+                className="inline-flex h-8 items-center gap-1 border border-border px-3 text-xs text-foreground hover:border-foreground/40"
               >
                 <ExternalLink className="h-4 w-4" />
                 Open Telegram

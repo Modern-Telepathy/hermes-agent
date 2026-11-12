@@ -424,7 +424,7 @@ export const en: Translations = {
       signIn: 'Sign in',
       view: 'View',
       disable: 'Disable',
-      disabledMessage: name => `${name} MCP disabled. Re-enable it any time from Capabilities → MCP.`,
+      disabledMessage: name => `${name} MCP disabled. Re-enable it any time from Toolkit → MCP.`,
       disableFailed: name => `Could not disable ${name} MCP.`
     },
     errors: {
@@ -1027,7 +1027,7 @@ export const en: Translations = {
         'How chat messages and the composer choose their direction. Auto follows the first letter of each paragraph; pick a direction when mixed text lines up the wrong way. Code always stays left-to-right.',
       textDirection: { auto: 'Auto', rtl: 'Right-to-left', ltr: 'Left-to-right' },
       introSplashTitle: 'Intro Splash',
-      introSplashDesc: 'The wordmark and prompt shown on an empty chat.',
+      introSplashDesc: 'The greeting and prompt shown on an empty chat.',
       modelPricingTitle: 'Model Pricing',
       modelPricingDesc: 'Show input, output, and cache-read prices per million tokens in the model picker.',
       reactionsTitle: 'Message Reactions',
@@ -2408,7 +2408,7 @@ export const en: Translations = {
     nav: {
       newChat: { title: 'New session', detail: 'Start a fresh session' },
       settings: { title: 'Settings', detail: 'Configure Hermes desktop' },
-      capabilities: { title: 'Capabilities', detail: 'Skills, tools, MCP servers, and plugins' },
+      capabilities: { title: 'Toolkit', detail: 'Skills, tools, MCP servers, and plugins' },
       messaging: { title: 'Messaging', detail: 'Set up Telegram, Slack, Discord, and more' },
       artifacts: { title: 'Artifacts', detail: 'Browse generated outputs' }
     },
@@ -2968,7 +2968,7 @@ export const en: Translations = {
   cron: {
     control: enCronControl,
     close: 'Close cron',
-    title: 'Scheduled jobs',
+    title: 'Automations',
     count: count => `${count} ${count === 1 ? 'job' : 'jobs'}`,
     search: 'Search cron jobs...',
     loading: 'Loading cron jobs...',
@@ -3211,10 +3211,10 @@ export const en: Translations = {
     profileRail: 'Profile rail',
     nav: {
       'new-session': 'New session',
-      capabilities: 'Capabilities',
+      capabilities: 'Toolkit',
       messaging: 'Messaging',
       artifacts: 'Artifacts',
-      cron: 'Scheduled jobs'
+      cron: 'Automations'
     },
     searchAria: 'Search sessions',
     searchPlaceholder: 'Search sessions…',
@@ -4407,7 +4407,7 @@ export const en: Translations = {
     newSessionTab: 'New session tab',
     newTab: 'New tab',
     pluginDisabled: pluginId => `Plugin "${pluginId}" disabled`,
-    pluginDisabledBody: 'Re-enable it in Capabilities → Plugins to bring the pane back.',
+    pluginDisabledBody: 'Re-enable it in Toolkit → Plugins to bring the pane back.',
     missingPane: paneId => `missing pane: ${paneId}`,
     editTitle: 'Layouts',
     editHint: 'Pick a layout, or drag panes between zones.',

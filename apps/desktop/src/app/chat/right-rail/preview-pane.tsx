@@ -858,6 +858,7 @@ export function PreviewPane({
     }
 
     const lifetime = new AbortController()
+
     const unregister = registerPreviewPageReader(tabId, async () => {
       const webview = webviewRef.current
 
@@ -1264,6 +1265,30 @@ export function PreviewPane({
       })
     }
 
+    // A dashboard plugin opened with `embed=1` is meant to be the whole pane.
+    // The dashboard bundle renders its own navigation and page header around
+    // every plugin route, so strip that chrome inside the guest on each load.
+    // Kept on the desktop side (a guest stylesheet, not a dashboard rebuild).
+    const stripEmbeddedChrome = () => {
+      let url = ''
+
+      try {
+        url = webview.getURL?.() ?? ''
+      } catch {
+        return
+      }
+
+      if (!/[?&]embed=1(?:&|$)/.test(url)) {
+        return
+      }
+
+      void (
+        webview as unknown as { insertCSS?: (css: string) => Promise<string> }
+      ).insertCSS?.(
+        '#app-sidebar,[data-dashboard-chrome],[data-dashboard-page-header],header[role="banner"]{display:none!important}'
+      )?.catch(() => undefined)
+    }
+
     // The WEBVIEW is the source of truth for DevTools, not our click handler:
     // closing the DevTools window itself fires devtools-closed with no click,
     // and the glyph was left stuck "on" when we tracked it locally.
@@ -1360,6 +1385,7 @@ export function PreviewPane({
     webview.addEventListener('page-title-updated', notePage)
     // #101880: never let a guest reach the native print panel.
     webview.addEventListener('dom-ready', armPrintGuard)
+    webview.addEventListener('dom-ready', stripEmbeddedChrome)
     webview.addEventListener('dom-ready', noteGuestReady)
     host.appendChild(webview)
     navigationRef.current = webview
@@ -1389,6 +1415,7 @@ export function PreviewPane({
       webview.removeEventListener('did-stop-loading', onStop)
       webview.removeEventListener('page-title-updated', notePage)
       webview.removeEventListener('dom-ready', armPrintGuard)
+      webview.removeEventListener('dom-ready', stripEmbeddedChrome)
       webview.removeEventListener('dom-ready', noteGuestReady)
       webview.remove()
       setAnnotate(session => (session.mode ? { ...endAnnotateMode(session), stack: emptyAnnotateStack() } : session))
@@ -1401,7 +1428,7 @@ export function PreviewPane({
   // rebuild it. Per-page state (annotate pins, console log, history) resets
   // around the load so nothing bleeds across pages. Skipped when the guest
   // already shows the address (an in-page navigation got there first).
-  // eslint-disable-next-line no-restricted-syntax -- legitimate non-atom ref write (see eslint rule comment)
+
   useEffect(() => {
     if (!isWebPreview || isRemoteHtml) {
       return

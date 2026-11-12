@@ -1,0 +1,10 @@
+{
+  "name": "office-suite",
+  "label": "Office suite (host)",
+  "description": "Shared Canvas host, app bundles and workspace backend for the Docs, Sheets, Slides, Notes, Calendar and DocTransit tabs.",
+  "icon": "FileText",
+  "version": "0.1.0",
+  "tab": { "path": "/office", "hidden": true },
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}

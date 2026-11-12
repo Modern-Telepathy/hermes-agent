@@ -240,6 +240,46 @@ export const $sidebarRecentsOpen = atom(true)
 // default (it only renders at all when cron sessions exist) so the
 // scheduler's `[IMPORTANT: …]` first-message previews don't spam recents.
 export const $sidebarCronOpen = persistentAtom(SIDEBAR_CRON_OPEN_STORAGE_KEY, false, Codecs.bool)
+// The library sections below the sessions list. Factories starts collapsed:
+// the desktop has no factory runner yet, so its body is the empty state.
+export const $sidebarPluginsOpen = persistentAtom('hermes.desktop.sidebarPluginsOpen', true, Codecs.bool)
+export const $sidebarFactoriesOpen = persistentAtom('hermes.desktop.sidebarFactoriesOpen', false, Codecs.bool)
+export const $sidebarDashboardOpen = persistentAtom('hermes.desktop.sidebarDashboardOpen', true, Codecs.bool)
+export const setSidebarDashboardOpen = (open: boolean): void => $sidebarDashboardOpen.set(open)
+export const $sidebarBotsOpen = persistentAtom('hermes.desktop.sidebarBotsOpen', true, Codecs.bool)
+export const setSidebarBotsOpen = (open: boolean): void => $sidebarBotsOpen.set(open)
+/** Main-section order (Factories first: it is not a footer). */
+export const $sidebarSectionOrder = persistentAtom(
+  'hermes.desktop.sidebarSectionOrder',
+  ['factories', 'pins', 'sessions', 'bots', 'dashboard'],
+  Codecs.stringArray
+)
+export const setSidebarSectionOrder = (ids: string[]): void => $sidebarSectionOrder.set(ids)
+export const SIDEBAR_SECTION_HEIGHT_MIN = 24
+export const SIDEBAR_SECTION_HEIGHT_MAX = 720
+/** Per-section heights, set by the grip line at each section's bottom edge. */
+export const $sidebarSectionHeights = persistentAtom<Record<string, number>>(
+  'hermes.desktop.sidebarSectionHeights',
+  {},
+  Codecs.json<Record<string, number>>(raw => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return {}
+    }
+
+    return Object.fromEntries(
+      Object.entries(raw).filter(
+        (entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1])
+      )
+    )
+  })
+)
+
+export const setSidebarSectionHeight = (id: string, height: number): void => {
+  const clamped = Math.min(SIDEBAR_SECTION_HEIGHT_MAX, Math.max(SIDEBAR_SECTION_HEIGHT_MIN, Math.round(height)))
+
+  $sidebarSectionHeights.set({ ...$sidebarSectionHeights.get(), [id]: clamped })
+}
+
 // Messaging platform sections collapse by default (they can be numerous and
 // tall). We persist the ids the user has *explicitly expanded*, so the default
 // stays collapsed unless they've opened a platform before.
@@ -838,6 +878,14 @@ export function setSidebarRecentsOpen(open: boolean) {
 
 export function setSidebarCronOpen(open: boolean) {
   $sidebarCronOpen.set(open)
+}
+
+export function setSidebarPluginsOpen(open: boolean) {
+  $sidebarPluginsOpen.set(open)
+}
+
+export function setSidebarFactoriesOpen(open: boolean) {
+  $sidebarFactoriesOpen.set(open)
 }
 
 export function toggleSidebarMessagingOpen(sourceId: string) {

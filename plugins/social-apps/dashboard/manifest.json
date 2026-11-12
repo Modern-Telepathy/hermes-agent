@@ -1,0 +1,10 @@
+{
+  "name": "social-apps",
+  "label": "Social apps (host)",
+  "description": "Shared Canvas Extensions host, app bundles and Agent Server backend for the per-app social tabs.",
+  "icon": "Users",
+  "version": "0.2.0",
+  "tab": { "path": "/social", "hidden": true },
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}

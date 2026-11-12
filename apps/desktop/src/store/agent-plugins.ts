@@ -33,6 +33,17 @@ export interface AgentPluginServer {
   sentence: string
 }
 
+/** A plugin's Webapp page (``<plugin>/dashboard/manifest.json``), carried on
+ *  the row so the desktop can list the tabs the dashboard shows. */
+export interface DashboardPluginManifest {
+  name: string
+  label?: string
+  description?: string
+  icon?: string
+  version?: string
+  tab?: { path?: string; position?: string; hidden?: boolean; override?: string }
+}
+
 export interface AgentPluginRow {
   name: string
   /** Canonical registry key (e.g. `image_gen/fal`) — absent on legacy backends. */
@@ -61,6 +72,10 @@ export interface AgentPluginRow {
   pinned_sha?: string
   /** The package folder also ships `desktop/plugin.js` (unified agent+desktop package). */
   has_desktop_half?: boolean
+  /** A Webapp page ships with this plugin (`dashboard/manifest.json`). */
+  has_dashboard_manifest?: boolean
+  /** That manifest: the label/icon/tab path the Plugins nav lists. */
+  dashboard_manifest?: DashboardPluginManifest | null
   /** Absolute install dir on the backend (informational). */
   install_dir?: string
   /** Manifest `config_schema` rendered as a settings form (with current values). */
@@ -100,6 +115,8 @@ export type AgentPluginsStatus = 'idle' | 'loading' | 'ready' | 'error'
 export type GatewayRequest = <T>(method: string, params?: Record<string, unknown>, timeoutMs?: number) => Promise<T>
 
 export const $agentPlugins = atom<AgentPluginRow[]>([])
+/** Dashboard pages whose plugin has no agent row of its own (dashboard-only plugins). */
+export const $orphanDashboardPlugins = atom<DashboardPluginManifest[]>([])
 export const $agentPluginsStatus = atom<AgentPluginsStatus>('idle')
 export const $agentPluginsError = atom<string | null>(null)
 /** The profile `$agentPlugins` was loaded for (`null` = the backend's launch
@@ -163,16 +180,17 @@ export function loadAgentPlugins(request: GatewayRequest, profile?: string | nul
     }
 
     try {
-      const result = await request<{ plugins?: AgentPluginRow[] }>(
-        'plugins.manage',
-        withProfile({ action: 'list' }, scope)
-      )
+      const result = await request<{
+        plugins?: AgentPluginRow[]
+        orphan_dashboard_plugins?: DashboardPluginManifest[]
+      }>('plugins.manage', withProfile({ action: 'list' }, scope))
 
       if (generation !== loadGeneration) {
         return
       }
 
       $agentPlugins.set((result?.plugins ?? []).map(normalizeAgentPluginRow))
+      $orphanDashboardPlugins.set(result?.orphan_dashboard_plugins ?? [])
       $agentPluginsProfile.set(scope)
       $agentPluginsStatus.set('ready')
       $agentPluginsError.set(null)

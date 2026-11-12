@@ -101,7 +101,7 @@ export function InstalledPluginsHeader({ loading, loadHub, pluginCount, showToas
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="font-mondwest text-display text-xs tracking-[0.12em] text-text-secondary">
+        <h3 className="font-mondwest text-display text-xs text-text-secondary">
           {t.pluginsPage.pluginListHeading}
         </h3>
 

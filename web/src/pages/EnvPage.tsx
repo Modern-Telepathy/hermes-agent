@@ -396,7 +396,7 @@ function ProviderGroupCard({
           ) : (
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           )}
-          <span className="font-semibold text-sm tracking-wide">
+          <span className="font-semibold text-sm">
             {group.name === "Other" ? t.common.other : group.name}
           </span>
           {hasAnyConfigured && (
@@ -567,7 +567,7 @@ function CustomKeysCard({
 
         {/* Add-key form */}
         <div className="grid gap-2 border border-dashed border-border p-4">
-          <Label className="text-xs font-semibold tracking-wide">
+          <Label className="text-xs font-semibold">
             {t.env.addCustomKey}
           </Label>
           <div className="flex items-start gap-2">
@@ -670,7 +670,7 @@ export default function EnvPage() {
             key={s.id}
             type="button"
             onClick={() => scrollTo(s.id)}
-            className="shrink-0 cursor-pointer px-2 py-0.5 font-mondwest text-display text-xs tracking-wider text-text-secondary hover:text-foreground border border-border/50 hover:border-foreground/30 transition-colors"
+            className="shrink-0 cursor-pointer px-2 py-0.5 font-mondwest text-display text-xs text-text-secondary hover:text-foreground border border-border/50 hover:border-foreground/30 transition-colors"
           >
             {s.label}
           </button>
@@ -1073,7 +1073,7 @@ function EnvCategoryCard({
               type="button"
               onClick={() => setShowAll((open) => !open)}
               aria-expanded={showAll}
-              className="shrink-0 cursor-pointer border-0 bg-transparent p-0 font-mondwest text-xs tracking-[0.08em] text-text-secondary transition-colors hover:text-foreground"
+              className="shrink-0 cursor-pointer border-0 bg-transparent p-0 font-mondwest text-xs text-text-secondary transition-colors hover:text-foreground"
             >
               {showAll ? t.env.showLess : t.env.showMore}
             </button>

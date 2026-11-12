@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "doctransit",
+  "display_name": "DocTransit™",
+  "version": "0.1.0",
+  "description": "DocTransit e-signature inside Canvas: its own sign-in, create-account and dashboard pages, plus a native documents list through the Agents API.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "doctransit",
+        "title": "DocTransit™",
+        "path": "/doctransit",
+        "nav_label": "DocTransit™",
+        "description": "Open DocTransit, sign in, and see your documents and signing links."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "slate"
+  }
+}

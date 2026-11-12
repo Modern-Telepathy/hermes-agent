@@ -33,13 +33,12 @@ import {
   FolderOpen,
   FileText,
   Globe,
+  GripVertical,
   Heart,
   KeyRound,
   Menu,
   MessageSquare,
   Package,
-  PanelLeftClose,
-  PanelLeftOpen,
   Plug,
   Puzzle,
   Radio,
@@ -53,7 +52,6 @@ import {
   Users,
   Webhook,
   Wrench,
-  X,
   Zap,
 } from "lucide-react";
 import { Button } from "@nous-research/ui/ui/components/button";
@@ -62,9 +60,23 @@ import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { cn } from "@/lib/utils";
-import { SidebarFooter } from "@/components/SidebarFooter";
-import { SidebarStatusStrip, gatewayLine } from "@/components/SidebarStatusStrip";
+import { SidebarFooter, SidebarOrgMeta } from "@/components/SidebarFooter";
+import { SidebarHeader } from "@/components/SidebarHeader";
+import { SidebarLists } from "@/components/SidebarLists";
+import { SidebarNavCollapse } from "@/components/SidebarNavCollapse";
+import { SidebarSettingsHoverCard } from "@/components/SidebarSettingsHoverCard";
+import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
+import { SidebarStatusStrip } from "@/components/SidebarStatusStrip";
 import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint";
+
+import { rowsInGroup, useSidebarDrag } from "@/hooks/useSidebarDrag";
+import {
+  applySidebarOrder,
+  movePath,
+  readStoredSidebarOrder,
+  writeStoredSidebarOrder,
+  type SidebarOrder,
+} from "@/lib/sidebar-order";
 import { useSidebarStatus } from "@/hooks/useSidebarStatus";
 import { AuthWidget } from "@/components/AuthWidget";
 import { PageHeaderProvider } from "@/contexts/PageHeaderProvider";
@@ -387,6 +399,34 @@ export default function App() {
       return false;
     }
   });
+  // Drag order lives in localStorage so a reorder survives a reload; paths that vanish from the
+  // saved order (a plugin removed) are simply appended again by applySidebarOrder.
+  const [navOrder, setNavOrder] = useState<SidebarOrder>(() =>
+    readStoredSidebarOrder(),
+  );
+  const reorderNav = useCallback(
+    (from: string, to: string, group: string) => {
+      const rendered = rowsInGroup(group);
+      const fromIndex = rendered.indexOf(from);
+      const toIndex = rendered.indexOf(to);
+      if (fromIndex < 0 || toIndex < 0) return;
+      const next = movePath(rendered, fromIndex, toIndex);
+      if (next === rendered) return;
+      const key = group === "plugins" ? "plugins" : "core";
+      setNavOrder((prev) => {
+        const updated: SidebarOrder = { ...prev, [key]: next };
+        writeStoredSidebarOrder(updated);
+        return updated;
+      });
+    },
+    [],
+  );
+  const [navQuery, setNavQuery] = useState("");
+  const sidebarNavRef = useRef<HTMLElement | null>(null);
+  const navDrag = useSidebarDrag({
+    navRef: sidebarNavRef,
+    onMove: reorderNav,
+  });
   const toggleCollapsed = useCallback(() => {
     setCollapsed((prev) => {
       const next = !prev;
@@ -489,6 +529,10 @@ export default function App() {
 
   const layoutVariant = theme.layoutVariant ?? "standard";
 
+  const navFilter = navQuery.trim().toLowerCase();
+  const matchesNavQuery = (item: NavItem) =>
+    !navFilter || item.label.toLowerCase().includes(navFilter);
+
   useEffect(() => {
     if (!mobileOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -552,7 +596,7 @@ export default function App() {
           <Menu />
         </Button>
 
-        <Typography className="font-bold text-[0.95rem] leading-[0.95] tracking-[0.05em] text-midground">
+        <Typography className="font-bold text-[0.95rem] leading-[0.95] text-midground">
           {t.app.brand}
         </Typography>
       </header>
@@ -586,14 +630,17 @@ export default function App() {
             id="app-sidebar"
             aria-label={t.app.navigation}
             className={cn(
-              "fixed top-0 left-0 z-50 flex h-dvh max-h-dvh w-64 min-h-0 flex-col font-sans",
+              // `min-w-0` is load-bearing: without it the flex item's automatic minimum size
+              // (its content's min-content width) pins the rail open even when the collapsed
+              // width applies, so the sidebar never actually narrows.
+              "fixed top-0 left-0 z-50 flex h-dvh max-h-dvh w-64 min-h-0 min-w-0 flex-col font-sans",
               "border-r border-current/20",
               "bg-background-base",
               "transition-[transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]",
               mobileOpen ? "translate-x-0" : "-translate-x-full",
               "lg:sticky lg:top-0 lg:translate-x-0 lg:shrink-0 lg:overflow-hidden",
               "lg:transition-[width] lg:duration-300 lg:ease-[cubic-bezier(0.23,1,0.32,1)]",
-              collapsed && "lg:w-14",
+              collapsed ? "lg:w-14" : "lg:w-64",
             )}
             style={{
               background:
@@ -602,113 +649,63 @@ export default function App() {
               borderImage: "var(--component-sidebar-border-image)",
             }}
           >
-            <div
-              className={cn(
-                "flex h-14 shrink-0 items-center gap-2",
-                "border-b border-current/20",
-                collapsed ? "lg:justify-center lg:px-0" : "px-4 justify-between",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex items-center gap-2",
-                  collapsed && "lg:hidden",
-                )}
-              >
-                <PluginSlot name="header-left" />
-
-                <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
-                  Hermes
-                  <br />
-                  Agent
-                </Typography>
-              </div>
-
-              <Button
-                ghost
-                size="icon"
-                onClick={closeMobile}
-                aria-label={t.app.closeNavigation}
-                className="lg:hidden text-text-secondary hover:text-midground"
-              >
-                <X />
-              </Button>
-
-              <Button
-                ghost
-                size="icon"
-                onClick={toggleCollapsed}
-                aria-label={
-                  collapsed ? t.common.expand : t.common.collapse
-                }
-                className="hidden lg:flex text-text-secondary hover:text-midground"
-              >
-                {collapsed ? (
-                  <PanelLeftOpen className="h-4 w-4" />
-                ) : (
-                  <PanelLeftClose className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+            <SidebarHeader
+              collapsed={isDesktopCollapsed}
+              onCloseMobile={closeMobile}
+              onQueryChange={setNavQuery}
+              onToggleCollapsed={toggleCollapsed}
+              query={navQuery}
+            />
 
             <ProfileSwitcher collapsed={isDesktopCollapsed} />
 
             <nav
               className="min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden border-t border-current/10 py-2"
               aria-label={t.app.navigation}
+              ref={sidebarNavRef}
+              data-dragging={navDrag.dragging ?? undefined}
             >
-              <ul className="flex flex-col">
-                {sidebarNav.coreItems.map((item) => (
-                  <SidebarNavLink
-                    closeMobile={closeMobile}
-                    collapsed={isDesktopCollapsed}
-                    item={item}
-                    key={item.path}
-                    t={t}
-                    tooltipWarmRef={tooltipWarmRef}
-                  />
-                ))}
-              </ul>
+              <SidebarNavCollapse
+                collapsed={isDesktopCollapsed}
+                forceExpanded={Boolean(navFilter)}
+                hasListBelow={sidebarNav.pluginItems.length > 0}
+              >
+                <ul className="flex flex-col" data-nav-group="core">
+                  {applySidebarOrder(sidebarNav.coreItems, navOrder.core).filter(matchesNavQuery).map((item) => (
+                    <SidebarNavLink
+                      closeMobile={closeMobile}
+                      collapsed={isDesktopCollapsed}
+                      item={item}
+                      key={item.path}
+                      t={t}
+                      tooltipWarmRef={tooltipWarmRef}
+                    />
+                  ))}
+                </ul>
+              </SidebarNavCollapse>
 
-              {sidebarNav.pluginItems.length > 0 && (
-                <div
-                  aria-labelledby="hermes-sidebar-plugin-nav-heading"
-                  className="flex flex-col border-t border-current/10 pb-2"
-                  role="group"
-                >
-                  <span
-                    className={cn(
-                      "px-5 pt-2.5 pb-1",
-                      "font-sans text-display text-xs tracking-[0.12em] text-text-tertiary",
-                      isDesktopCollapsed && "lg:hidden",
-                    )}
-                    id="hermes-sidebar-plugin-nav-heading"
-                  >
-                    {t.app.pluginNavSection}
-                  </span>
+              <SidebarPluginNav
+                closeMobile={closeMobile}
+                collapsed={isDesktopCollapsed}
+                items={applySidebarOrder(sidebarNav.pluginItems, navOrder.plugins).filter(matchesNavQuery)}
+                t={t}
+                tooltipWarmRef={tooltipWarmRef}
+              />
 
-                  <ul className="flex flex-col">
-                    {sidebarNav.pluginItems.map((item) => (
-                      <SidebarNavLink
-                        closeMobile={closeMobile}
-                        collapsed={isDesktopCollapsed}
-                        item={item}
-                        key={item.path}
-                        t={t}
-                        tooltipWarmRef={tooltipWarmRef}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <SidebarLists collapsed={isDesktopCollapsed} onNavigate={closeMobile} />
+
+              {navFilter &&
+                applySidebarOrder(sidebarNav.coreItems, navOrder.core).filter(matchesNavQuery)
+                  .length === 0 &&
+                applySidebarOrder(sidebarNav.pluginItems, navOrder.plugins).filter(matchesNavQuery)
+                  .length === 0 && (
+                  <p className="px-5 py-2 text-xs text-text-tertiary">
+                    No navigation matches “{navQuery}”.
+                  </p>
+                )}
             </nav>
 
-            <SidebarSystemActions
-              collapsed={isDesktopCollapsed}
-              onNavigate={closeMobile}
-              status={sidebarStatus}
-              tooltipWarmRef={tooltipWarmRef}
-            />
+            <CockpitSidebarSlot layoutVariant={layoutVariant} />
 
             <div
               className={cn(
@@ -726,23 +723,19 @@ export default function App() {
                   isDesktopCollapsed && "lg:flex-col lg:items-start",
                 )}
               >
+                {/* `header-left` used to sit beside the brand wordmark; it lives with the other
+                    top-bar decorations now that the brand block is gone. */}
+                <PluginSlot name="header-left" />
+
                 <PluginSlot name="header-right" />
 
-                <SidebarIconWithTooltip
+                <SidebarSystemActions
                   collapsed={isDesktopCollapsed}
-                  label={t.theme?.switchTheme ?? "Switch theme"}
+                  onNavigate={closeMobile}
+                  status={sidebarStatus}
                   tooltipWarmRef={tooltipWarmRef}
-                >
-                  <ThemeSwitcher collapsed={isDesktopCollapsed} dropUp />
-                </SidebarIconWithTooltip>
+                />
 
-                <SidebarIconWithTooltip
-                  collapsed={isDesktopCollapsed}
-                  label={t.language.switchTo}
-                  tooltipWarmRef={tooltipWarmRef}
-                >
-                  <LanguageSwitcher collapsed={isDesktopCollapsed} dropUp />
-                </SidebarIconWithTooltip>
               </div>
             </div>
 
@@ -753,7 +746,7 @@ export default function App() {
               )}
             >
               <AuthWidget />
-              <SidebarFooter status={sidebarStatus} />
+              <SidebarFooter />
             </div>
           </aside>
 
@@ -874,6 +867,8 @@ function SidebarNavLink({
 
   return (
     <li
+      className="group/nav relative"
+      data-nav-path={path}
       onMouseEnter={collapsed ? showTooltip : undefined}
       onMouseLeave={collapsed ? hideTooltip : undefined}
     >
@@ -888,7 +883,7 @@ function SidebarNavLink({
           cn(
             "group/nav relative flex items-center gap-3",
             "px-5 py-2.5",
-            "font-sans text-display uppercase text-sm tracking-[0.12em]",
+            "font-sans text-display text-sm",
             "whitespace-nowrap transition-colors cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
             isActive
@@ -928,10 +923,60 @@ function SidebarNavLink({
         )}
       </NavLink>
 
+      {!collapsed && (
+        <span
+          aria-label={`Reorder ${navLabel}`}
+          className={cn(
+            "absolute left-0.5 top-1/2 z-1 flex h-6 w-4 -translate-y-1/2",
+            "cursor-grab touch-none items-center justify-center",
+            "text-text-tertiary opacity-0 transition-opacity duration-150",
+            "group-hover/nav:opacity-100 group-focus-within/nav:opacity-100",
+            "hover:text-midground",
+          )}
+          data-nav-grip
+          role="button"
+          tabIndex={0}
+        >
+          <GripVertical className="h-3 w-3" />
+        </span>
+      )}
+
       {collapsed && hovered && tooltipAnchor && (
         <SidebarTooltip anchor={tooltipAnchor} label={navLabel} warmRef={tooltipWarmRef} />
       )}
     </li>
+  );
+}
+
+function SidebarPluginNav({
+  items,
+  ...linkProps
+}: Omit<SidebarNavLinkProps, "item"> & { items: NavItem[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      aria-labelledby="hermes-sidebar-plugin-nav-heading"
+      className="flex flex-col pb-2"
+      role="group"
+    >
+      <span
+        className={cn(
+          "px-5 pt-1 pb-1",
+          "font-sans text-display text-xs text-text-tertiary",
+          linkProps.collapsed && "lg:hidden",
+        )}
+        id="hermes-sidebar-plugin-nav-heading"
+      >
+        {linkProps.t.app.pluginNavSection}
+      </span>
+
+      <ul className="flex flex-col" data-nav-group="plugins">
+        {items.map((item) => (
+          <SidebarNavLink {...linkProps} item={item} key={item.path} />
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -1040,44 +1085,36 @@ function SidebarSystemActions({
 
   return (
     <>
-    <div
-      className={cn(
-        "shrink-0 flex flex-col",
-        "border-t border-current/10",
-        "py-1",
-      )}
+    <SidebarSettingsHoverCard
+      collapsed={collapsed}
+      footer={
+        <>
+          <ThemeSwitcher dropUp />
+          <LanguageSwitcher dropUp />
+        </>
+      }
+      label={t.app.system}
+      meta={<SidebarOrgMeta status={status} />}
     >
-      <span
-        className={cn(
-          "px-5 pt-0.5 pb-0.5",
-          "font-sans text-display text-xs tracking-[0.12em] text-text-tertiary",
-          collapsed && "lg:hidden",
-        )}
-      >
-        {t.app.system}
-      </span>
-
-      <div className={cn(collapsed && "lg:hidden")}>
+      <div className="flex flex-col py-1">
         <SidebarStatusStrip status={status} />
+
+        <ul className="flex flex-col">
+          {items.map((item) => (
+            <SystemActionButton
+              key={item.action}
+              collapsed={false}
+              disabled={isBusy && !(pendingAction === item.action || (activeAction === item.action && isRunning))}
+              tooltipWarmRef={tooltipWarmRef}
+              isPending={pendingAction === item.action}
+              isRunning={activeAction === item.action && isRunning && pendingAction !== item.action}
+              item={item}
+              onClick={() => handleClick(item.action)}
+            />
+          ))}
+        </ul>
       </div>
-
-      <GatewayDot collapsed={collapsed} status={status} tooltipWarmRef={tooltipWarmRef} />
-
-      <ul className="flex flex-col">
-        {items.map((item) => (
-          <SystemActionButton
-            key={item.action}
-            collapsed={collapsed}
-            disabled={isBusy && !(pendingAction === item.action || (activeAction === item.action && isRunning))}
-            tooltipWarmRef={tooltipWarmRef}
-            isPending={pendingAction === item.action}
-            isRunning={activeAction === item.action && isRunning && pendingAction !== item.action}
-            item={item}
-            onClick={() => handleClick(item.action)}
-          />
-        ))}
-      </ul>
-    </div>
+    </SidebarSettingsHoverCard>
 
     <ConfirmDialog
       cancelLabel={t.common.cancel}
@@ -1154,7 +1191,7 @@ function SystemActionButton({
         className={cn(
           "group/action relative flex w-full items-center gap-3",
           "px-5 py-2.5",
-          "font-sans text-display text-xs tracking-[0.1em]",
+          "font-sans text-display text-xs",
           "whitespace-nowrap transition-colors cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
           busy
@@ -1203,106 +1240,6 @@ function SystemActionButton({
   );
 }
 
-function SidebarIconWithTooltip({
-  children,
-  collapsed,
-  label,
-  tooltipWarmRef,
-}: SidebarIconWithTooltipProps) {
-  const [hovered, setHovered] = useState(false);
-  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
-  const showTooltip = (event: MouseEvent<HTMLDivElement>) => {
-    setHovered(true);
-    setTooltipAnchor(event.currentTarget);
-  };
-  const hideTooltip = () => {
-    setHovered(false);
-    setTooltipAnchor(null);
-  };
-
-  return (
-    <div
-      className={cn(
-        "relative w-fit",
-        collapsed && "group/icon",
-      )}
-      onMouseEnter={collapsed ? showTooltip : undefined}
-      onMouseLeave={collapsed ? hideTooltip : undefined}
-    >
-      {children}
-
-      {collapsed && (
-        <span
-          aria-hidden
-          className="absolute inset-y-0 inset-x-[-0.375rem] bg-midground opacity-0 pointer-events-none transition-opacity duration-200 group-hover/icon:opacity-5 hidden lg:block"
-        />
-      )}
-
-      {collapsed && hovered && tooltipAnchor && (
-        <SidebarTooltip anchor={tooltipAnchor} label={label} warmRef={tooltipWarmRef} />
-      )}
-    </div>
-  );
-}
-
-function GatewayDot({ collapsed, status, tooltipWarmRef }: GatewayDotProps) {
-  const { t } = useI18n();
-  const [hovered, setHovered] = useState(false);
-  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
-
-  const toneToColor: Record<string, string> = {
-    "text-success": "bg-success",
-    "text-warning": "bg-warning",
-    "text-destructive": "bg-destructive",
-    "text-muted-foreground": "bg-muted-foreground",
-  };
-
-  let color: string;
-  let label: string;
-
-  if (!status) {
-    color = "bg-midground/20";
-    label = t.status.gateway;
-  } else {
-    const gw = gatewayLine(status, t);
-    color = toneToColor[gw.tone] ?? "bg-muted-foreground";
-    label = `${t.status.gateway} ${gw.label}`;
-  }
-  const showTooltip = (event: MouseEvent<HTMLDivElement> | FocusEvent<HTMLDivElement>) => {
-    setHovered(true);
-    setTooltipAnchor(event.currentTarget);
-  };
-  const hideTooltip = () => {
-    setHovered(false);
-    setTooltipAnchor(null);
-  };
-
-  return (
-    <div
-      className={cn(
-        "hidden lg:flex py-3 pl-[1.625rem] transition-opacity duration-300",
-        collapsed ? "lg:opacity-100" : "lg:opacity-0 lg:h-0 lg:py-0 lg:overflow-hidden",
-      )}
-      role="status"
-      aria-label={label}
-      tabIndex={collapsed ? 0 : -1}
-      onMouseEnter={collapsed ? showTooltip : undefined}
-      onMouseLeave={collapsed ? hideTooltip : undefined}
-      onFocus={collapsed ? showTooltip : undefined}
-      onBlur={collapsed ? hideTooltip : undefined}
-    >
-      <span
-        aria-hidden
-        className={cn("h-1.5 w-1.5 rounded-full", color)}
-      />
-
-      {hovered && tooltipAnchor && (
-        <SidebarTooltip anchor={tooltipAnchor} label={label} warmRef={tooltipWarmRef} />
-      )}
-    </div>
-  );
-}
-
 function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
   const rect = anchor.getBoundingClientRect();
   const sidebar = document.getElementById("app-sidebar");
@@ -1328,7 +1265,7 @@ function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
         "fixed z-[100] pointer-events-none",
         "px-2 py-1",
         "bg-background-base border border-current/20 shadow-lg",
-        "font-sans text-display text-xs tracking-[0.1em] text-midground uppercase",
+        "font-sans text-display text-xs text-midground",
       )}
       style={{
         top: rect.top + rect.height / 2,
@@ -1346,24 +1283,11 @@ function SidebarTooltip({ anchor, label, warmRef }: SidebarTooltipProps) {
 
 type TooltipWarmRef = React.RefObject<number>;
 
-interface GatewayDotProps {
-  collapsed: boolean;
-  status: StatusResponse | null;
-  tooltipWarmRef: TooltipWarmRef;
-}
-
 interface NavItem {
   icon: ComponentType<{ className?: string }>;
   label: string;
   labelKey?: string;
   path: string;
-}
-
-interface SidebarIconWithTooltipProps {
-  children: ReactNode;
-  collapsed: boolean;
-  label: string;
-  tooltipWarmRef: TooltipWarmRef;
 }
 
 interface SidebarNavLinkProps {

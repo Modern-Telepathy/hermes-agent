@@ -830,7 +830,7 @@ export function ModelCatalogMenu({
                   group.families.map((family, familyIdx) => (
                     <Fragment key={`${group.provider.slug}:${family.id}`}>
                       {!search && sectionTitle(group, familyIdx, copyPicker) ? (
-                        <DropdownMenuLabel className="px-2 pb-0.5 pt-1.5 text-[0.6rem] font-medium uppercase tracking-wide text-(--ui-text-tertiary)">
+                        <DropdownMenuLabel className="px-2 pb-0.5 pt-1.5 text-[0.6rem] font-medium text-(--ui-text-tertiary)">
                           {sectionTitle(group, familyIdx, copyPicker)}
                         </DropdownMenuLabel>
                       ) : null}
@@ -1173,7 +1173,7 @@ function ModelFamilyRow({
           </span>
           {tag ? <ModelChip>{tag}</ModelChip> : null}
           {decoration.badge ? (
-            <Badge className="shrink-0 uppercase tracking-wide" data-model-menu-row-badge="" size="xs" variant="muted">
+            <Badge className="shrink-0" data-model-menu-row-badge="" size="xs" variant="muted">
               {decoration.badge}
             </Badge>
           ) : null}
@@ -1235,7 +1235,7 @@ const LOCAL_PROVIDER_SLUG = 'llamacpp'
 
 // Heading for every row group in the list (Favorites, providers, downloads).
 const catalogGroupLabel =
-  'px-2 pb-0.5 pt-0.5 text-[0.625rem] font-semibold uppercase tracking-wider text-(--ui-text-secondary)'
+ 'px-2 pb-0.5 pt-0.5 text-[0.625rem] font-semibold text-(--ui-text-secondary)'
 
 // A provider inside a mixed Favorites section: the group heading's ink, set
 // in normal case and indented to the model names it labels, so it reads as
@@ -1247,7 +1247,7 @@ const favoriteProviderLabel = 'pt-1.5 pb-0 pr-2 pl-7.75 text-[0.625rem] text-(--
  *  different kinds of fact at a glance. */
 function ModelChip({ children, setting = false }: { children: ReactNode; setting?: boolean }): ReactElement {
   return (
-    <Badge className="shrink-0 uppercase tracking-wide" size="xs" variant={setting ? 'outline' : 'muted'}>
+    <Badge className="shrink-0" size="xs" variant={setting ?'outline' :'muted'}>
       {children}
     </Badge>
   )

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "holons-hangout",
+  "display_name": "Holons™",
+  "version": "0.1.0",
+  "description": "Feeds, courses and members for Holons, with a demo mode.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "holons-hangout",
+        "title": "Holons™",
+        "path": "/holons-hangout",
+        "nav_label": "Holons™",
+        "description": "Feeds, courses and members for Holons, with a demo mode."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "emerald"
+  }
+}

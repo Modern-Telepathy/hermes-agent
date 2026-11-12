@@ -811,7 +811,7 @@ export default function SystemPage() {
               <X />
             </Button>
             <header className="p-5 pb-3 border-b border-border">
-              <h2 className="font-mondwest text-display text-base tracking-wider">
+              <h2 className="font-mondwest text-display text-base">
                 New shell hook
               </h2>
             </header>
@@ -881,7 +881,7 @@ export default function SystemPage() {
               </p>
               <div className="flex justify-end">
                 <Button
-                  className="uppercase"
+                  className=""
                   size="sm"
                   onClick={createHook}
                   disabled={creatingHook}
@@ -913,23 +913,23 @@ export default function SystemPage() {
           <CardContent className="py-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-6 text-sm">
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">OS</div>
+                <div className="text-xs text-muted-foreground">OS</div>
                 <div>{stats?.os} {stats?.os_release}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Arch</div>
+                <div className="text-xs text-muted-foreground">Arch</div>
                 <div>{stats?.arch}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Host</div>
+                <div className="text-xs text-muted-foreground">Host</div>
                 <div className="truncate">{stats?.hostname}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Python</div>
+                <div className="text-xs text-muted-foreground">Python</div>
                 <div>{stats?.python_impl} {stats?.python_version}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Hermes</div>
+                <div className="text-xs text-muted-foreground">Hermes</div>
                 <div className="flex items-center gap-2">
                   <span>v{stats?.hermes_version}</span>
                   {canUpdateHermes &&
@@ -944,7 +944,7 @@ export default function SystemPage() {
                 </div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
                   <Cpu className="h-3 w-3" /> CPU
                 </div>
                 <div>
@@ -956,7 +956,7 @@ export default function SystemPage() {
               </div>
               {stats?.memory && (
                 <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Memory</div>
+                  <div className="text-xs text-muted-foreground">Memory</div>
                   <div>
                     {formatBytes(stats.memory.used)} / {formatBytes(stats.memory.total)} ({stats.memory.percent}%)
                   </div>
@@ -964,7 +964,7 @@ export default function SystemPage() {
               )}
               {stats?.disk && (
                 <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
                     <HardDrive className="h-3 w-3" /> Disk
                   </div>
                   <div>
@@ -974,13 +974,13 @@ export default function SystemPage() {
               )}
               {typeof stats?.uptime_seconds === "number" && (
                 <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Uptime</div>
+                  <div className="text-xs text-muted-foreground">Uptime</div>
                   <div>{formatDuration(stats.uptime_seconds)}</div>
                 </div>
               )}
               {stats?.load_avg && stats.load_avg.length >= 3 && (
                 <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Load avg</div>
+                  <div className="text-xs text-muted-foreground">Load avg</div>
                   <div>{stats.load_avg.map((n) => n.toFixed(2)).join(" / ")}</div>
                 </div>
               )}
@@ -1063,7 +1063,7 @@ export default function SystemPage() {
             </div>
             {portal?.features && portal.features.length > 0 && (
               <div className="flex flex-col gap-1 border-t border-border pt-3">
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Tool Gateway routing
                 </span>
                 {portal.features.map((f) => (
@@ -1139,7 +1139,7 @@ export default function SystemPage() {
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
-                className="uppercase"
+                className=""
                 onClick={() => runGateway("start")}
                 disabled={gatewayRunning}
                 prefix={<Play className="h-3.5 w-3.5" />}
@@ -1148,7 +1148,7 @@ export default function SystemPage() {
               </Button>
               <Button
                 size="sm"
-                className="uppercase"
+                className=""
                 onClick={requestRestart}
                 prefix={<RotateCw className="h-3.5 w-3.5" />}
               >
@@ -1156,7 +1156,7 @@ export default function SystemPage() {
               </Button>
               <Button
                 size="sm"
-                className="uppercase text-warning"
+                className=" text-warning"
                 ghost
                 onClick={() => runGateway("stop")}
                 disabled={!gatewayRunning}
@@ -1181,7 +1181,7 @@ export default function SystemPage() {
                 </span>
                 <Button
                   size="sm"
-                  className="uppercase"
+                  className=""
                   onClick={migrateToMultiplex}
                   disabled={!migratePlan.eligible}
                   title={migratePlan.eligible ? undefined : "Fix the blockers below first"}
@@ -1222,7 +1222,7 @@ export default function SystemPage() {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button size="sm" className="uppercase" onClick={addCredential} disabled={addingCred} prefix={addingCred ? <Spinner /> : undefined}>
+              <Button size="sm" className="" onClick={addCredential} disabled={addingCred} prefix={addingCred ? <Spinner /> : undefined}>
                 Add key
               </Button>
             </div>
@@ -1233,7 +1233,7 @@ export default function SystemPage() {
             )}
             {pool.map((prov) => (
               <div key={prov.provider} className="flex flex-col gap-2">
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   {prov.provider}
                 </span>
                 {prov.entries.map((entry) => (
@@ -1553,7 +1553,7 @@ export default function SystemPage() {
           <H2 variant="sm" className="flex items-center gap-2 text-muted-foreground">
             <Terminal className="h-4 w-4" /> Shell hooks
           </H2>
-          <Button size="sm" className="uppercase" prefix={<Plus className="h-3.5 w-3.5" />} onClick={() => setHookModalOpen(true)}>
+          <Button size="sm" className="" prefix={<Plus className="h-3.5 w-3.5" />} onClick={() => setHookModalOpen(true)}>
             New hook
           </Button>
         </div>

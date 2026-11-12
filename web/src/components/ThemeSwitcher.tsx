@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Palette, Check, Type } from "lucide-react";
+import { Palette, Check, Square, Type } from "lucide-react";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { ListItem } from "@nous-research/ui/ui/components/list-item";
 import { BottomSheet } from "@nous-research/ui/ui/components/bottom-sheet";
@@ -9,6 +9,8 @@ import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint
 import { BUILTIN_THEMES, THEME_DEFAULT_FONT_ID, useTheme } from "@/themes";
 import type { DashboardTheme, FontChoice, ThemeListEntry } from "@/themes";
 import { useI18n } from "@/i18n";
+import { RangeField } from "@/components/RangeField";
+import { setCornerOverride, useThemeCorners } from "@/lib/theme-corners";
 import { cn } from "@/lib/utils";
 
 /**
@@ -81,7 +83,7 @@ export function ThemeSwitcher({ collapsed = false, dropUp = false }: ThemeSwitch
 
           {!collapsed && (
             <Typography
-              className="hidden sm:inline text-display tracking-wide text-xs"
+              className="hidden sm:inline text-display text-xs"
             >
               {label}
             </Typography>
@@ -108,6 +110,7 @@ export function ThemeSwitcher({ collapsed = false, dropUp = false }: ThemeSwitch
               fontId={fontId}
               setFont={setFont}
             />
+            <CornerSection />
           </div>
         </BottomSheet>
       )}
@@ -133,7 +136,7 @@ export function ThemeSwitcher({ collapsed = false, dropUp = false }: ThemeSwitch
           >
             <div className="border-b border-current/20 px-3 py-2">
               <Typography
-                className="text-display text-xs tracking-[0.12em] text-text-tertiary"
+                className="text-display text-xs text-text-tertiary"
               >
                 {sheetTitle}
               </Typography>
@@ -150,6 +153,7 @@ export function ThemeSwitcher({ collapsed = false, dropUp = false }: ThemeSwitch
               fontId={fontId}
               setFont={setFont}
             />
+            <CornerSection />
           </div>
         );
         return dropUp ? createPortal(dropdown, document.body) : dropdown;
@@ -190,7 +194,7 @@ function ThemeSwitcherOptions({
 
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <Typography
-                className="truncate text-display text-xs tracking-wide"
+                className="truncate text-display text-xs"
               >
                 {th.label}
               </Typography>
@@ -232,7 +236,7 @@ function FontSection({ fontChoices, fontId, setFont }: FontSectionProps) {
         <span className="inline-flex items-center gap-1.5">
           <Type className="h-3 w-3 text-text-tertiary" />
           <Typography
-            className="text-display text-xs tracking-[0.12em] text-text-tertiary"
+            className="text-display text-xs text-text-tertiary"
           >
             {t.theme?.fontTitle ?? "Font"}
           </Typography>
@@ -271,7 +275,7 @@ function FontSection({ fontChoices, fontId, setFont }: FontSectionProps) {
         return (
           <div key={cat}>
             <div className="px-3 pb-0.5 pt-1.5">
-              <Typography className="text-[0.65rem] uppercase tracking-[0.1em] text-text-tertiary">
+              <Typography className="text-[0.65rem] text-text-tertiary">
                 {catLabel}
               </Typography>
             </div>
@@ -355,4 +359,69 @@ interface FontSectionProps {
 interface ThemeSwitcherProps {
   collapsed?: boolean;
   dropUp?: boolean;
+}
+
+function parseRadiusPx(value: string | undefined, rootFontSize: number): number {
+  if (!value) return 0;
+  const trimmed = value.trim();
+  const parsed = Number.parseFloat(trimmed);
+  if (!Number.isFinite(parsed)) return 0;
+  if (trimmed.endsWith("rem") || trimmed.endsWith("em")) return parsed * rootFontSize;
+  return parsed;
+}
+
+/**
+ * Corner-radius controls. Buttons and containers/modals round separately
+ * because a pill button over a square panel is a deliberate look, not a
+ * half-applied scale factor. Both start from the active theme radius and
+ * become explicit overrides as soon as either control moves.
+ */
+function CornerSection() {
+  const { availableThemes, themeName } = useTheme();
+  const corners = useThemeCorners();
+  const activeTheme =
+    BUILTIN_THEMES[themeName] ??
+    availableThemes.find((entry) => entry.name === themeName)?.definition;
+  const rootFontSize =
+    typeof window === "undefined"
+      ? 16
+      : Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const themeRadius = parseRadiusPx(activeTheme?.layout.radius, rootFontSize);
+  const isOverridden = corners.button !== null || corners.container !== null;
+
+  return (
+    <>
+      <div className="mt-1 flex items-center justify-between gap-2 border-t border-current/20 px-3 pb-1 pt-2">
+        <span className="inline-flex items-center gap-1.5">
+          <Square className="h-3 w-3 text-text-tertiary" />
+          <Typography className="text-display text-xs text-text-tertiary">
+            Corners
+          </Typography>
+        </span>
+        {isOverridden && (
+          <button
+            className="text-xs text-text-tertiary transition-colors hover:text-midground"
+            onClick={() => {
+              setCornerOverride("button", null);
+              setCornerOverride("container", null);
+            }}
+            type="button"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      <RangeField
+        label="Button corners"
+        onChange={(value) => setCornerOverride("button", value)}
+        value={Math.round(corners.button ?? Math.max(0, themeRadius - 2))}
+      />
+      <RangeField
+        label="Container corners"
+        onChange={(value) => setCornerOverride("container", value)}
+        value={Math.round(corners.container ?? themeRadius)}
+      />
+    </>
+  );
 }

@@ -43,48 +43,71 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Hermes Agent — Nous DS with the LENS_0 (Hermes teal) palette applied
+/* Inter — the dashboard's one UI typeface.                            */
+/* Bundled as a tracked source asset (OFL-1.1) so the shell reads the  */
+/* same offline and after a fresh clone: the Google-Fonts presets only */
+/* inject their mono faces at runtime. Variable axis 100-900, latin.   */
+/* ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/InterVariable-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hermes Agent — Nous DS with the Neutral (Meet) palette applied
    statically as the default dashboard theme. */
 /* ------------------------------------------------------------------ */
 
 :root {
   /* LENS_0 — from design-language/src/ui/components/overlays/index.tsx.
-     These are the defaults for the `default` (Hermes Teal) dashboard theme;
+     These are the defaults for the `default` (Neutral) dashboard theme;
      ThemeProvider rewrites them as inline styles when a user switches themes. */
   --foreground: color-mix(in srgb, #ffffff 0%, transparent);
   --foreground-base: #ffffff;
   --foreground-alpha: 0;
-  --midground: color-mix(in srgb, #ffe6cb 100%, transparent);
-  --midground-base: #ffe6cb;
+  --midground: color-mix(in srgb, #eeeeee 100%, transparent);
+  --midground-base: #eeeeee;
   --midground-alpha: 1;
-  --background: color-mix(in srgb, #041c1c 100%, transparent);
-  --background-base: #041c1c;
+  --background: color-mix(in srgb, #171717 100%, transparent);
+  --background-base: #171717;
   --background-alpha: 1;
 
-  /* Typography tokens — rewritten by ThemeProvider. Defaults match the
-     system stack so themes that don't override look native. */
-  --theme-font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
+  /* Typography tokens — rewritten by ThemeProvider. Inter is the single
+     UI face; the system stack after it is the last-resort fallback. */
+  --theme-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --theme-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
     Consolas, monospace;
   --theme-font-display: var(--theme-font-sans);
-  --theme-base-size: 15px;
-  --theme-line-height: 1.55;
+  --theme-base-size: 14px;
+  --theme-line-height: 1.45;
   --theme-letter-spacing: 0;
 
   /* Layout tokens. */
-  --radius: 0.5rem;
-  --theme-radius: 0.5rem;
+  --radius: 0.75rem;
+  --theme-radius: 0.75rem;
+  /* Corners split in two so buttons and panels/modals can round
+     independently: the theme's radius feeds both by default, and the
+     theme engine's sliders override either one at runtime. */
+  --theme-radius-button: calc(var(--theme-radius) - 2px);
+  --theme-radius-container: var(--theme-radius);
   --theme-spacing-mul: 1;
   --theme-density: comfortable;
 
   /* Data-series accents — consumed by Analytics + Models pages for the
      input-vs-output token visualisations (chart bars, table values,
-     legend swatches). Defaults are tuned for the Hermes-teal LENS_0
+     legend swatches). Defaults are tuned for the neutral grey scale
      look: cream input + emerald-400 output read as warm/cool against
      the dark canvas. Themes override via ThemeProvider, which emits
      these as `--series-input-token` / `--series-output-token`. */
-  --series-input-token: #ffe6cb;
+  --series-input-token: #eeeeee;
   --series-output-token: #34d399;
 }
 
@@ -120,6 +143,12 @@ code, kbd, pre, samp, .font-mono, .font-mono-ui {
   --spacing: calc(0.25rem * var(--theme-spacing-mul, 1));
   --font-sans: var(--theme-font-sans);
   --font-mono: var(--theme-font-mono);
+  /* Type policy: the tracked "label" look is retired, so the wide end of
+     the tracking scale collapses to normal spacing everywhere. Acronyms
+     stay legible through the letters themselves, not through tracking. */
+  --tracking-wide: 0em;
+  --tracking-wider: 0em;
+  --tracking-widest: 0em;
 }
 
 #root {
@@ -180,12 +209,27 @@ code { font-size: 0.875rem; }
   --color-popover: color-mix(in srgb, var(--midground-base) 4%, var(--background-base));
   --color-popover-foreground: var(--midground);
 
-  --radius-sm: calc(var(--theme-radius) - 4px);
-  --radius-md: calc(var(--theme-radius) - 2px);
-  --radius-lg: var(--theme-radius);
-  --radius-xl: calc(var(--theme-radius) + 4px);
+  --radius-sm: calc(var(--theme-radius-button) - 2px);
+  --radius-md: var(--theme-radius-button);
+  --radius-lg: var(--theme-radius-container);
+  --radius-xl: calc(var(--theme-radius-container) + 4px);
 }
 
+
+/* Reorder feedback for the left nav: the row being dragged lifts away from
+   the list while the others slide to their new slots (the slide itself is a
+   FLIP transform applied by `useSidebarDrag`). */
+[data-nav-path].nav-row-dragging {
+  position: relative;
+  z-index: 1;
+  opacity: 0.9;
+  box-shadow: 0 10px 24px -16px rgb(0 0 0 / 0.9);
+}
+
+body.nav-dragging-active {
+  cursor: grabbing;
+  user-select: none;
+}
 
 /* Collapsed sidebar tooltip entrance — skipped when moving between items. */
 @keyframes sidebar-tooltip-in {
@@ -229,6 +273,55 @@ code { font-size: 0.875rem; }
    still apply here. */
 .font-mono-ui {
   font-family: var(--theme-font-mono);
+}
+
+/* One UI typeface. The DS's display chrome (`font-mondwest`) and its
+   display-stack aliases are hardcoded families, not theme tokens, so map
+   them back onto the UI stack: headings, dialogs and page titles share the
+   body's Inter instead of Mondwest. Monospace surfaces (code, the terminal,
+   `.font-mono-ui`) keep the theme's mono stack. */
+.font-mondwest,
+.font-display {
+  font-family: var(--theme-font-sans);
+}
+
+/* Type policy: never render body copy in all caps. Only `.text-display`
+   (the DS chrome utility) and Tailwind's `.uppercase` transform text, so
+   both are neutralised here rather than at 90-odd call sites; strings that
+   are acronyms keep their caps because they are typed that way. */
+.text-display,
+.uppercase {
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+/* The design system and plugin bundles bake one-off `tracking-[0.2em]`-style
+   utilities into their own markup, which no source sweep can reach. Catch
+   them by class-name shape: anything tracked is decorative, so flatten it. */
+[class*="tracking-["] {
+  letter-spacing: 0;
+}
+
+/* Titles are upright — italic display type reads as emphasis the words
+   don't carry, and it fights the single-face type system. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-style: normal;
+}
+
+/* The remaining display faces (Rules Expanded/Compressed) are declared as
+   standalone `--font-*` tokens by the DS rather than theme tokens, so
+   retarget the tokens themselves: no heading, eyebrow or badge renders in a
+   second typeface. */
+:root {
+  --font-mondwest: var(--theme-font-sans);
+  --font-rules-compressed: var(--theme-font-sans);
+  --font-rules-expanded: var(--theme-font-sans);
 }
 
 /* Subtle grain overlay for badges. */

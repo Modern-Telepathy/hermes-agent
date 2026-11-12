@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "suite-calendar",
+  "display_name": "Calendar",
+  "version": "0.1.0",
+  "description": "Calendar and Tasks over plain files in the shared suite/ folder: month, week, day and agenda views, recurring events, reminders, .ics import/export, a task list, board and today view, and optional agent runs on a schedule.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "main",
+        "title": "Calendar",
+        "path": "/main",
+        "nav_label": "Calendar",
+        "description": "Events, tasks and scheduled agent runs, stored as markdown files agents can edit too."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "#9a9bff"
+  }
+}

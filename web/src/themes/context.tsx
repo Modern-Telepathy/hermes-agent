@@ -1,3 +1,4 @@
+import { applyCornerOverrides } from "@/lib/theme-corners";
 import {
   createContext,
   useCallback,
@@ -468,6 +469,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     _ACTIVE_FONT_OVERRIDE = fontId;
     applyTheme(resolveTheme(themeName));
+    // Theme application rewrites the base radius; re-assert the user's
+    // per-surface corner overrides afterwards so they survive a switch.
+    applyCornerOverrides();
   }, [themeName, resolveTheme, fontId]);
 
   // Load server-side themes (built-ins + user YAMLs) once on mount.

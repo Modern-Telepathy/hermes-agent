@@ -135,7 +135,7 @@ export function SidebarDateDivider({
   toggle?: { ariaLabel: string; onToggle: () => void; open: boolean }
 }) {
   const caption = (
-    <span className="shrink-0 text-[0.64rem] font-semibold uppercase tracking-[0.12em] text-(--ui-text-quaternary)">
+    <span className="shrink-0 text-[0.64rem] font-semibold text-(--ui-text-quaternary)">
       {label}
     </span>
   )
