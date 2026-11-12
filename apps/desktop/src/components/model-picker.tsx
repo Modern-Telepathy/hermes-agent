@@ -400,7 +400,7 @@ function ModelResults({
                   <span className="text-[0.62rem] tabular-nums text-muted-foreground">{loadProgress.percent}%</span>
                 </span>
               )}
-              {locked && <span className="shrink-0 text-[0.62rem] uppercase tracking-wide opacity-80">{copy.pro}</span>}
+              {locked && <span className="shrink-0 text-[0.62rem] opacity-80">{copy.pro}</span>}
               {resetLabel && (
                 <Badge
                   className="font-sans tabular-nums"
@@ -626,7 +626,7 @@ function UsageBar({ gauge, isCurrent }: { gauge: PlanUsageGauge; isCurrent?: boo
 /** Window plans: "Recommended" / "Other models" title inside a provider group (not selectable). */
 function ModelSectionLabel({ children }: { children: string }) {
   return (
-    <div className="px-6 pb-1 pt-2 text-[0.62rem] font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="px-6 pb-1 pt-2 text-[0.62rem] font-medium text-muted-foreground">
       {children}
     </div>
   )
@@ -771,7 +771,7 @@ function ModelPrice({ price, isCurrent }: { price?: ModelPricing; isCurrent: boo
         ) : null}
         <span
           className={cn(
-            'shrink-0 rounded-sm px-1 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide',
+           'shrink-0 rounded-sm px-1 py-0.5 text-[0.62rem] font-semibold',
             isCurrent ? 'bg-primary-foreground/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
           )}
         >
@@ -842,15 +842,15 @@ function ProviderHeading({ provider }: { provider: ModelOptionProvider }) {
 
   const tierBadge =
     provider.plan_usage?.kind === 'usage_window' && planName ? (
-      <span className="rounded-sm bg-primary/15 px-1 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-primary">
+      <span className="rounded-sm bg-primary/15 px-1 py-0.5 text-[0.6rem] font-semibold text-primary">
         {planName}
       </span>
     ) : provider.free_tier === true || provider.free_tier_row === true ? (
-      <span className="rounded-sm bg-emerald-500/15 px-1 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+      <span className="rounded-sm bg-emerald-500/15 px-1 py-0.5 text-[0.6rem] font-semibold text-emerald-600 dark:text-emerald-400">
         {copy.freeTier}
       </span>
     ) : provider.free_tier === false ? (
-      <span className="rounded-sm bg-primary/15 px-1 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-primary">
+      <span className="rounded-sm bg-primary/15 px-1 py-0.5 text-[0.6rem] font-semibold text-primary">
         {copy.pro}
       </span>
     ) : null

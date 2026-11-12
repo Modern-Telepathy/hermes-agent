@@ -55,7 +55,7 @@ export function CanonicalGroupRoomSettings({ autoRouting = false, binding, conte
   }
 
   return <div className="grid min-w-0 gap-1.5">
-    <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-(--ui-text-tertiary)">{labels.purposeLabel}</span>
+    <span className="text-[0.6875rem] font-semibold text-(--ui-text-tertiary)">{labels.purposeLabel}</span>
     {context?.purpose && <p className="line-clamp-3 text-xs text-foreground" title={context.purpose}>{context.purpose}</p>}
     <Button className="justify-self-start" disabled={disabled || !context} onClick={open} size="sm" variant="outline">{labels.roomSettings}</Button>
     {draft && <Dialog onOpenChange={value => !value && !saving && setDraft(null)} open>

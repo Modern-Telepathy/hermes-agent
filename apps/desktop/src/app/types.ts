@@ -126,9 +126,18 @@ export interface HandoffFailResponse {
 }
 
 export type SidebarNavId =
-  'artifacts' | 'capabilities' | 'command-center' | 'cron' | 'messaging' | 'new-session' | 'settings'
+  | 'artifacts'
+  | 'capabilities'
+  | 'command-center'
+  | 'cron'
+  | 'messaging'
+  | 'new-session'
+  | 'plugins'
+  | 'settings'
 
 export interface SidebarNavItem extends Tiered {
+  /** Page of the local web dashboard this row opens (plugin apps live there). */
+  dashboardPath?: string
   /** Built-in view id, or a contributed row's namespaced contribution id. */
   id: SidebarNavId | (string & {})
   label: string

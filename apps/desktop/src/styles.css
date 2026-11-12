@@ -124,6 +124,25 @@
   src: url('./fonts/JetBrainsMono-Italic.woff2') format('woff2');
 }
 
+/* Inter — bundled UI face for themes that choose it (the Meet skin), so the
+   default dashboard typeface ships with the app instead of a stylesheet URL. */
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/InterVariable-latin.woff2') format('woff2');
+}
+
+/* Runtime-overridable corner radii. Declared OUTSIDE @theme so they are always
+   emitted as real custom properties; store/theme-corners.ts overrides them on
+   :root, and every `rounded-*` utility resolves through them. A pill button
+   over a square panel is a deliberate pair, not one scale factor. */
+:root {
+  --theme-radius-button: calc(var(--radius-scalar, 1) * 0.625rem);
+  --theme-radius-container: calc(var(--radius-scalar, 1) * 0.75rem);
+}
+
 @theme inline {
   --color-background: var(--dt-background);
   --color-foreground: var(--dt-foreground);
@@ -153,11 +172,11 @@
 
   --spacing-mul: var(--dt-spacing-mul, 1);
 
-  --radius-xs: calc(var(--radius-scalar) * 0.125rem);
-  --radius-sm: calc(var(--radius-scalar) * 0.5rem);
-  --radius-md: calc(var(--radius-scalar) * 0.625rem);
-  --radius-lg: calc(var(--radius-scalar) * 0.75rem);
-  --radius-xl: calc(var(--radius-scalar) * 1rem);
+  --radius-xs: calc(var(--radius-scalar, 1) * 0.125rem);
+  --radius-sm: calc(var(--radius-scalar, 1) * 0.5rem);
+  --radius-md: var(--theme-radius-button);
+  --radius-lg: var(--theme-radius-container);
+  --radius-xl: calc(var(--radius-scalar, 1) * 1rem);
   --radius-2xl: calc(var(--radius-scalar) * 1.5rem);
   --radius-3xl: calc(var(--radius-scalar) * 2rem);
   --radius-4xl: calc(var(--radius-scalar) * 2.5rem);
@@ -539,7 +558,8 @@
     --sticky-human-top: 0.23rem;
     --file-tree-row-height: 1.375rem;
 
-    --composer-width: 100%;
+    /* One capped column for the transcript and the composer, centred in the pane. */
+    --composer-width: 48rem;
     --composer-control-size: 1.5rem;
     --composer-control-primary-size: 1.625rem;
     --composer-voice-menu-size: 1.25rem;
@@ -1988,10 +2008,9 @@ body.guest-pointer-lock :is(webview, iframe) {
 }
 
 [data-slot='aui_intro'] {
-  align-items: center;
-  justify-content: center;
-  padding-bottom: var(--composer-measured-height);
-  text-align: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
 }
 
 [data-slot='aui_intro'] > div {
@@ -2000,7 +2019,6 @@ body.guest-pointer-lock :is(webview, iframe) {
 
 [data-slot='aui_intro'] p:last-child {
   max-width: 34rem;
-  margin-inline: auto;
   color: var(--ui-text-tertiary);
   font-size: 0.875rem;
   line-height: 1.45;
@@ -4266,4 +4284,28 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
 .aui-error-details .aui-error-details-link:hover {
   background: none;
   color: var(--err-ink);
+}
+
+/* A sidebar section's heading is chrome, not content: it stays put while the
+   rows below it scroll. It paints nothing of its own — the sidebar surface
+   already sits behind it, and a fill here reads as a darker band. */
+[data-sidebar-section] [data-section-heading] {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* A collapsed section is just its heading: drop a stored resize height so the
+   grip follows the heading up instead of leaving an empty gap below it. The
+   marker is the section's OWN open state, never a nested collapsible row. */
+[data-sidebar-section]:has(> [data-section-open='false']),
+[data-sidebar-section][data-section-open='false'] {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* A closed group keeps no floor either: Sessions' root carries min-h-32, which
+   otherwise leaves a 128px blank block under its heading. */
+[data-sidebar-section]:has(> [data-section-open='false']) [data-slot='sidebar-group'] {
+  min-height: 0 !important;
 }

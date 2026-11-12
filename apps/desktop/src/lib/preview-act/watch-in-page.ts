@@ -430,7 +430,7 @@ export function watchInPage(doc: Document, holder: WatchHolder, stage: WatchStag
       overflow: 'hidden',
       padding: '0 ' + nudge + 'px',
       position: 'absolute',
-      'text-transform': 'uppercase',
+     'text-transform':'',
       'white-space': 'nowrap'
     })
 

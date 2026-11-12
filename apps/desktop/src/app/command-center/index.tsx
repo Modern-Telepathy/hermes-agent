@@ -543,7 +543,7 @@ export function CommandCenterView({
 
                 <div className="flex min-h-0 flex-col pt-2">
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                    <span className="text-[0.625rem] font-medium uppercase tracking-[0.08em] text-(--ui-text-tertiary)">
+                    <span className="text-[0.625rem] font-medium text-(--ui-text-tertiary)">
                       {cc.recentLogs}
                     </span>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -669,7 +669,7 @@ function UsagePanel({ error, loading, onRefresh, period, usage }: UsagePanelProp
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-[0.625rem] font-medium uppercase tracking-[0.08em] text-(--ui-text-tertiary)">
+          <span className="text-[0.625rem] font-medium text-(--ui-text-tertiary)">
             {cc.dailyTokens}
           </span>
           <span className="flex items-center gap-3 text-[0.65rem] text-(--ui-text-tertiary)">
@@ -753,7 +753,7 @@ function UsageList({
 }) {
   return (
     <section className="min-w-0">
-      <div className="mb-1.5 text-[0.625rem] font-medium uppercase tracking-[0.08em] text-(--ui-text-tertiary)">
+      <div className="mb-1.5 text-[0.625rem] font-medium text-(--ui-text-tertiary)">
         {title}
       </div>
       {rows.length === 0 ? (
@@ -777,7 +777,7 @@ function UsageList({
 function UsageStat({ hint, label, value }: { hint?: string; label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <div className="text-[0.625rem] font-medium uppercase tracking-[0.12em] text-(--ui-text-tertiary)">{label}</div>
+      <div className="text-[0.625rem] font-medium text-(--ui-text-tertiary)">{label}</div>
       <div className="mt-1 truncate text-base font-semibold tracking-tight text-foreground">{value}</div>
       {hint && <div className="mt-0.5 truncate text-[0.62rem] text-(--ui-text-tertiary)">{hint}</div>}
     </div>

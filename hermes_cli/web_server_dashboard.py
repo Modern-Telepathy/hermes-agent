@@ -648,6 +648,15 @@ def _strip_dashboard_manifest(p: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in p.items() if not k.startswith("_")}
 
 
+def dashboard_plugin_manifests() -> list[dict[str, Any]]:
+    """Every ``<plugin>/dashboard/manifest.json`` as a plain manifest dict.
+
+    The dashboard's own sidebar and the Desktop's Plugins nav both read this,
+    so the two surfaces can never disagree about which plugins have a page.
+    """
+    return [_strip_dashboard_manifest(p) for p in _discover_dashboard_plugins()]
+
+
 _PLUGINS_HUB_CACHE_TTL_SECONDS = 5.0
 _plugins_hub_cache: dict[str, dict[str, Any]] = {}
 _plugins_hub_cache_expires_at: dict[str, float] = {}

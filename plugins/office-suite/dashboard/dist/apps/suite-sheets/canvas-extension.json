@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "suite-sheets",
+  "display_name": "Sheets",
+  "version": "0.1.0",
+  "description": "Spreadsheet editor for the Kosmos Suite: virtualised grid, formulas, formats, charts, xlsx/ods/csv import and export over plain .csv and .sheet.json files in the workspace suite/ folder.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "main",
+        "title": "Sheets",
+        "path": "/main",
+        "nav_label": "Sheets",
+        "description": "Edit suite/sheets/**/*.csv and *.sheet.json with live agent edits, conflict handling and range links for Docs and Slides."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "#9a9bff"
+  }
+}

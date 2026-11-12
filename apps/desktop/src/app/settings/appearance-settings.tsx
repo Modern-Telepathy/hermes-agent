@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { useDebounced } from '@/app/hooks/use-debounced'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import { Button } from '@/components/ui/button'
 import { SearchField } from '@/components/ui/search-field'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { Slider } from '@/components/ui/slider'
@@ -36,6 +37,13 @@ import { $reasoningCollapsedByDefault, setReasoningCollapsedByDefault } from '@/
 import { $sessionListDensity, type SessionListDensity, setSessionListDensity } from '@/store/session-list-density'
 import { $tabStripDefault, setTabStripDefault, type TabStripDefault } from '@/store/tabstrip-prefs'
 import { $textDirection, setTextDirection, TEXT_DIRECTIONS, type TextDirection } from '@/store/text-direction'
+import {
+  $themeCorners,
+  MAX_CORNER_RADIUS,
+  MIN_CORNER_RADIUS,
+  resetThemeCorners,
+  setThemeCorner
+} from '@/store/theme-corners'
 import { $hideThreadTimeline, setHideThreadTimeline } from '@/store/thread-timeline'
 import { $spentTipCount, $tipsEnabled, resetTips, setTipsEnabled } from '@/store/tips'
 import {
@@ -389,6 +397,36 @@ function TranslucencySlider({ label, onChange, value }: TranslucencySliderProps)
   )
 }
 
+// The stylesheet's theme-derived radii, mirrored here so a slider that is
+// following the theme still shows a sensible thumb position.
+const CORNER_DEFAULT_PX = { button: 10, container: 12 } as const
+
+/** One 0–24px lever for a corner kind, independent of the other kind. */
+function CornerSlider({ kind, label }: { kind: 'button' | 'container'; label: string }) {
+  const corners = useStore($themeCorners)
+  const value = corners[kind] ?? CORNER_DEFAULT_PX[kind]
+
+  return (
+    <label className="flex items-center gap-3">
+      <span className="w-20 text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{label}</span>
+      <Slider
+        aria-label={`${label} corner radius`}
+        max={MAX_CORNER_RADIUS}
+        min={MIN_CORNER_RADIUS}
+        onChange={event => {
+          triggerHaptic('selection')
+          setThemeCorner(kind, Number(event.target.value))
+        }}
+        step={1}
+        value={value}
+      />
+      <span className="w-12 text-right text-[length:var(--conversation-caption-font-size)] tabular-nums text-(--ui-text-tertiary)">
+        {corners[kind] === null ? 'Theme' : `${corners[kind]}px`}
+      </span>
+    </label>
+  )
+}
+
 interface GlassRowProps {
   children: React.ReactNode
   label: string
@@ -665,6 +703,24 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
               id={settingElementId(ids.theme)}
               title={a.themeTitle}
               wide
+            />
+          )}
+
+          {show('theme') && (
+            <ListRow
+              below={
+                <div className="mt-3 grid gap-2">
+                  <CornerSlider kind="button" label="Buttons" />
+                  <CornerSlider kind="container" label="Containers" />
+                  <div>
+                    <Button onClick={resetThemeCorners} size="sm" variant="ghost">
+                      Follow the theme
+                    </Button>
+                  </div>
+                </div>
+              }
+              description="Round buttons and containers separately. The theme supplies the default; a value here overrides it."
+              title="Corner radius"
             />
           )}
 

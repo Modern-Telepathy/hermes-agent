@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "suite-notes",
+  "display_name": "Notes",
+  "version": "0.1.0",
+  "description": "Notes: a calm markdown vault with live preview, [[wikilinks]], backlinks, a graph view, daily notes, dictation and an agent composer. Plain files in suite/notes/ that agents can edit while you write.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "main",
+        "title": "Notes",
+        "path": "/main",
+        "nav_label": "Notes",
+        "description": "Markdown notes vault: live preview editor, wikilinks, backlinks, graph, daily notes."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "#9a9bff"
+  }
+}

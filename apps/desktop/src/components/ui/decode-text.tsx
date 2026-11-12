@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
  *    no timer logic (even a stale HMR one) can garble them.
  *  - Optional blinking dither-cursor square.
  *
- * Typography (mono, small, uppercase, wide tracking) is baked in; color comes
+ * Typography (mono, small, , wide tracking) is baked in; color comes
  * from the caller via className/text color so the same primitive works on the
  * boot overlay (--theme-primary) and quiet surfaces (--ui-text-quaternary).
  */
@@ -107,7 +107,7 @@ export function DecodeText({
   return (
     <span
       className={cn(
-        'inline-flex items-center font-mono text-[0.64rem] font-semibold uppercase tracking-[0.4em] tabular-nums',
+       'inline-flex items-center font-mono text-[0.64rem] font-semibold tabular-nums',
         className
       )}
       {...props}

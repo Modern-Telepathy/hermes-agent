@@ -371,7 +371,8 @@ const classicPalette = (colors: Record<string, string>) => skinToDesktopTheme({ 
 /**
  * Classic Hermes — the CLI's stock `default` skin (gold on navy), offered as a
  * Desktop pick under its OWN id. Never `default`: stock config ships
- * `display.skin: default`, and Desktop reads that as "no pick" (→ nous), so a
+ * `display.skin: default`, and Desktop reads that as "no pick" (→ the default
+ * skin), so a
  * user only ever gets Classic by choosing it (#76579). Both palettes go through
  * the converter a backend skin takes, so each mode paints what the CLI paints
  * in a dark or light terminal.
@@ -441,6 +442,49 @@ export const slateTheme: DesktopTheme = {
   }
 }
 
+// Meet — the dashboard's default look, carried to the native surface: a neutral
+// near-black canvas, a light midground instead of a brand accent, Inter, and
+// the rounded-panel radius the web shell uses. The tones mirror the dashboard's
+// `--mt-bg` / `--mt-panel` / `--mt-text` so a session looks the same in either
+// surface. Light mode is synthesized from these (no hand-tuned light palette).
+const MEET_SANS = `'Inter Variable', 'Inter', ${SYSTEM_SANS}`
+
+export const meetTheme: DesktopTheme = {
+  name: 'meet',
+  label: 'Meet',
+  description: 'Neutral canvas, Inter type, rounded panels',
+  colors: {
+    background: '#171717',
+    foreground: '#eeeeee',
+    card: '#1c1c1c',
+    cardForeground: '#eeeeee',
+    muted: '#232323',
+    mutedForeground: '#a3a3a3',
+    popover: '#1c1c1c',
+    popoverForeground: '#eeeeee',
+    primary: '#eeeeee',
+    primaryForeground: '#171717',
+    secondary: '#262626',
+    secondaryForeground: '#eeeeee',
+    accent: '#2e2e2e',
+    accentForeground: '#eeeeee',
+    border: '#2e2e2e',
+    input: '#2e2e2e',
+    ring: '#8a8a8a',
+    midground: '#eeeeee',
+    destructive: '#f87171',
+    destructiveForeground: '#171717',
+    sidebarBackground: '#141414',
+    sidebarBorder: '#262626',
+    userBubble: '#262626',
+    userBubbleBorder: '#303030'
+  },
+  typography: {
+    fontSans: MEET_SANS,
+    fontMono: SYSTEM_MONO
+  }
+}
+
 export const BUILTIN_THEMES: Record<string, DesktopTheme> = {
   nous: nousTheme,
   github: githubTheme,
@@ -453,13 +497,19 @@ export const BUILTIN_THEMES: Record<string, DesktopTheme> = {
   ember: emberTheme,
   mono: monoTheme,
   slate: slateTheme,
-  cyberpunk: cyberpunkTheme
+  cyberpunk: cyberpunkTheme,
+  meet: meetTheme
 }
 
 export const BUILTIN_THEME_LIST = Object.values(BUILTIN_THEMES)
 
-/** Skin used when nothing is persisted or the persisted name is retired. */
-export const DEFAULT_SKIN_NAME = 'nous'
+/** Skin used when nothing is persisted or the persisted name is retired. Mono
+ *  is the neutral grayscale default: no brand accent, no stock-config
+ *  collision (the CLI's `default` skin is Classic, not this). */
+export const DEFAULT_SKIN_NAME = 'mono'
+
+/** The theme every unresolved/retired name falls back to. */
+export const DEFAULT_THEME = BUILTIN_THEMES[DEFAULT_SKIN_NAME]
 
 /** Names that no longer resolve to a skin of their own. A stored pick of one
  *  falls back to DEFAULT_SKIN_NAME, and a cached backend theme under one is

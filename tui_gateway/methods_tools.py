@@ -1676,6 +1676,14 @@ def _plugin_rows() -> list[dict]:
     out = []
     active = pc._category_active_names()
     owned_tools = _plugin_tool_ownership()
+    # Dashboard-only plugins (a Webapp page, no agent half) are still real
+    # plugins to a person; carry their manifest so Desktop's Plugins nav lists
+    # the same tabs. One scan for the whole listing.
+    try:
+        dash_manifests = _tools_mod("hermes_cli.web_server_dashboard").dashboard_plugin_manifests()
+    except Exception:
+        dash_manifests = []
+    dash_by_name = {str(m.get("name") or ""): m for m in dash_manifests}
     for name, version, desc, source, _dir, key in sorted(pc._discover_all_plugins()):
         # Bundled backends/platforms/providers and the live memory provider run without an explicit
         # enable: _plugin_status reports the truthful default instead of "not enabled" (reads as OFF).
@@ -1695,6 +1703,7 @@ def _plugin_rows() -> list[dict]:
             "servers": _plugin_server_rows(_dir_path, key, portable=portable, catalog_titles=titles),
             # Tools this package's own code registered: Desktop's tool-media renderer ownership check.
             "tools": owned_tools.get(key, []),
+            "dashboard_manifest": dash_by_name.get(name),
             **cat.catalog_row_fields(_dir, pins, versions),
             **({"update_available": True, "update_target": target}
                if _dir_path and (target := git_updates.get(_dir_path.name)) else {}),
@@ -1737,7 +1746,16 @@ def _with_activation(result: dict, name: str) -> dict:
 def _plugins_list(rid, params):
     rows = _plugin_rows()
     user_count = sum(1 for r in rows if r["source"] != "bundled")
-    return _ok(rid, {"plugins": rows, "user_count": user_count, "bundled_count": len(rows) - user_count})
+    # A dashboard page with no agent half has no row of its own above; list it
+    # separately so Desktop can still show it under Plugins.
+    try:
+        manifests = _tools_mod("hermes_cli.web_server_dashboard").dashboard_plugin_manifests()
+    except Exception:
+        manifests = []
+    names = {str(r.get("name") or "") for r in rows}
+    orphans = [m for m in manifests if str(m.get("name") or "") not in names]
+    return _ok(rid, {"plugins": rows, "user_count": user_count, "bundled_count": len(rows) - user_count,
+                     "orphan_dashboard_plugins": orphans})
 
 
 def _plugins_toggle(rid, params):

@@ -1,0 +1,12 @@
+{
+  "name": "office-docs",
+  "label": "Docs",
+  "description": "Rich-text documents on plain markdown in the shared suite workspace: wikilinks, live sheet embeds, docx/odt/html import and export.",
+  "icon": "FileText",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/office/docs",
+    "position": "after:chat"
+  },
+  "entry": "dist/index.js"
+}

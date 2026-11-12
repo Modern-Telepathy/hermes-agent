@@ -1,0 +1,12 @@
+{
+  "name": "office-notes",
+  "label": "Notes",
+  "description": "A markdown vault with live preview, wikilinks, backlinks, graph view and daily notes, stored as plain files.",
+  "icon": "FileText",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/office/notes",
+    "position": "after:office/slides"
+  },
+  "entry": "dist/index.js"
+}

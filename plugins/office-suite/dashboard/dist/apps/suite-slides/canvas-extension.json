@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "suite-slides",
+  "display_name": "Slides",
+  "version": "0.1.0",
+  "description": "Slide decks on plain markdown files in the shared suite/ folder: filmstrip, inline editing on the slide, live sheet and doc embeds, presenter mode with speaker view, .pptx/.html/.pdf export, .pptx import, and live reload when an agent edits the deck.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "main",
+        "title": "Slides",
+        "path": "/main",
+        "nav_label": "Slides",
+        "description": "Build and present decks stored as markdown in suite/slides."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "#9a9bff"
+  }
+}

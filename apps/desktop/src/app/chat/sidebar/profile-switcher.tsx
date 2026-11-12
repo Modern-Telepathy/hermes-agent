@@ -108,6 +108,7 @@ import { buildRestGroups, countRestAgents, type FleetAgent, type FleetGroup, fle
 import { useLocalDeviceSwitch } from './local-device-switch'
 import { ProfileLaunchContextMenu, ProfileLaunchMenuSection } from './profile-launch-menu'
 import { ProfileRemoteOverrideDialog } from './profile-remote-override-dialog'
+import { ThemeHovercard } from './theme-hovercard'
 import { ProfileRowGlyph, UnservedProfileNote, useUnservedProfiles } from './unserved-profiles'
 import { useFleetRoster } from './use-fleet-roster'
 import { useProfilePrewarm } from './use-profile-prewarm'
@@ -669,6 +670,8 @@ export function ProfileRail() {
           <ImportProfileButton label={p.importProfile} />
         </>
       )}
+
+      <ThemeHovercard />
 
       {/* Always reachable, even with only the default profile: the manage
           overlay is the only place to edit a profile's SOUL.md, and a
@@ -1326,7 +1329,7 @@ function RestSquare({
                   <button
                     aria-busy={pending || undefined}
                     aria-label={statusText ? `${label}, ${statusText}` : label}
-                    className="relative grid size-5 shrink-0 select-none place-items-center rounded-[3px] text-[0.5625rem] font-semibold uppercase leading-none opacity-55 transition-opacity hover:opacity-100 aria-busy:opacity-100"
+                    className="relative grid size-5 shrink-0 select-none place-items-center rounded-[3px] text-[0.5625rem] font-semibold leading-none opacity-55 transition-opacity hover:opacity-100 aria-busy:opacity-100"
                     data-connection-id={agent.connectionId}
                     data-profile={agent.profile}
                     data-slot="profile-rail-rest-square"
@@ -1506,7 +1509,7 @@ function ProfileSquare({
                 <TooltipTrigger asChild>
                   <button
                     className={cn(
-                      'relative grid size-5 shrink-0 cursor-grab touch-none select-none place-items-center rounded-[3px] text-[0.5625rem] font-semibold uppercase leading-none transition-opacity hover:opacity-100',
+                     'relative grid size-5 shrink-0 cursor-grab touch-none select-none place-items-center rounded-[3px] text-[0.5625rem] font-semibold leading-none transition-opacity hover:opacity-100',
                       active ? 'opacity-100' : 'opacity-55',
                       isDragging && 'z-10 cursor-grabbing opacity-100'
                     )}

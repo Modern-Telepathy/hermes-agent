@@ -13,6 +13,8 @@ import './store/translucency'
 import './store/user-bubble-transparency'
 // Side-effect: restores chat typography before the first conversation paints.
 import './store/chat-text-scale'
+// Side-effect: paints the user's button/container corner overrides on :root.
+import './store/theme-corners'
 // Side-effect: mirrors the keep-awake mode to main and listens for main's
 // one-time keep-awake offer. Settings loads lazily, too late for the offer.
 import './store/keep-awake'

@@ -181,7 +181,7 @@ export function CanonicalGroupDetails({ avatarFor, children, labels, onClose, ro
 
   return <aside aria-label={labels.groupDetails} className="flex w-72 shrink-0 flex-col gap-4 overflow-y-auto border-l border-(--ui-stroke-tertiary) px-4 py-3">
     <div className="flex items-center justify-between">
-      <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-(--ui-text-tertiary)">{labels.groupDetails}</span>
+      <span className="text-[0.6875rem] font-semibold text-(--ui-text-tertiary)">{labels.groupDetails}</span>
       <Button aria-label={labels.close} onClick={onClose} size="icon-xs" variant="ghost"><Codicon name="close" /></Button>
     </div>
     <div className="flex flex-col items-center gap-2 text-center">
@@ -189,7 +189,7 @@ export function CanonicalGroupDetails({ avatarFor, children, labels, onClose, ro
       <span className="text-sm font-semibold text-foreground">{room.name}</span>
     </div>
     <div className="grid gap-1">
-      <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-(--ui-text-tertiary)">{labels.members} · {room.members.length}</span>
+      <span className="text-[0.6875rem] font-semibold text-(--ui-text-tertiary)">{labels.members} · {room.members.length}</span>
       {room.members.map(member => {
         const status = statuses.get(member.member_id) ?? { kind: 'idle' as const }
         const detail = 'detail' in status ? status.detail : undefined

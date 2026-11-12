@@ -1,0 +1,12 @@
+{
+  "name": "office-sheets",
+  "label": "Sheets",
+  "description": "Spreadsheets over plain CSV and .sheet.json files: formulas, formats, charts, xlsx/ods/csv import and export.",
+  "icon": "BarChart3",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/office/sheets",
+    "position": "after:office/docs"
+  },
+  "entry": "dist/index.js"
+}

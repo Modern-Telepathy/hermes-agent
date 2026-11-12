@@ -4,7 +4,6 @@ import type * as React from 'react'
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { type NewSessionSplitHandler, startNewSessionDrag } from '@/app/chat/new-session-drag'
-import { SidebarPanelLabel } from '@/app/shell/sidebar-label'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar'
 import type { HermesGitWorktree } from '@/global'
@@ -75,13 +74,13 @@ function SidebarSectionHeader({
   const labelBody = (
     <>
       {icon}
-      <SidebarPanelLabel>{label}</SidebarPanelLabel>
+      <span className="min-w-0 truncate text-[0.6875rem] font-medium">{label}</span>
       {meta && <SidebarSectionMeta>{meta}</SidebarSectionMeta>}
     </>
   )
 
   return (
-    <div className="group/section flex shrink-0 items-center justify-between gap-1 pb-1 pt-1.5">
+    <div className="group/section flex shrink-0 items-center justify-between gap-1 pb-1 pt-1.5" data-section-heading="">
       {collapsible ? (
         <button
           aria-expanded={open}
@@ -89,6 +88,7 @@ function SidebarSectionHeader({
           // pushing the header's trailing action icons out of view.
           className={cn(
             'group/section-label flex w-fit min-w-0 items-center gap-1 rounded-sm bg-transparent text-left leading-none',
+            'text-(--ui-text-secondary) transition-colors hover:text-foreground',
             SIDEBAR_FOCUS_VISIBLE
           )}
           onClick={onToggle}
@@ -96,7 +96,7 @@ function SidebarSectionHeader({
         >
           {labelBody}
           <DisclosureCaret
-            className="text-(--ui-text-tertiary) opacity-0 transition group-hover/section-label:opacity-100 group-focus-visible/section-label:opacity-100"
+            className="text-(--ui-text-tertiary) opacity-60 transition group-hover/section-label:opacity-100 group-focus-visible/section-label:opacity-100"
             open={open}
           />
         </button>
@@ -629,7 +629,11 @@ export function SidebarSessionsSection({
   const resolvedContentClassName = cn(contentClassName, flatVirtualized && 'overflow-visible')
 
   return (
-    <SidebarGroup className={cn(rootClassName, DROP_TARGET_RING)} {...sessionDropTargetProps(pinned)}>
+    <SidebarGroup
+      className={cn(rootClassName, DROP_TARGET_RING)}
+      data-section-open={sectionOpen ? 'true' : 'false'}
+      {...sessionDropTargetProps(pinned)}
+    >
       <SidebarSectionHeader
         action={headerAction}
         collapsible={collapsible}

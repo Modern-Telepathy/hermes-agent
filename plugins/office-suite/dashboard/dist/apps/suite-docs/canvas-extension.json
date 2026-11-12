@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "suite-docs",
+  "display_name": "Docs",
+  "version": "0.1.0",
+  "description": "Rich-text documents on plain markdown files in the shared suite/ folder: wikilinks and suite:// links, live sheet embeds, backlinks, .docx/.odt/.html import and export, and live reload when an agent edits the file.",
+  "entrypoint": "extension.js",
+  "icon": "icon.svg",
+  "contributes": {
+    "pages": [
+      {
+        "id": "main",
+        "title": "Docs",
+        "path": "/main",
+        "nav_label": "Docs",
+        "description": "Write and organise documents stored as markdown in suite/docs."
+      }
+    ]
+  },
+  "icon_appearance": {
+    "background": "#9a9bff"
+  }
+}

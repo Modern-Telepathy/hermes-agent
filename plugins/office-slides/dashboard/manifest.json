@@ -1,0 +1,12 @@
+{
+  "name": "office-slides",
+  "label": "Slides",
+  "description": "Slide decks on plain markdown: filmstrip, presenter mode, pptx/html/pdf export, live sheet and doc embeds.",
+  "icon": "Star",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/office/slides",
+    "position": "after:office/sheets"
+  },
+  "entry": "dist/index.js"
+}

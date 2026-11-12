@@ -526,7 +526,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
           </DialogHeader>
           <div className="space-y-3 py-2 text-xs">
             <div>
-              <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+              <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                 {ctrl.objectiveLabel}
               </div>
               <div className="mt-0.5 text-foreground leading-relaxed break-words">{goal.title}</div>
@@ -535,7 +535,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             {/* Contract fields */}
             {goal.contract.outcome && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.contractOutcome}
                 </div>
                 <div className="mt-0.5 text-foreground/90 leading-relaxed">{goal.contract.outcome}</div>
@@ -543,7 +543,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             )}
             {goal.contract.verification && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.contractVerification}
                 </div>
                 <div className="mt-0.5 text-foreground/90 leading-relaxed">{goal.contract.verification}</div>
@@ -551,7 +551,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             )}
             {goal.contract.constraints && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.contractConstraints}
                 </div>
                 <div className="mt-0.5 text-foreground/90 leading-relaxed">{goal.contract.constraints}</div>
@@ -559,7 +559,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             )}
             {goal.contract.boundaries && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.contractBoundaries}
                 </div>
                 <div className="mt-0.5 text-foreground/90 leading-relaxed">{goal.contract.boundaries}</div>
@@ -567,7 +567,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             )}
             {goal.contract.stop_when && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.contractStopWhen}
                 </div>
                 <div className="mt-0.5 text-foreground/90 leading-relaxed">{goal.contract.stop_when}</div>
@@ -577,7 +577,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             {/* Wait Barrier */}
             {goal.wait_barrier && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.waitBarrierTitle}
                 </div>
                 <div className="mt-0.5 text-foreground/90 leading-relaxed">
@@ -595,7 +595,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
             {/* Quality Gates */}
             {goal.gates.length > 0 && (
               <div>
-                <div className="font-semibold text-muted-foreground/75 uppercase tracking-wider text-[0.68rem]">
+                <div className="font-semibold text-muted-foreground/75 text-[0.68rem]">
                   {ctrl.qualityGatesTitle}
                 </div>
                 <div className="mt-1 space-y-1.5">

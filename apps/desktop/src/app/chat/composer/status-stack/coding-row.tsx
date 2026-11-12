@@ -21,8 +21,8 @@ import { openWorktreeDialog, registerRepoStatusCwd, repoStatusForCwd, repoWorktr
 import { notifyError } from '@/store/notifications'
 import { $pullRequestsByBranch, branchPrKey, refreshPullRequests } from '@/store/pull-requests'
 
-// Tiny uppercase section header, matching the composer "+" menu's labels.
-const MENU_SECTION = 'text-[0.625rem] font-semibold uppercase tracking-wider text-(--ui-text-tertiary)'
+// Tiny section header, matching the composer"+" menu's labels.
+const MENU_SECTION ='text-[0.625rem] font-semibold text-(--ui-text-tertiary)'
 
 interface CodingStatusRowProps {
   /** Branch the current draft off into a fresh worktree + session, based on

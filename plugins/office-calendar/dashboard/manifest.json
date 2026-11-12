@@ -1,0 +1,12 @@
+{
+  "name": "office-calendar",
+  "label": "Calendar",
+  "description": "Calendar and tasks over plain markdown: month/week/day/agenda, recurrence, reminders, .ics, tasks and board.",
+  "icon": "Clock",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/office/calendar",
+    "position": "end"
+  },
+  "entry": "dist/index.js"
+}
