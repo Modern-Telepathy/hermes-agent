@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "holons-hangout",
+  "name": "holons",
   "display_name": "Holons™",
   "version": "0.1.0",
   "description": "Feeds, courses and members for Holons, with a demo mode.",
@@ -9,9 +9,9 @@
   "contributes": {
     "pages": [
       {
-        "id": "holons-hangout",
+        "id": "holons",
         "title": "Holons™",
-        "path": "/holons-hangout",
+        "path": "/holons",
         "nav_label": "Holons™",
         "description": "Feeds, courses and members for Holons, with a demo mode."
       }

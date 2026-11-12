@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "bitsocial-hangout",
+  "name": "bitkin",
   "display_name": "Bitkin™",
   "version": "0.1.0",
   "description": "Bitkin: a client for Bitsocial communities: channels, threads, members and a composer over the Plebbit RPC, with a Demo mode when no node is connected.",
@@ -9,9 +9,9 @@
   "contributes": {
     "pages": [
       {
-        "id": "bitsocial-hangout",
+        "id": "bitkin",
         "title": "Bitkin™",
-        "path": "/bitsocial-hangout",
+        "path": "/bitkin",
         "nav_label": "Bitkin™",
         "description": "Chat in Bitsocial communities with Bitkin."
       }

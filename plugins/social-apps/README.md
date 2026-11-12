@@ -6,11 +6,16 @@ plugin system:
 | Tab | App | Bundle | Protocol |
 |---|---|---|---|
 | Hangout™ | `apps/hangout` | 212 KB | Nostr · WebRTC |
-| Bitkin™ | `apps/bitsocial-hangout` | 227 KB | Plebbit RPC · IPFS |
-| MESH™ | `apps/mesh-hangout` | 275 KB | MESH protocol · Ed25519 |
-| Holons™ | `apps/holons-hangout` | 190 KB | Matrix |
+| Bitkin™ | `apps/bitkin` | 227 KB | Plebbit RPC · IPFS |
+| MESH™ | `apps/mesh` | 275 KB | MESH protocol · Ed25519 |
+| Holons™ | `apps/holons` | 190 KB | Matrix |
 | Murmur™ | `apps/murmur` | 1.6 MB | libp2p · IPFS |
 | MeetRightHere™ | `apps/meet` | 146 KB | WebRTC · LiveKit |
+
+The brand slug is the same word in all three places it appears: the bundle directory (`apps/bitkin`),
+the plugin that mounts it (`plugins/social-bitkin`) and the tab route (`/bitkin`). A Canvas page path
+(`contributes.pages[].path`) is its route too, so a page is never served at one name and shipped under
+another.
 
 Each `dist/apps/<name>/extension.js` is the **committed Canvas App bundle**, copied byte for byte
 with its `canvas-extension.json` and icon, and activated the way Agent Canvas activates them,
@@ -53,13 +58,27 @@ the documented one-shot CLI against the resumed session and returns the reply. V
 Hangout's "Sign in →" screen is its own local onboarding step (it writes `hangout:v1` to
 localStorage); after it, the dashboard's sessions appear as live agents ("8 agents · 8 live").
 
+## Local services
+
+`plugins/social-services` is the dashboard tab that owns the other half of each app's setup: it
+probes the port the app dials, shows the exact command that installs and starts that service, runs it
+detached through the same `/bin/sh -lc` path Meet's Start it uses, keeps the pid so **Stop** only ends
+what it started, and tails the command's log. Bitkin's row is exact — `npm install -g
+@bitsocial/bitsocial-cli`, then `bitsocial daemon` with npm's global prefix added to `PATH`, because a
+prefix outside the login shell's `PATH` is the usual reason an installed daemon reads as missing.
+Meet's start string is byte for byte the command its own Start it runs.
+
+MESH, Holons and Murmur ship no installer: those rows take any command you paste, because their
+servers are not distributed here. The port they are checked against is the one their bundle dials
+(`12000`, `3000`; Murmur has none — it is peer-to-peer).
+
 ## What still needs infrastructure
 
 - **Bitkin** wants a Plebbit RPC node (`ws://localhost:9138`), **MESH** a MESH node, **Holons** a
-  Matrix homeserver, **Murmur** libp2p peers. Until those exist the apps run their seeded/demo data
-  and log `ERR_CONNECTION_REFUSED`.
+  holons-api server, **Murmur** libp2p peers. Until those exist the apps run their seeded/demo data
+  and log `ERR_CONNECTION_REFUSED`. Start them from the dashboard's **Local services** tab.
 - **Meet** starts its meeting server through `start_bash_command`, which needs the LiveKit/media
-  binary installed locally.
+  binary installed locally; the same install and start are on the Local services tab.
 
 ## Licence
 

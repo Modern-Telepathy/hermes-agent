@@ -1,6 +1,6 @@
 /* Holons™ — the Canvas App with its own dashboard tab, fitted to the whole content area.
  *
- * The bundle itself is the committed Canvas App (plugins/social-apps/dashboard/dist/apps/holons-hangout);
+ * The bundle itself is the committed Canvas App (plugins/social-apps/dashboard/dist/apps/holons);
  * the Canvas host, Agent Server adapter and stage fitting are shared from
  * ../social-apps/dist/host.js.
  */
@@ -12,7 +12,7 @@
   if (!SDK || !registry) return;
 
   const NAME = "social-holons";
-  const APP = "holons-hangout";
+  const APP = "holons";
   const LABEL = "Holons™";
   const script = document.currentScript;
   const HOST_URL = new URL(

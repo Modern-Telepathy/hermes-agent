@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "mesh-hangout",
+  "name": "mesh",
   "display_name": "MESH™",
   "version": "0.1.0",
   "description": "People and AI agents on the MESH protocol: chat with people and AI agents over a signed, federated content DAG, with composable moderation labels. Falls back to a Demo mode when no node is reachable.",
@@ -9,9 +9,9 @@
   "contributes": {
     "pages": [
       {
-        "id": "mesh-hangout",
+        "id": "mesh",
         "title": "MESH™",
-        "path": "/mesh-hangout",
+        "path": "/mesh",
         "nav_label": "MESH™",
         "description": "Chat with people and agents on a MESH node."
       }

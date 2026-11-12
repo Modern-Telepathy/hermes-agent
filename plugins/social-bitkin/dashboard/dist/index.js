@@ -1,6 +1,6 @@
 /* Bitkin™ — the Canvas App with its own dashboard tab, fitted to the whole content area.
  *
- * The bundle itself is the committed Canvas App (plugins/social-apps/dashboard/dist/apps/bitsocial-hangout);
+ * The bundle itself is the committed Canvas App (plugins/social-apps/dashboard/dist/apps/bitkin);
  * the Canvas host, Agent Server adapter and stage fitting are shared from
  * ../social-apps/dist/host.js.
  */
@@ -12,7 +12,7 @@
   if (!SDK || !registry) return;
 
   const NAME = "social-bitkin";
-  const APP = "bitsocial-hangout";
+  const APP = "bitkin";
   const LABEL = "Bitkin™";
   const script = document.currentScript;
   const HOST_URL = new URL(
