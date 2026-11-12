@@ -1,0 +1,14 @@
+{
+  "name": "social-services",
+  "label": "Local services",
+  "description": "Install, start and stop the local servers the social apps talk to: the Bitsocial node, LiveKit, a MESH node and holons-api.",
+  "icon": "Server",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/services",
+    "position": "after:chat"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

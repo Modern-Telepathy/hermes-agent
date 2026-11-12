@@ -1,0 +1,160 @@
+/* Local services page. Colours come from the dashboard's own theme variables so the page follows the
+ * active theme instead of pinning a palette; every var has a neutral fallback for older hosts. */
+
+.ss-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 960px;
+  padding: 8px 0 32px;
+}
+
+.ss-page h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ui-text-primary, inherit);
+}
+
+.ss-lede {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ui-text-secondary, rgba(127, 127, 127, 0.9));
+  margin: 0;
+}
+
+.ss-error {
+  margin: 0;
+  font-size: 12px;
+  color: #f87171;
+}
+
+.ss-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--ui-border, rgba(127, 127, 127, 0.22));
+  border-radius: 10px;
+}
+
+.ss-row__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ss-row__head h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ss-row__endpoint {
+  font-size: 12px;
+  color: var(--ui-text-tertiary, rgba(127, 127, 127, 0.85));
+}
+
+.ss-row__why {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ui-text-secondary, rgba(127, 127, 127, 0.9));
+}
+
+.ss-row__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ui-text-tertiary, rgba(127, 127, 127, 0.85));
+}
+
+.ss-pill {
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-border, rgba(127, 127, 127, 0.3));
+  color: var(--ui-text-tertiary, rgba(127, 127, 127, 0.85));
+}
+
+.ss-pill.is-on {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.ss-pill.is-starting {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.ss-cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ss-cmd code,
+.ss-input {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--ui-border, rgba(127, 127, 127, 0.22));
+  background: rgba(127, 127, 127, 0.1);
+  color: inherit;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.ss-row__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ss-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--ui-border, rgba(127, 127, 127, 0.3));
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ss-btn:hover:not(:disabled) {
+  background: var(--ui-control-hover-background, rgba(127, 127, 127, 0.16));
+}
+
+.ss-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ss-btn--primary {
+  border-color: rgba(96, 165, 250, 0.55);
+  color: #60a5fa;
+}
+
+.ss-link {
+  font-size: 12px;
+  color: var(--ui-text-secondary, rgba(127, 127, 127, 0.9));
+  text-decoration: underline;
+}
+
+.ss-pre {
+  margin: 0;
+  padding: 8px;
+  max-height: 180px;
+  overflow: auto;
+  border-radius: 6px;
+  background: rgba(127, 127, 127, 0.12);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+}
