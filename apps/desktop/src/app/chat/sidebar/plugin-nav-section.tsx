@@ -67,44 +67,44 @@ export function SidebarPluginNavSection({
         data-section-body=""
         style={open && height !== undefined ? { maxHeight: height } : undefined}
       >
-      {open && (
-        <ul className="flex flex-col gap-px" id="sidebar-plugins-rows">
-          {items.map(item => (
-            <SidebarMenuItem data-plugin-nav-row={item.id} key={item.id}>
-              <SidebarMenuButton
-                className={cn(
-                  'flex h-7 w-full justify-start gap-2 rounded-md border border-transparent px-[var(--ui-row-px,0.5rem)] text-left text-[0.8125rem] font-medium text-(--ui-text-secondary) transition-colors duration-100 ease-out [-webkit-app-region:no-drag] hover:bg-(--ui-control-hover-background) hover:text-foreground hover:transition-none',
-                  // The same active classes the built-in rows use, so the
-                  // focused-route test (and anything keyed off the row) reads
-                  // plugin and core navigation identically.
-                  activePath === item.route &&
-                    'border-(--ui-stroke-tertiary) bg-(--ui-control-active-background) text-foreground shadow-none hover:border-(--ui-stroke-tertiary)!'
-                )}
-                onClick={() => {
-                  if (item.dashboardPath) {
-                    void openDashboardApp(item).then(opened => {
-                      if (!opened) {
-                        onNavigate(item)
-                      }
-                    })
+        {open && (
+          <ul className="flex flex-col gap-px" id="sidebar-plugins-rows">
+            {items.map(item => (
+              <SidebarMenuItem data-plugin-nav-row={item.id} key={item.id}>
+                <SidebarMenuButton
+                  className={cn(
+                    'flex h-7 w-full justify-start gap-2 rounded-md border border-transparent px-[var(--ui-row-px,0.5rem)] text-left text-[0.8125rem] font-medium text-(--ui-text-secondary) transition-colors duration-100 ease-out [-webkit-app-region:no-drag] hover:bg-(--ui-control-hover-background) hover:text-foreground hover:transition-none',
+                    // The same active classes the built-in rows use, so the
+                    // focused-route test (and anything keyed off the row) reads
+                    // plugin and core navigation identically.
+                    activePath === item.route &&
+                      'border-(--ui-stroke-tertiary) bg-(--ui-control-active-background) text-foreground shadow-none hover:border-(--ui-stroke-tertiary)!'
+                  )}
+                  onClick={() => {
+                    if (item.dashboardPath) {
+                      void openDashboardApp(item).then(opened => {
+                        if (!opened) {
+                          onNavigate(item)
+                        }
+                      })
 
-                    return
-                  }
+                      return
+                    }
 
-                  onNavigate(item)
-                }}
-                tooltip={item.label}
-                type="button"
-              >
-                <item.icon className="size-4 shrink-0 text-[color-mix(in_srgb,currentColor_72%,transparent)]" />
-                <span className="min-w-0 truncate" data-tour={`sidebar-nav-${item.id}`}>
-                  {item.label}
-                </span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </ul>
-      )}
+                    onNavigate(item)
+                  }}
+                  tooltip={item.label}
+                  type="button"
+                >
+                  <item.icon className="size-4 shrink-0 text-[color-mix(in_srgb,currentColor_72%,transparent)]" />
+                  <span className="min-w-0 truncate" data-tour={`sidebar-nav-${item.id}`}>
+                    {item.label}
+                  </span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </ul>
+        )}
       </div>
       <SidebarSectionResizeGrip id="plugins" />
     </nav>
