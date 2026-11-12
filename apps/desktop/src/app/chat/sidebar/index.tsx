@@ -1846,7 +1846,11 @@ export function ChatSidebar({
                     // included, so one column never mixes card and inline
                     // geometry at the section boundary.
                     card={cardRows}
-                    contentClassName="flex flex-col gap-px rounded-lg pb-2 pt-1"
+                    // Same 7px under the last row as every other list: the
+                    // pinned block used to carry pb-2 here AND pb-1 on its root,
+                    // which put 20px between its last row and the Sessions
+                    // heading where the next-nearest boundary is 15.
+                    contentClassName="flex flex-col gap-px rounded-lg pb-1.75 pt-1"
                     dndSensors={dndSensors}
                     emptyState={<SidebarPinnedEmptyState archived={showArchived} filtered={filtersNarrow} />}
                     label={s.pinned}
@@ -1860,7 +1864,7 @@ export function ChatSidebar({
                     onToggleUnread={toggleUnread}
                     open={pinsOpen}
                     pinned
-                    rootClassName="shrink-0 p-0 pb-1"
+                    rootClassName="shrink-0 p-0"
                     sessions={pinnedSessions}
                     showProfileTags={showAllProfiles}
                     sortable={pinnedSessions.length > 1}
